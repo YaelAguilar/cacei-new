@@ -45,6 +45,11 @@ export interface JsonApiConvocatoriaResponse {
   data: ConvocatoriaResponseDTO;
 }
 
+// Nueva interface para la lista de convocatorias
+export interface JsonApiConvocatoriasListResponse {
+  data: ConvocatoriaResponseDTO[];
+}
+
 export interface ActiveConvocatoriaCheckAttributes {
   hasActiveConvocatoria: boolean;
 }

@@ -3,7 +3,8 @@ import {
   CreateConvocatoriaRequest,
   JsonApiConvocatoriaResponse,
   ProfesoresApiResponse,
-  JsonApiActiveConvocatoriaResponse
+  JsonApiActiveConvocatoriaResponse,
+  JsonApiConvocatoriasListResponse
 } from "../models/ConvocatoriaDTO";
 import { Convocatoria, Profesor } from "../models/Convocatoria";
 
@@ -37,6 +38,40 @@ export class ConvocatoriaRepository {
       return null;
     } catch (error) {
       console.error("Error en createConvocatoria:", error);
+      throw error;
+    }
+  }
+
+  async getConvocatorias(): Promise<Convocatoria[]> {
+    try {
+      const response = await ApiClient.get<JsonApiConvocatoriasListResponse>('/convocatorias');
+      
+      if (response.status === 200 && response.data.data) {
+        return response.data.data.map(item => {
+          const data = item.attributes;
+          
+          // Convertir profesores DTO a modelo de dominio
+          const profesores = data.profesoresDisponibles.map(p => 
+            new Profesor(p.id, p.nombre, p.email)
+          );
+          
+          return new Convocatoria(
+            item.id,
+            data.nombre,
+            data.descripcion,
+            new Date(data.fechaLimite),
+            data.pasantiasDisponibles,
+            profesores,
+            data.active,
+            new Date(data.createdAt),
+            new Date(data.updatedAt)
+          );
+        });
+      }
+      
+      return [];
+    } catch (error) {
+      console.error("Error en getConvocatorias:", error);
       throw error;
     }
   }
