@@ -12,6 +12,8 @@ import { roleRouter } from './roles/infrastructure/roleRouter';
 import { authRouter } from './auth/infrastructure/authRouter';
 import { convocatoriaRouter } from './convocatorias/infrastructure/convocatoriaRouter';
 
+// Scheduler de convocatorias
+import { convocatoriaScheduler } from './convocatorias/infrastructure/dependencies';
 
 const app = express();
 dotenv.config();
@@ -56,3 +58,6 @@ app.use("/api/v1/submenus", subMenuRouter)
 app.use("/api/v1/menus",menuRouter);
 app.use("/api/v1/roles",roleRouter);
 app.use("/api/v1/convocatorias", authMiddleware, convocatoriaRouter);
+
+// Inicializar scheduler de convocatorias
+convocatoriaScheduler.startScheduler();

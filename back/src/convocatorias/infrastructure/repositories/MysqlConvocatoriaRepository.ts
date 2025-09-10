@@ -204,4 +204,26 @@ export class MysqlConvocatoriaRepository implements ConvocatoriaRepository {
             throw new Error(`Error al obtener los profesores disponibles: ${error}`);
         }
     }
+
+    async deactivateExpiredConvocatorias(): Promise<void> {
+        const sql = `
+            UPDATE convocatorias 
+            SET active = 0, updated_at = CURRENT_TIMESTAMP 
+            WHERE active = 1 
+            AND fecha_limite <= NOW()
+        `;
+
+        try {
+            const result: any = await query(sql);
+            
+            if (result.affectedRows > 0) {
+                console.log(`[${new Date().toISOString()}] Desactivadas ${result.affectedRows} convocatorias expiradas`);
+            } else {
+                console.log(`[${new Date().toISOString()}] No hay convocatorias expiradas para desactivar`);
+            }
+        } catch (error) {
+            console.error("Error deactivating expired convocatorias:", error);
+            throw new Error(`Error al desactivar convocatorias expiradas: ${error}`);
+        }
+    }
 }

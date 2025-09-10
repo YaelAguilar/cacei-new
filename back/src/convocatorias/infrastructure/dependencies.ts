@@ -4,6 +4,7 @@ import { GetConvocatoriasUseCase } from "../application/getConvocatoriasUseCase"
 import { GetConvocatoriaUseCase } from "../application/getConvocatoriaUseCase";
 import { UpdateConvocatoriaUseCase } from "../application/updateConvocatoriaUseCase";
 import { GetProfesoresDisponiblesUseCase } from "../application/getProfesoresDisponiblesUseCase";
+import { DeactivateExpiredConvocatoriasUseCase } from "../application/deactivateExpiredConvocatoriasUseCase";
 
 // Controladores
 import { CreateConvocatoriaController } from "./controllers/createConvocatoriaController";
@@ -12,8 +13,9 @@ import { GetConvocatoriaController } from "./controllers/getConvocatoriaControll
 import { UpdateConvocatoriaController } from "./controllers/updateConvocatoriaController";
 import { GetProfesoresDisponiblesController } from "./controllers/getProfesoresDisponiblesController";
 
-// Repositorio
+// Repositorio y servicios
 import { MysqlConvocatoriaRepository } from "./repositories/MysqlConvocatoriaRepository";
+import { ConvocatoriaSchedulerService } from "./services/ConvocatoriaSchedulerService";
 
 // Instancia del repositorio
 const convocatoriaRepository = new MysqlConvocatoriaRepository();
@@ -24,6 +26,10 @@ const getConvocatoriasUseCase = new GetConvocatoriasUseCase(convocatoriaReposito
 const getConvocatoriaUseCase = new GetConvocatoriaUseCase(convocatoriaRepository);
 const updateConvocatoriaUseCase = new UpdateConvocatoriaUseCase(convocatoriaRepository);
 const getProfesoresDisponiblesUseCase = new GetProfesoresDisponiblesUseCase(convocatoriaRepository);
+const deactivateExpiredConvocatoriasUseCase = new DeactivateExpiredConvocatoriasUseCase(convocatoriaRepository);
+
+// Servicio scheduler
+const convocatoriaSchedulerService = new ConvocatoriaSchedulerService(deactivateExpiredConvocatoriasUseCase);
 
 // Controladores exportados
 export const createConvocatoriaController = new CreateConvocatoriaController(createConvocatoriaUseCase);
@@ -31,3 +37,6 @@ export const getConvocatoriasController = new GetConvocatoriasController(getConv
 export const getConvocatoriaController = new GetConvocatoriaController(getConvocatoriaUseCase);
 export const updateConvocatoriaController = new UpdateConvocatoriaController(updateConvocatoriaUseCase);
 export const getProfesoresDisponiblesController = new GetProfesoresDisponiblesController(getProfesoresDisponiblesUseCase);
+
+// Exportar scheduler para usar en index.ts
+export const convocatoriaScheduler = convocatoriaSchedulerService;
