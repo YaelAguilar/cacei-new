@@ -417,8 +417,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
                     id: row.id,
                     uuid: row.uuid,
                     nombre: row.nombre,
-                    pasantiasDisponibles: JSON.parse(row.pasantias_disponibles),
-                    profesoresDisponibles: JSON.parse(row.profesores_disponibles)
+                    pasantiasDisponibles: row.pasantias_disponibles,
+                    profesoresDisponibles: row.profesores_disponibles
                 };
             }
             return null;
