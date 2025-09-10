@@ -11,6 +11,12 @@ export class CreateConvocatoriaUseCase {
         pasantiasDisponibles: string[]
     ): Promise<Convocatoria | null> {
         try {
+            // Validar que no exista una convocatoria activa
+            const hasActiveConvocatoria = await this.convocatoriaRepository.hasActiveConvocatoria();
+            if (hasActiveConvocatoria) {
+                throw new Error("No se puede crear una nueva convocatoria mientras haya una convocatoria vigente");
+            }
+
             // Validaciones básicas
             if (!nombre.trim()) {
                 throw new Error("El nombre es obligatorio");

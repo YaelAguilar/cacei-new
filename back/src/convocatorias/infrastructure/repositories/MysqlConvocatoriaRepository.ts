@@ -1,3 +1,5 @@
+// src/convocatorias/infrastructure/repositories/MysqlConvocatoriaRepository.ts
+
 import { ConvocatoriaRepository } from "../../domain/interfaces/convocatoriaRepository";
 import { Convocatoria } from "../../domain/models/convocatoria";
 import { Profesor } from "../../domain/models/profesor";

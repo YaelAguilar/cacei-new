@@ -28,4 +28,6 @@ export interface ConvocatoriaRepository {
     getProfesoresDisponibles(): Promise<Profesor[] | null>;
 
     deactivateExpiredConvocatorias(): Promise<void>;
+
+    hasActiveConvocatoria(): Promise<boolean>;
 }

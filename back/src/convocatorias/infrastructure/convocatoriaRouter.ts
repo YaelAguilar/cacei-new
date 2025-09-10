@@ -9,7 +9,7 @@ import {
 
 export const convocatoriaRouter = express.Router();
 
-// Ruta para obtener profesores disponibles
+// Ruta para obtener profesores disponibles (debe ir antes de las rutas con parámetros)
 convocatoriaRouter.get('/profesores/disponibles', getProfesoresDisponiblesController.run.bind(getProfesoresDisponiblesController));
 
 // Rutas para convocatorias
