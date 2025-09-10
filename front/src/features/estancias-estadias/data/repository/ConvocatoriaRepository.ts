@@ -1,6 +1,7 @@
 import ApiClient from "../../../../core/API/ApiClient";
 import { 
   CreateConvocatoriaRequest,
+  UpdateConvocatoriaRequest,
   JsonApiConvocatoriaResponse,
   ProfesoresApiResponse,
   JsonApiActiveConvocatoriaResponse,
@@ -110,6 +111,36 @@ export class ConvocatoriaRepository {
       console.error("Error en checkActiveConvocatoria:", error);
       // Si hay error, asumimos que no hay convocatoria activa
       return false;
+    }
+  }
+
+  async updateConvocatoria(uuid: string, request: UpdateConvocatoriaRequest): Promise<Convocatoria | null> {
+    try {
+      const response = await ApiClient.put<JsonApiConvocatoriaResponse>(`/convocatorias/${uuid}`, request);
+      
+      if (response.status === 200) {
+        const data = response.data.data.attributes;
+        const profesores = data.profesoresDisponibles.map(p => 
+          new Profesor(p.id, p.nombre, p.email)
+        );
+        
+        return new Convocatoria(
+          response.data.data.id,
+          data.nombre,
+          data.descripcion,
+          new Date(data.fechaLimite),
+          data.pasantiasDisponibles,
+          profesores,
+          data.active,
+          new Date(data.createdAt),
+          new Date(data.updatedAt)
+        );
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error en updateConvocatoria:", error);
+      throw error;
     }
   }
 }

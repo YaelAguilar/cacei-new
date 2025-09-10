@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { ConvocatoriaRepository } from "../../data/repository/ConvocatoriaRepository";
 import { GetConvocatoriasUseCase } from "../../domain/GetConvocatoriasUseCase";
+import { UpdateConvocatoriaUseCase, UpdateConvocatoriaParams } from "../../domain/UpdateConvocatoriaUseCase";
 import { Convocatoria } from "../../data/models/Convocatoria";
 
 export class VisualizarConvocatoriasViewModel {
@@ -8,21 +9,26 @@ export class VisualizarConvocatoriasViewModel {
   loading: boolean = false;
   error: string | null = null;
   isInitialized: boolean = false;
+  isUpdating: boolean = false; 
 
   // Estados de datos
   convocatorias: Convocatoria[] = [];
   selectedConvocatoria: Convocatoria | null = null;
   showDetailModal: boolean = false;
+  convocatoriaToEdit: Convocatoria | null = null;
+  showEditModal: boolean = false;
 
   // Casos de uso
   private repository: ConvocatoriaRepository;
   private getConvocatoriasUseCase: GetConvocatoriasUseCase;
+  private updateConvocatoriaUseCase: UpdateConvocatoriaUseCase;
 
   constructor() {
     makeAutoObservable(this);
 
     this.repository = new ConvocatoriaRepository();
     this.getConvocatoriasUseCase = new GetConvocatoriasUseCase(this.repository);
+    this.updateConvocatoriaUseCase = new UpdateConvocatoriaUseCase(this.repository);
   }
 
   // Setters para estados
@@ -44,6 +50,18 @@ export class VisualizarConvocatoriasViewModel {
 
   setShowDetailModal(show: boolean) {
     this.showDetailModal = show;
+  }
+
+  setIsUpdating(updating: boolean) {
+    this.isUpdating = updating;
+  }
+
+  setConvocatoriaToEdit(convocatoria: Convocatoria | null) {
+    this.convocatoriaToEdit = convocatoria;
+  }
+
+  setShowEditModal(show: boolean) {
+    this.showEditModal = show;
   }
 
   // Método de inicialización
@@ -93,6 +111,48 @@ export class VisualizarConvocatoriasViewModel {
   closeDetailModal() {
     this.setShowDetailModal(false);
     this.setSelectedConvocatoria(null);
+  }
+
+  // Abrir modal de edición
+  openEditModal(convocatoria: Convocatoria) {
+    this.setConvocatoriaToEdit(convocatoria);
+    this.setShowEditModal(true);
+  }
+
+  // Cerrar modal de edición
+  closeEditModal() {
+    this.setShowEditModal(false);
+    this.setConvocatoriaToEdit(null);
+  }
+
+  // Actualizar una convocatoria
+  async updateConvocatoria(params: UpdateConvocatoriaParams): Promise<boolean> {
+    this.setIsUpdating(true);
+    this.setError(null);
+
+    try {
+      const updatedConvocatoria = await this.updateConvocatoriaUseCase.execute(params);
+      
+      runInAction(() => {
+        // Actualizar la lista de convocatorias localmente
+        const index = this.convocatorias.findIndex(c => c.getId() === updatedConvocatoria.getId());
+        if (index !== -1) {
+          const newConvocatorias = [...this.convocatorias];
+          newConvocatorias[index] = updatedConvocatoria;
+          this.setConvocatorias(newConvocatorias);
+        }
+        this.closeEditModal();
+      });
+
+      return true;
+    } catch (error: any) {
+      runInAction(() => {
+        this.setError(error.message || "Error al actualizar la convocatoria");
+      });
+      return false;
+    } finally {
+      this.setIsUpdating(false);
+    }
   }
 
   // Obtener convocatorias activas
@@ -180,5 +240,8 @@ export class VisualizarConvocatoriasViewModel {
     this.convocatorias = [];
     this.selectedConvocatoria = null;
     this.showDetailModal = false;
+    this.isUpdating = false;
+    this.convocatoriaToEdit = null;
+    this.showEditModal = false;
   }
 }

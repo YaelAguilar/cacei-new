@@ -4,6 +4,8 @@ import MainContainer from "../../../shared/layout/MainContainer";
 import { VisualizarConvocatoriasViewModel } from "../viewModels/VisualizarConvocatoriasViewModel";
 import ConvocatoriaCard from "../components/ConvocatoriaCard";
 import ConvocatoriaDetailModal from "../components/ConvocatoriaDetailModal";
+import EditConvocatoriaModal from "../components/EditConvocatoriaModal";
+import { Toasters } from "../../../shared/components/Toasters";
 import { FiRefreshCw, FiAlertCircle, FiCalendar } from "react-icons/fi";
 
 const VisualizarPeriodos: React.FC = observer(() => {
@@ -31,6 +33,11 @@ const VisualizarPeriodos: React.FC = observer(() => {
   // Manejar actualización manual
   const handleRefresh = async () => {
     await visualizarViewModel.loadConvocatorias();
+  };
+
+  // Callback para cuando se actualiza exitosamente una convocatoria
+  const handleUpdateSuccess = () => {
+    Toasters("success", "¡Convocatoria actualizada exitosamente!");
   };
 
   // Mostrar loading mientras se inicializa
@@ -222,6 +229,16 @@ const VisualizarPeriodos: React.FC = observer(() => {
             convocatoria={visualizarViewModel.selectedConvocatoria}
             viewModel={visualizarViewModel}
             onClose={() => visualizarViewModel.closeDetailModal()}
+          />
+        )}
+
+        {/* Modal de edición */}
+        {visualizarViewModel.showEditModal && visualizarViewModel.convocatoriaToEdit && (
+          <EditConvocatoriaModal
+            convocatoria={visualizarViewModel.convocatoriaToEdit}
+            viewModel={visualizarViewModel}
+            onClose={() => visualizarViewModel.closeEditModal()}
+            onSuccess={handleUpdateSuccess}
           />
         )}
       </div>

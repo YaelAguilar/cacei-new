@@ -72,3 +72,11 @@ export interface ApiErrorDetail {
 export interface ErrorResponse {
   errors: ApiErrorDetail[];
 }
+
+export interface UpdateConvocatoriaRequest {
+  nombre?: string;
+  descripcion?: string | null;
+  fechaLimite?: string; // ISO 8601 format
+  pasantiasSeleccionadas?: string[];
+  actualizarProfesores?: boolean;
+}
