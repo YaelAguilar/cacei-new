@@ -1,6 +1,6 @@
 export class Convocatoria {
     constructor(
-        private readonly id: string | number,
+        private readonly id: number,
         private readonly nombre: string,
         private readonly descripcion: string | null,
         private readonly fechaLimite: Date,
@@ -10,11 +10,11 @@ export class Convocatoria {
         private readonly active?: boolean,
         private readonly created_at?: Date,
         private readonly updated_at?: Date,
-        private readonly user_creation?: string,
-        private readonly user_update?: string
+        private readonly user_creation?: number | null,
+        private readonly user_update?: number | null
     ) {}
 
-    getId(): string | number {
+    getId(): number {
         return this.id;
     }
 
@@ -54,11 +54,11 @@ export class Convocatoria {
         return this.updated_at;
     }
 
-    getUserCreation(): string | undefined {
+    getUserCreation(): number | null | undefined {
         return this.user_creation;
     }
 
-    getUserUpdate(): string | undefined {
+    getUserUpdate(): number | null | undefined {
         return this.user_update;
     }
 }

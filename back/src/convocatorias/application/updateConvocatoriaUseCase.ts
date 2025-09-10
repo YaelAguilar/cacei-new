@@ -22,25 +22,34 @@ export class UpdateConvocatoriaUseCase {
             }> = {};
 
             if (nombre !== undefined) {
-                if (!nombre.trim()) {
+                if (!nombre || !nombre.trim()) {
                     throw new Error("El nombre es obligatorio");
                 }
-                updatedData.nombre = nombre;
+                updatedData.nombre = nombre.trim();
             }
 
             if (descripcion !== undefined) {
-                updatedData.descripcion = descripcion;
+                updatedData.descripcion = descripcion ? descripcion.trim() : null;
             }
 
             if (fechaLimite !== undefined) {
-                if (fechaLimite <= new Date()) {
+                // Validar que la fecha límite sea al menos 1 hora en el futuro
+                const now = new Date();
+                const minDate = new Date(now.getTime() + 60 * 60 * 1000); // 1 hora
+                
+                if (fechaLimite <= now) {
                     throw new Error("La fecha límite debe ser en el futuro");
                 }
+
+                if (fechaLimite <= minDate) {
+                    throw new Error("La fecha límite debe ser al menos 1 hora en el futuro");
+                }
+
                 updatedData.fechaLimite = fechaLimite;
             }
 
             if (pasantiasDisponibles !== undefined) {
-                if (pasantiasDisponibles.length === 0) {
+                if (!Array.isArray(pasantiasDisponibles) || pasantiasDisponibles.length === 0) {
                     throw new Error("Debe seleccionar al menos una pasantía");
                 }
 
@@ -55,7 +64,8 @@ export class UpdateConvocatoriaUseCase {
                     throw new Error(`Pasantías no válidas: ${pasantiasInvalidas.join(", ")}`);
                 }
 
-                updatedData.pasantiasDisponibles = pasantiasDisponibles;
+                // Eliminar duplicados
+                updatedData.pasantiasDisponibles = [...new Set(pasantiasDisponibles)];
             }
 
             // Si se solicita actualizar la lista de profesores
@@ -67,7 +77,14 @@ export class UpdateConvocatoriaUseCase {
                         nombre: profesor.getNombre(),
                         email: profesor.getEmail()
                     }));
+                } else {
+                    console.warn("No hay profesores disponibles al actualizar la convocatoria");
                 }
+            }
+
+            // Verificar que haya al menos un campo para actualizar
+            if (Object.keys(updatedData).length === 0) {
+                throw new Error("No hay campos para actualizar");
             }
 
             return await this.convocatoriaRepository.updateConvocatoria(uuid, updatedData);

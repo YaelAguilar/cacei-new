@@ -4,12 +4,16 @@ import {
     getConvocatoriasController,
     getConvocatoriaController,
     updateConvocatoriaController,
-    getProfesoresDisponiblesController
+    getProfesoresDisponiblesController,
+    checkActiveConvocatoriaController
 } from './dependencies';
 
 export const convocatoriaRouter = express.Router();
 
-// Ruta para obtener profesores disponibles (debe ir antes de las rutas con parámetros)
+// Ruta para verificar si hay convocatoria activa
+convocatoriaRouter.get('/active/check', checkActiveConvocatoriaController.run.bind(checkActiveConvocatoriaController));
+
+// Ruta para obtener profesores disponibles
 convocatoriaRouter.get('/profesores/disponibles', getProfesoresDisponiblesController.run.bind(getProfesoresDisponiblesController));
 
 // Rutas para convocatorias

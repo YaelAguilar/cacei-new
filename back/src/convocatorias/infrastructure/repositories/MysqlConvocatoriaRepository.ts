@@ -1,5 +1,3 @@
-// src/convocatorias/infrastructure/repositories/MysqlConvocatoriaRepository.ts
-
 import { ConvocatoriaRepository } from "../../domain/interfaces/convocatoriaRepository";
 import { Convocatoria } from "../../domain/models/convocatoria";
 import { Profesor } from "../../domain/models/profesor";
@@ -206,22 +204,38 @@ export class MysqlConvocatoriaRepository implements ConvocatoriaRepository {
             throw new Error(`Error al obtener los profesores disponibles: ${error}`);
         }
     }
-}`;
+
+    async deactivateExpiredConvocatorias(): Promise<void> {
+        const sql = `
+            UPDATE convocatorias 
+            SET active = false, updated_at = CURRENT_TIMESTAMP
+            WHERE fecha_limite < NOW() AND active = true
+        `;
 
         try {
             const result: any = await query(sql);
-            
-            if (result.length > 0) {
-                return result.map((row: any) => new Profesor(
-                    row.id,
-                    row.nombre,
-                    row.email
-                ));
+            if (result.affectedRows > 0) {
+                console.log(`Se desactivaron ${result.affectedRows} convocatorias expiradas`);
             }
-            return [];
         } catch (error) {
-            console.error("Error getting profesores disponibles:", error);
-            throw new Error(`Error al obtener los profesores disponibles: ${error}`);
+            console.error("Error deactivating expired convocatorias:", error);
+            throw new Error(`Error al desactivar convocatorias expiradas: ${error}`);
+        }
+    }
+
+    async hasActiveConvocatoria(): Promise<boolean> {
+        const sql = `
+            SELECT COUNT(*) as count 
+            FROM convocatorias 
+            WHERE active = true AND fecha_limite >= NOW()
+        `;
+
+        try {
+            const result: any = await query(sql);
+            return result[0].count > 0;
+        } catch (error) {
+            console.error("Error checking active convocatoria:", error);
+            throw new Error(`Error al verificar convocatoria activa: ${error}`);
         }
     }
 }

@@ -18,15 +18,23 @@ export class CreateConvocatoriaUseCase {
             }
 
             // Validaciones básicas
-            if (!nombre.trim()) {
+            if (!nombre || !nombre.trim()) {
                 throw new Error("El nombre es obligatorio");
             }
 
-            if (fechaLimite <= new Date()) {
+            // Validar que la fecha límite sea al menos 1 día en el futuro
+            const now = new Date();
+            const minDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 horas
+            
+            if (fechaLimite <= now) {
                 throw new Error("La fecha límite debe ser en el futuro");
             }
 
-            if (pasantiasDisponibles.length === 0) {
+            if (fechaLimite <= minDate) {
+                throw new Error("La fecha límite debe ser al menos 24 horas en el futuro");
+            }
+
+            if (!Array.isArray(pasantiasDisponibles) || pasantiasDisponibles.length === 0) {
                 throw new Error("Debe seleccionar al menos una pasantía");
             }
 
@@ -40,6 +48,9 @@ export class CreateConvocatoriaUseCase {
             if (pasantiasInvalidas.length > 0) {
                 throw new Error(`Pasantías no válidas: ${pasantiasInvalidas.join(", ")}`);
             }
+
+            // Eliminar duplicados
+            const pasantiasUnicas = [...new Set(pasantiasDisponibles)];
 
             // Obtener la lista actual de profesores disponibles
             const profesores = await this.convocatoriaRepository.getProfesoresDisponibles();
@@ -55,10 +66,10 @@ export class CreateConvocatoriaUseCase {
             }));
 
             return await this.convocatoriaRepository.createConvocatoria(
-                nombre,
-                descripcion,
+                nombre.trim(),
+                descripcion ? descripcion.trim() : null,
                 fechaLimite,
-                pasantiasDisponibles,
+                pasantiasUnicas,
                 profesoresDisponibles
             );
         } catch (error) {

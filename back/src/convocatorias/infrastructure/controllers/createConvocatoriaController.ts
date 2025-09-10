@@ -20,6 +20,18 @@ export class CreateConvocatoriaController {
                 return;
             }
 
+            // Validar que pasantiasSeleccionadas sea un array
+            if (!Array.isArray(pasantiasSeleccionadas)) {
+                res.status(400).json({
+                    errors: [{
+                        status: "400",
+                        title: "Bad Request",
+                        detail: "El campo pasantiasSeleccionadas debe ser un array"
+                    }]
+                });
+                return;
+            }
+
             // Convertir la fecha límite a objeto Date
             const fechaLimiteDate = new Date(fechaLimite);
             if (isNaN(fechaLimiteDate.getTime())) {
@@ -69,6 +81,35 @@ export class CreateConvocatoriaController {
             }
         } catch (error) {
             console.error("Error in CreateConvocatoriaController:", error);
+            
+            // Manejo específico de errores de validación de negocio
+            if (error instanceof Error) {
+                const errorMessage = error.message;
+                
+                // Errores de validación de negocio (400)
+                const businessErrors = [
+                    "No se puede crear una nueva convocatoria mientras haya una convocatoria vigente",
+                    "El nombre es obligatorio",
+                    "La fecha límite debe ser en el futuro",
+                    "Debe seleccionar al menos una pasantía",
+                    "No se pueden seleccionar más de 5 pasantías",
+                    "No hay profesores disponibles para la convocatoria"
+                ];
+                
+                if (businessErrors.some(msg => errorMessage.includes(msg)) || 
+                    errorMessage.includes("Pasantías no válidas:")) {
+                    res.status(400).json({
+                        errors: [{
+                            status: "400",
+                            title: "Business Logic Error",
+                            detail: errorMessage
+                        }]
+                    });
+                    return;
+                }
+            }
+            
+            // Error genérico del servidor (500)
             res.status(500).json({
                 errors: [{
                     status: "500",
