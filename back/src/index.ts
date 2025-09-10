@@ -1,3 +1,4 @@
+// src/index.ts
 import express from 'express';
 import * as dotenv from "dotenv"
 import cors from "cors";
@@ -11,6 +12,7 @@ import  { menuRouter } from './menus/infrastructure/menuRouter'
 import { roleRouter } from './roles/infrastructure/roleRouter';
 import { authRouter } from './auth/infrastructure/authRouter';
 import { convocatoriaRouter } from './convocatorias/infrastructure/convocatoriaRouter';
+import { propuestaRouter } from './propuestas/infrastructure/propuestaRouter'; // Nuevo router
 
 // Scheduler de convocatorias
 import { convocatoriaScheduler } from './convocatorias/infrastructure/dependencies';
@@ -58,6 +60,7 @@ app.use("/api/v1/submenus", subMenuRouter)
 app.use("/api/v1/menus",menuRouter);
 app.use("/api/v1/roles",roleRouter);
 app.use("/api/v1/convocatorias", authMiddleware, convocatoriaRouter);
+app.use("/api/v1/propuestas", authMiddleware, propuestaRouter); // Nueva ruta
 
 // Inicializar scheduler de convocatorias
 convocatoriaScheduler.startScheduler();
