@@ -252,12 +252,33 @@ export class PropuestaViewModel {
   }
 
   get hasPropuestaEnConvocatoriaActual(): boolean {
-    if (!this.convocatoriaActiva) return false;
-    
-    return this.misPropuestas.some(propuesta => 
-      propuesta.getIdConvocatoria().toString() === this.convocatoriaActiva!.getId()
-    );
+  if (!this.convocatoriaActiva) {
+    console.log('🔍 hasPropuestaEnConvocatoriaActual: No hay convocatoria activa');
+    return false;
   }
+  
+  const convocatoriaId = this.convocatoriaActiva.getId();
+  console.log('🔍 hasPropuestaEnConvocatoriaActual - Convocatoria ID:', convocatoriaId, typeof convocatoriaId);
+  console.log('🔍 hasPropuestaEnConvocatoriaActual - Propuestas:', this.misPropuestas.length);
+  
+  const result = this.misPropuestas.some(propuesta => {
+    const propuestaConvocatoriaId = propuesta.getIdConvocatoria();
+    console.log('🔍 Comparando:', {
+      propuestaId: propuesta.getId(),
+      propuestaConvocatoriaId: propuestaConvocatoriaId,
+      propuestaConvocatoriaIdType: typeof propuestaConvocatoriaId,
+      convocatoriaId: convocatoriaId,
+      convocatoriaIdType: typeof convocatoriaId,
+      sonIguales: propuestaConvocatoriaId.toString() === convocatoriaId.toString()
+    });
+    
+    // Comparar como strings para evitar problemas de tipos
+    return propuestaConvocatoriaId.toString() === convocatoriaId.toString();
+  });
+  
+  console.log('🔍 hasPropuestaEnConvocatoriaActual - Resultado:', result);
+  return result;
+}
 
   get canCreatePropuesta(): boolean {
     return this.hasConvocatoriaActiva && 

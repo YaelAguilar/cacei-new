@@ -49,28 +49,37 @@ const GenerarPropuesta: React.FC = observer(() => {
 
   // Determinar qué vista mostrar basado en el estado del ViewModel
   const determineViewState = () => {
-    if (!propuestaViewModel.isInitialized) {
-      setViewState('loading');
-      return;
-    }
+  console.log('🔍 Debugging view state:', {
+    isInitialized: propuestaViewModel.isInitialized,
+    hasConvocatoriaActiva: propuestaViewModel.hasConvocatoriaActiva,
+    convocatoriaActivaId: propuestaViewModel.convocatoriaActiva?.getId(),
+    misPropuestasCount: propuestaViewModel.misPropuestas.length,
+    hasPropuestaEnConvocatoriaActual: propuestaViewModel.hasPropuestaEnConvocatoriaActual
+  });
 
-    if (!propuestaViewModel.hasConvocatoriaActiva) {
-      setViewState('no-convocatoria');
-      return;
-    }
+  if (!propuestaViewModel.isInitialized) {
+    setViewState('loading');
+    return;
+  }
 
-    if (propuestaViewModel.hasPropuestaEnConvocatoriaActual) {
-      setViewState('propuesta-existente');
-      return;
-    }
+  if (!propuestaViewModel.hasConvocatoriaActiva) {
+    setViewState('no-convocatoria');
+    return;
+  }
 
-    if (propuestaViewModel.lastCreatedPropuesta) {
-      setViewState('success');
-      return;
-    }
+  if (propuestaViewModel.hasPropuestaEnConvocatoriaActual) {
+    console.log('✅ Usuario tiene propuesta en convocatoria actual - mostrando PropuestaExistenteMessage');
+    setViewState('propuesta-existente');
+    return;
+  }
 
-    setViewState('form');
-  };
+  if (propuestaViewModel.lastCreatedPropuesta) {
+    setViewState('success');
+    return;
+  }
+
+  setViewState('form');
+};
 
   // Re-evaluar el estado cuando cambie el ViewModel
   useEffect(() => {

@@ -1,4 +1,3 @@
-// src/propuestas/infrastructure/controllers/getPropuestasByAlumnoController.ts
 import { Request, Response } from 'express';
 import { GetPropuestasByAlumnoUseCase } from '../../application/getPropuestasUseCase';
 
@@ -55,6 +54,24 @@ export class GetPropuestasByAlumnoController {
             const propuestas = await this.getPropuestasByAlumnoUseCase.run(idAlumno);
             console.log('📋 Propuestas obtenidas:', propuestas ? propuestas.length : 'null');
 
+            // 🔧 DEBUG: Información detallada de las propuestas
+            if (propuestas && propuestas.length > 0) {
+                console.log('📊 Detalles de propuestas encontradas:');
+                propuestas.forEach((propuesta, index) => {
+                    console.log(`  Propuesta ${index + 1}:`, {
+                        id: propuesta.getId(),
+                        idConvocatoria: propuesta.getIdConvocatoria(),
+                        tipoIdConvocatoria: typeof propuesta.getIdConvocatoria(),
+                        proyecto: propuesta.getNombreProyecto(),
+                        empresa: propuesta.getNombreEmpresa(),
+                        activa: propuesta.isActive(),
+                        fechaCreacion: propuesta.getCreatedAt()
+                    });
+                });
+            } else {
+                console.log('📊 No se encontraron propuestas para el alumno ID:', idAlumno);
+            }
+
             const formattedPropuestas = propuestas ? propuestas.map(propuesta => ({
                 type: "propuesta",
                 id: propuesta.getUuid(),
@@ -89,6 +106,15 @@ export class GetPropuestasByAlumnoController {
             })) : [];
 
             console.log('✅ Enviando respuesta:', formattedPropuestas.length, 'propuestas');
+            console.log('📤 Formato de respuesta para frontend:', {
+                propuestasCount: formattedPropuestas.length,
+                idConvocatorias: formattedPropuestas.map(p => ({
+                    propuestaId: p.id,
+                    idConvocatoria: p.attributes.idConvocatoria,
+                    tipoIdConvocatoria: typeof p.attributes.idConvocatoria
+                }))
+            });
+            
             res.status(200).json({
                 data: formattedPropuestas
             });

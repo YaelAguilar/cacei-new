@@ -1,4 +1,3 @@
-// src/propuestas/infrastructure/controllers/getActiveConvocatoriaController.ts
 import { Request, Response } from 'express';
 import { GetActiveConvocatoriaUseCase } from '../../application/getPropuestasUseCase';
 
@@ -12,11 +11,25 @@ export class GetActiveConvocatoriaController {
             console.log('🔍 Ejecutando getActiveConvocatoriaUseCase...');
             const convocatoriaActiva = await this.getActiveConvocatoriaUseCase.run();
             console.log('📋 Convocatoria activa:', convocatoriaActiva ? 'encontrada' : 'no encontrada');
+            
+            // 🔧 DEBUG: Información detallada de la convocatoria
+            if (convocatoriaActiva) {
+                console.log('📊 Detalles convocatoria activa:', {
+                    id: convocatoriaActiva.id,
+                    uuid: convocatoriaActiva.uuid,
+                    nombre: convocatoriaActiva.nombre,
+                    pasantiasCount: convocatoriaActiva.pasantiasDisponibles.length,
+                    profesoresCount: convocatoriaActiva.profesoresDisponibles.length
+                });
+                
+                console.log('🎯 ID que se enviará al frontend:', convocatoriaActiva.uuid);
+                console.log('🎯 ID interno de BD:', convocatoriaActiva.id);
+            }
 
             if (convocatoriaActiva) {
                 const formattedConvocatoria = {
                     type: "convocatoria-activa",
-                    id: convocatoriaActiva.uuid,
+                    id: convocatoriaActiva.id.toString(), // Este es el UUID, no el ID numérico
                     attributes: {
                         nombre: convocatoriaActiva.nombre,
                         pasantiasDisponibles: convocatoriaActiva.pasantiasDisponibles,
@@ -24,7 +37,13 @@ export class GetActiveConvocatoriaController {
                     }
                 };
 
-                console.log('✅ Enviando convocatoria activa');
+                console.log('✅ Enviando convocatoria activa al frontend');
+                console.log('📤 Formato de respuesta:', {
+                    type: formattedConvocatoria.type,
+                    id: formattedConvocatoria.id,
+                    nombre: formattedConvocatoria.attributes.nombre
+                });
+                
                 res.status(200).json({ data: formattedConvocatoria });
             } else {
                 console.log('❌ No hay convocatoria activa');
