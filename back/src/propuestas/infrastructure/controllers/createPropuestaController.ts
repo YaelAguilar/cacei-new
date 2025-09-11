@@ -6,6 +6,9 @@ export class CreatePropuestaController {
     constructor(private readonly createPropuestaUseCase: CreatePropuestaUseCase) {}
 
     async run(req: Request, res: Response): Promise<void> {
+        console.log('🏁 CreatePropuestaController iniciado');
+        console.log('📝 Body recibido:', req.body);
+        
         const {
             tutorAcademicoId,
             tipoPasantia,
@@ -25,8 +28,11 @@ export class CreatePropuestaController {
 
         try {
             // Obtener el ID del alumno del token JWT
+            console.log('🔍 Verificando token...');
             const userFromToken = (req as any).user;
+            
             if (!userFromToken || !userFromToken.uuid) {
+                console.log('❌ Token inválido');
                 res.status(401).json({
                     errors: [{
                         status: "401",
@@ -37,10 +43,15 @@ export class CreatePropuestaController {
                 return;
             }
 
+            console.log('✅ Token válido, UUID:', userFromToken.uuid);
+
             // Obtener el ID del alumno desde la base de datos usando el UUID del token
+            console.log('🔍 Consultando usuario en BD...');
             const { query } = require('../../../database/mysql');
             const userResult = await query('SELECT id FROM users WHERE uuid = ? AND active = true', [userFromToken.uuid]);
+            
             if (userResult.length === 0) {
+                console.log('❌ Usuario no encontrado en BD');
                 res.status(404).json({
                     errors: [{
                         status: "404",
@@ -52,11 +63,14 @@ export class CreatePropuestaController {
             }
 
             const idAlumno = userResult[0].id;
+            console.log('✅ ID del alumno encontrado:', idAlumno);
 
             // Validar campos requeridos
+            console.log('🔍 Validando campos requeridos...');
             if (!tutorAcademicoId || !tipoPasantia || !nombreProyecto || !descripcionProyecto || 
                 !entregables || !tecnologias || !supervisorProyecto || !actividades || 
                 !fechaInicio || !fechaFin || !nombreEmpresa || !sectorEmpresa || !personaContacto) {
+                console.log('❌ Faltan campos requeridos');
                 res.status(400).json({
                     errors: [{
                         status: "400",
@@ -67,11 +81,15 @@ export class CreatePropuestaController {
                 return;
             }
 
+            console.log('✅ Campos validados');
+
             // Convertir fechas
+            console.log('🔍 Convirtiendo fechas...');
             const fechaInicioDate = new Date(fechaInicio);
             const fechaFinDate = new Date(fechaFin);
             
             if (isNaN(fechaInicioDate.getTime()) || isNaN(fechaFinDate.getTime())) {
+                console.log('❌ Formato de fechas inválido');
                 res.status(400).json({
                     errors: [{
                         status: "400",
@@ -82,6 +100,9 @@ export class CreatePropuestaController {
                 return;
             }
 
+            console.log('✅ Fechas convertidas exitosamente');
+
+            console.log('🔍 Ejecutando createPropuestaUseCase...');
             const propuesta = await this.createPropuestaUseCase.run(
                 idAlumno,
                 tutorAcademicoId,
@@ -99,6 +120,8 @@ export class CreatePropuestaController {
                 personaContacto,
                 paginaWebEmpresa || null
             );
+
+            console.log('📋 Propuesta creada:', propuesta ? 'exitosamente' : 'falló');
 
             if (propuesta) {
                 const formattedPropuesta = {
@@ -134,8 +157,10 @@ export class CreatePropuestaController {
                     }
                 };
 
+                console.log('✅ Enviando respuesta exitosa');
                 res.status(201).json({ data: formattedPropuesta });
             } else {
+                console.log('❌ No se pudo crear la propuesta');
                 res.status(400).json({
                     errors: [{
                         status: "400",
@@ -145,7 +170,8 @@ export class CreatePropuestaController {
                 });
             }
         } catch (error) {
-            console.error("Error in CreatePropuestaController:", error);
+            console.error("❌ Error in CreatePropuestaController:", error);
+            console.error("Stack trace:", error instanceof Error ? error.stack : 'No stack');
             
             if (error instanceof Error) {
                 const errorMessage = error.message;
@@ -171,13 +197,15 @@ export class CreatePropuestaController {
                 }
             }
             
-            res.status(500).json({
-                errors: [{
-                    status: "500",
-                    title: "Server error",
-                    detail: error instanceof Error ? error.message : String(error)
-                }]
-            });
+            if (!res.headersSent) {
+                res.status(500).json({
+                    errors: [{
+                        status: "500",
+                        title: "Server error",
+                        detail: error instanceof Error ? error.message : String(error)
+                    }]
+                });
+            }
         }
     }
 }

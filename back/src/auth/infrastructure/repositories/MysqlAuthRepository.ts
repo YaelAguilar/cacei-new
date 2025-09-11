@@ -40,7 +40,7 @@ export class MysqlAuthRepository implements AuthRepository {
         const sql = `
           SELECT 
             u.*,
-            r.uuid AS uuid, 
+            r.uuid AS role_uuid, 
             r.id AS role_id,
             r.name AS role_name
           FROM users u
@@ -61,7 +61,7 @@ export class MysqlAuthRepository implements AuthRepository {
         // Recopila roles
         const roles = result
           .filter((row: any) => row.role_id && row.role_name)
-          .map((row: any) => ({ id: row.uuid, name: row.role_name }));
+          .map((row: any) => ({ id: row.role_uuid, name: row.role_name }));
 
         return new User(
           userRow.id,

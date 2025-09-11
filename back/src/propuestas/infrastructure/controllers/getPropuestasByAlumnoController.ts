@@ -6,10 +6,16 @@ export class GetPropuestasByAlumnoController {
     constructor(private readonly getPropuestasByAlumnoUseCase: GetPropuestasByAlumnoUseCase) {}
 
     async run(req: Request, res: Response): Promise<void> {
+        console.log('🏁 GetPropuestasByAlumnoController iniciado');
+        
         try {
             // Obtener el ID del alumno del token JWT
+            console.log('🔍 Verificando token...');
             const userFromToken = (req as any).user;
+            console.log('👤 UserFromToken:', userFromToken);
+            
             if (!userFromToken || !userFromToken.uuid) {
+                console.log('❌ Token inválido');
                 res.status(401).json({
                     errors: [{
                         status: "401",
@@ -20,10 +26,18 @@ export class GetPropuestasByAlumnoController {
                 return;
             }
 
+            console.log('✅ Token válido, UUID:', userFromToken.uuid);
+
             // Obtener el ID del alumno desde la base de datos usando el UUID del token
+            console.log('🔍 Consultando usuario en BD...');
             const { query } = require('../../../database/mysql');
+            console.log('📊 Función query importada:', typeof query);
+            
             const userResult = await query('SELECT id FROM users WHERE uuid = ? AND active = true', [userFromToken.uuid]);
+            console.log('👥 Resultado consulta usuario:', userResult);
+            
             if (userResult.length === 0) {
+                console.log('❌ Usuario no encontrado en BD');
                 res.status(404).json({
                     errors: [{
                         status: "404",
@@ -35,8 +49,11 @@ export class GetPropuestasByAlumnoController {
             }
 
             const idAlumno = userResult[0].id;
+            console.log('✅ ID del alumno encontrado:', idAlumno);
 
+            console.log('🔍 Ejecutando getPropuestasByAlumnoUseCase...');
             const propuestas = await this.getPropuestasByAlumnoUseCase.run(idAlumno);
+            console.log('📋 Propuestas obtenidas:', propuestas ? propuestas.length : 'null');
 
             const formattedPropuestas = propuestas ? propuestas.map(propuesta => ({
                 type: "propuesta",
@@ -71,18 +88,26 @@ export class GetPropuestasByAlumnoController {
                 }
             })) : [];
 
+            console.log('✅ Enviando respuesta:', formattedPropuestas.length, 'propuestas');
             res.status(200).json({
                 data: formattedPropuestas
             });
+            console.log('✅ Respuesta enviada exitosamente');
+            
         } catch (error) {
-            console.error("Error in GetPropuestasByAlumnoController:", error);
-            res.status(500).json({
-                errors: [{
-                    status: "500",
-                    title: "Error retrieving propuestas",
-                    detail: error instanceof Error ? error.message : String(error)
-                }]
-            });
+            console.error("❌ Error in GetPropuestasByAlumnoController:", error);
+            console.error("Stack trace:", error instanceof Error ? error.stack : 'No stack');
+            
+            // Asegurarse de que se envía una respuesta
+            if (!res.headersSent) {
+                res.status(500).json({
+                    errors: [{
+                        status: "500",
+                        title: "Error retrieving propuestas",
+                        detail: error instanceof Error ? error.message : String(error)
+                    }]
+                });
+            }
         }
     }
 }
