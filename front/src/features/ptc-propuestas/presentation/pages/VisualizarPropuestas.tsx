@@ -1,9 +1,199 @@
-import React from 'react';
+// src/features/ptc-propuestas/presentation/pages/VisualizarPropuestas.tsx
+import React, { useEffect, useMemo } from "react";
+import { observer } from "mobx-react-lite";
+import MainContainer from "../../../shared/layout/MainContainer";
+import { PTCPropuestasViewModel } from "../viewModels/PTCPropuestasViewModel";
+import StatisticsCards from "../components/StatisticsCards";
+import TableFilters from "../components/TableFilters";
+import PropuestasTable from "../components/PropuestasTable";
+import TablePagination from "../components/TablePagination";
+import PTCPropuestaDetailModal from "../components/PTCPropuestaDetailModal";
+import { FiRefreshCw, FiAlertCircle, FiDownload } from "react-icons/fi";
 
-const VisualizarPropuestas: React.FC = () => {
+const VisualizarPropuestas: React.FC = observer(() => {
+  // Crear instancia del ViewModel usando useMemo para evitar recreaciones
+  const ptcViewModel = useMemo(() => new PTCPropuestasViewModel(), []);
+
+  // Inicializar datos al montar el componente
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        await ptcViewModel.initialize();
+      } catch (error) {
+        console.error("Error al inicializar VisualizarPropuestas PTC:", error);
+      }
+    };
+
+    initializeData();
+
+    // Cleanup al desmontar
+    return () => {
+      ptcViewModel.reset();
+    };
+  }, [ptcViewModel]);
+
+  // Manejar actualización manual
+  const handleRefresh = async () => {
+    await ptcViewModel.loadPropuestas();
+  };
+
+  // Mostrar loading mientras se inicializa
+  if (!ptcViewModel.isInitialized) {
     return (
-        <h1>hola propuesta Director o PTC</h1>
+      <MainContainer>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Cargando propuestas de proyectos...</p>
+          </div>
+        </div>
+      </MainContainer>
     );
-};
+  }
+
+  return (
+    <MainContainer>
+      <div className="mt-5">
+        <div className="poppins">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+              <h1 className="text-[23px] md:text-[36px] font-semibold text-black">
+                Propuestas de Proyectos
+              </h1>
+              <p className="text-[14px] md:text-[24px] font-light text-black">
+                Gestión y revisión de todas las propuestas de proyectos registradas por los estudiantes.
+              </p>
+            </div>
+            
+            {/* Botones de acción */}
+            <div className="mt-4 md:mt-0 flex gap-3">
+              <button
+                onClick={handleRefresh}
+                disabled={ptcViewModel.loading}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <FiRefreshCw className={`w-4 h-4 ${ptcViewModel.loading ? 'animate-spin' : ''}`} />
+                {ptcViewModel.loading ? 'Actualizando...' : 'Actualizar'}
+              </button>
+              
+              {/* Botón de exportar (futuro) */}
+              <button
+                onClick={() => {
+                  // TODO: Implementar exportación
+                  alert('Funcionalidad de exportación próximamente');
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                title="Exportar datos"
+              >
+                <FiDownload className="w-4 h-4" />
+                Exportar
+              </button>
+            </div>
+          </div>
+
+          {/* Estadísticas rápidas */}
+          {ptcViewModel.hasPropuestas && (
+            <StatisticsCards viewModel={ptcViewModel} />
+          )}
+
+          {/* Manejo de errores */}
+          {ptcViewModel.error && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <FiAlertCircle className="h-5 w-5" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm">
+                    <strong>Error:</strong> {ptcViewModel.error}
+                  </p>
+                  <button
+                    onClick={() => ptcViewModel.clearError()}
+                    className="mt-2 text-sm underline hover:no-underline"
+                  >
+                    Descartar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Filtros de búsqueda */}
+          {ptcViewModel.hasPropuestas && (
+            <TableFilters viewModel={ptcViewModel} />
+          )}
+
+          {/* Loading state */}
+          {ptcViewModel.loading && (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+          )}
+
+          {/* Tabla de propuestas */}
+          {!ptcViewModel.loading && (
+            <>
+              {ptcViewModel.hasPropuestas ? (
+                <div className="space-y-6">
+                  {/* Tabla */}
+                  <PropuestasTable viewModel={ptcViewModel} />
+                  
+                  {/* Paginación */}
+                  <TablePagination viewModel={ptcViewModel} />
+                </div>
+              ) : (
+                /* Estado vacío */
+                <div className="text-center py-12">
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                    <FiAlertCircle className="w-12 h-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No hay propuestas registradas
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Aún no se han registrado propuestas de proyectos en el sistema. 
+                    Las propuestas aparecerán aquí cuando los estudiantes las registren.
+                  </p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button
+                      onClick={handleRefresh}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Verificar nuevamente
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Información adicional para tutores */}
+          {ptcViewModel.hasPropuestas && (
+            <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-900 mb-2">Información para Tutores Académicos</h3>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Puede ver todas las propuestas registradas por los estudiantes</li>
+                <li>• Use los filtros para encontrar propuestas específicas</li>
+                <li>• Haga clic en "Ver detalles" para revisar la información completa de cada propuesta</li>
+                <li>• Las propuestas se muestran organizadas por fecha de registro</li>
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Modal de detalles */}
+        {ptcViewModel.showDetailModal && ptcViewModel.selectedPropuesta && (
+          <PTCPropuestaDetailModal
+            propuesta={ptcViewModel.selectedPropuesta}
+            viewModel={ptcViewModel}
+            onClose={() => ptcViewModel.closeDetailModal()}
+          />
+        )}
+      </div>
+    </MainContainer>
+  );
+});
 
 export default VisualizarPropuestas;
