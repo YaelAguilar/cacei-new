@@ -2,7 +2,7 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
 import { PTCPropuestasViewModel } from "../viewModels/PTCPropuestasViewModel";
-import { FiEye, FiChevronUp, FiChevronDown, FiBriefcase, FiUser, FiCalendar } from "react-icons/fi";
+import { FiEye, FiChevronUp, FiChevronDown, FiBriefcase, FiUser } from "react-icons/fi";
 import Status from "../../../shared/components/Status";
 
 interface PropuestasTableProps {
@@ -72,15 +72,6 @@ const PropuestasTable: React.FC<PropuestasTableProps> = observer(({ viewModel })
                   {getSortIcon("tipoPasantia")}
                 </div>
               </th>
-              <th
-                onClick={() => handleSort("fechaInicio")}
-                className={getSortableHeaderClass("fechaInicio")}
-              >
-                <div className="flex items-center justify-between">
-                  <span>Fecha Inicio</span>
-                  {getSortIcon("fechaInicio")}
-                </div>
-              </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Estado
               </th>
@@ -106,9 +97,6 @@ const PropuestasTable: React.FC<PropuestasTableProps> = observer(({ viewModel })
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
                           {propuesta.getProyecto().getNombre()}
-                        </div>
-                        <div className="text-sm text-gray-500 max-w-xs truncate">
-                          {propuesta.getProyecto().getDescripcion()}
                         </div>
                       </div>
                     </div>
@@ -148,14 +136,6 @@ const PropuestasTable: React.FC<PropuestasTableProps> = observer(({ viewModel })
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                       {propuesta.getTipoPasantia()}
                     </span>
-                  </td>
-
-                  {/* Fecha de Inicio */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-900">
-                      <FiCalendar className="h-4 w-4 mr-2 text-gray-400" />
-                      {viewModel.formatDate(propuesta.getProyecto().getFechaInicio())}
-                    </div>
                   </td>
 
                   {/* Estado */}
