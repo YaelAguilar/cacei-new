@@ -1,4 +1,3 @@
-// src/propuestas/infrastructure/repositories/MysqlPropuestaRepository.ts
 import { PropuestaRepository, PropuestaCreateData, PropuestaUpdateData } from "../../domain/interfaces/propuestaRepository";
 import { Propuesta } from "../../domain/models/propuesta";
 import { query } from "../../../database/mysql";
@@ -43,10 +42,10 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             data.companyStreetType,
             data.companyStreetName,
             data.companyExteriorNumber,
-            data.companyInteriorNumber,
+            data.companyInteriorNumber ?? null,
             data.companyPostalCode,
-            data.companyWebsite,
-            data.companyLinkedin,
+            data.companyWebsite ?? null,
+            data.companyLinkedin ?? null,
             data.contactName,
             data.contactPosition,
             data.contactEmail,
@@ -91,10 +90,10 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
                 data.companyStreetType,
                 data.companyStreetName,
                 data.companyExteriorNumber,
-                data.companyInteriorNumber,
+                data.companyInteriorNumber ?? null,
                 data.companyPostalCode,
-                data.companyWebsite,
-                data.companyLinkedin,
+                data.companyWebsite ?? null,
+                data.companyLinkedin ?? null,
                 data.contactName,
                 data.contactPosition,
                 data.contactEmail,

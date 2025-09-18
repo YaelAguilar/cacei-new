@@ -1,3 +1,4 @@
+// src/propuestas/infrastructure/controllers/getPropuestasByStudentController.ts
 import { Request, Response } from 'express';
 import { GetPropuestasByStudentUseCase } from '../../application/getPropuestasUseCase';
 
