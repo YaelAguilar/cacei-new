@@ -1,4 +1,3 @@
-// src/propuestas/infrastructure/controllers/updatePropuestaController.ts
 import { Request, Response } from 'express';
 import { UpdatePropuestaUseCase } from '../../application/updatePropuestaUseCase';
 
@@ -7,22 +6,7 @@ export class UpdatePropuestaController {
 
     async run(req: Request, res: Response): Promise<void> {
         const { uuid } = req.params;
-        const {
-            tutorAcademicoId,
-            tipoPasantia,
-            nombreProyecto,
-            descripcionProyecto,
-            entregables,
-            tecnologias,
-            supervisorProyecto,
-            actividades,
-            fechaInicio,
-            fechaFin,
-            nombreEmpresa,
-            sectorEmpresa,
-            personaContacto,
-            paginaWebEmpresa
-        } = req.body;
+        const updateData = req.body;
 
         try {
             if (!uuid) {
@@ -36,12 +20,10 @@ export class UpdatePropuestaController {
                 return;
             }
 
-            let fechaInicioDate: Date | undefined;
-            let fechaFinDate: Date | undefined;
-
-            if (fechaInicio) {
-                fechaInicioDate = new Date(fechaInicio);
-                if (isNaN(fechaInicioDate.getTime())) {
+            // Convertir fechas si están presentes
+            if (updateData.projectStartDate) {
+                updateData.projectStartDate = new Date(updateData.projectStartDate);
+                if (isNaN(updateData.projectStartDate.getTime())) {
                     res.status(400).json({
                         errors: [{
                             status: "400",
@@ -53,9 +35,9 @@ export class UpdatePropuestaController {
                 }
             }
 
-            if (fechaFin) {
-                fechaFinDate = new Date(fechaFin);
-                if (isNaN(fechaFinDate.getTime())) {
+            if (updateData.projectEndDate) {
+                updateData.projectEndDate = new Date(updateData.projectEndDate);
+                if (isNaN(updateData.projectEndDate.getTime())) {
                     res.status(400).json({
                         errors: [{
                             status: "400",
@@ -67,51 +49,35 @@ export class UpdatePropuestaController {
                 }
             }
 
-            const propuesta = await this.updatePropuestaUseCase.run(
-                uuid,
-                tutorAcademicoId,
-                tipoPasantia,
-                nombreProyecto,
-                descripcionProyecto,
-                entregables,
-                tecnologias,
-                supervisorProyecto,
-                actividades,
-                fechaInicioDate,
-                fechaFinDate,
-                nombreEmpresa,
-                sectorEmpresa,
-                personaContacto,
-                paginaWebEmpresa
-            );
+            const propuesta = await this.updatePropuestaUseCase.run(uuid, updateData);
 
             if (propuesta) {
                 const formattedPropuesta = {
                     type: "propuesta",
                     id: propuesta.getUuid(),
                     attributes: {
-                        idConvocatoria: propuesta.getIdConvocatoria(),
+                        idConvocatoria: propuesta.getConvocatoriaId(),
                         tutorAcademico: {
-                            id: propuesta.getTutorAcademicoId(),
-                            nombre: propuesta.getTutorAcademicoNombre(),
-                            email: propuesta.getTutorAcademicoEmail()
+                            id: propuesta.getAcademicTutorId(),
+                            nombre: propuesta.getAcademicTutorName(),
+                            email: propuesta.getAcademicTutorEmail()
                         },
-                        tipoPasantia: propuesta.getTipoPasantia(),
+                        tipoPasantia: propuesta.getInternshipType(),
                         proyecto: {
-                            nombre: propuesta.getNombreProyecto(),
-                            descripcion: propuesta.getDescripcionProyecto(),
-                            entregables: propuesta.getEntregables(),
-                            tecnologias: propuesta.getTecnologias(),
-                            supervisor: propuesta.getSupervisorProyecto(),
-                            actividades: propuesta.getActividades(),
-                            fechaInicio: propuesta.getFechaInicio(),
-                            fechaFin: propuesta.getFechaFin()
+                            nombre: propuesta.getProjectName(),
+                            descripcion: propuesta.getProjectProblemDescription(),
+                            entregables: propuesta.getProjectPlannedDeliverables(),
+                            tecnologias: propuesta.getProjectTechnologies(),
+                            supervisor: propuesta.getSupervisorName(),
+                            actividades: propuesta.getProjectMainActivities(),
+                            fechaInicio: propuesta.getProjectStartDate(),
+                            fechaFin: propuesta.getProjectEndDate()
                         },
                         empresa: {
-                            nombre: propuesta.getNombreEmpresa(),
-                            sector: propuesta.getSectorEmpresa(),
-                            personaContacto: propuesta.getPersonaContacto(),
-                            paginaWeb: propuesta.getPaginaWebEmpresa()
+                            nombre: propuesta.getCompanyShortName(),
+                            sector: propuesta.getContactArea(),
+                            personaContacto: propuesta.getContactName(),
+                            paginaWeb: propuesta.getCompanyWebsite()
                         },
                         active: propuesta.isActive(),
                         createdAt: propuesta.getCreatedAt(),
@@ -143,7 +109,8 @@ export class UpdatePropuestaController {
                     "no puede ser anterior",
                     "debe ser posterior",
                     "no está disponible en la convocatoria actual",
-                    "No hay campos para actualizar"
+                    "No hay campos para actualizar",
+                    "debe tener una duración mínima"
                 ];
                 
                 if (businessErrors.some(msg => errorMessage.includes(msg))) {

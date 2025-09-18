@@ -34,3 +34,4 @@ export const getPropuestaController = new GetPropuestaController(getPropuestaUse
 export const updatePropuestaController = new UpdatePropuestaController(updatePropuestaUseCase);
 export const getActiveConvocatoriaController = new GetActiveConvocatoriaController(getActiveConvocatoriaUseCase);
 export const getPropuestasByStudentController = new GetPropuestasByStudentController(getPropuestasByStudentUseCase);
+export { GetPropuestasByStudentController } from "./controllers/getPropuestasByStudentController";

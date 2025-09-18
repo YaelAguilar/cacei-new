@@ -12,7 +12,6 @@ export class GetActiveConvocatoriaController {
             const convocatoriaActiva = await this.getActiveConvocatoriaUseCase.run();
             console.log('📋 Convocatoria activa:', convocatoriaActiva ? 'encontrada' : 'no encontrada');
             
-            // 🔧 DEBUG: Información detallada de la convocatoria
             if (convocatoriaActiva) {
                 console.log('📊 Detalles convocatoria activa:', {
                     id: convocatoriaActiva.id,
@@ -22,14 +21,12 @@ export class GetActiveConvocatoriaController {
                     profesoresCount: convocatoriaActiva.profesoresDisponibles.length
                 });
                 
-                console.log('🎯 ID que se enviará al frontend:', convocatoriaActiva.uuid);
+                console.log('🎯 UUID que se enviará al frontend:', convocatoriaActiva.uuid);
                 console.log('🎯 ID interno de BD:', convocatoriaActiva.id);
-            }
 
-            if (convocatoriaActiva) {
                 const formattedConvocatoria = {
                     type: "convocatoria-activa",
-                    id: convocatoriaActiva.id.toString(), // Este es el UUID, no el ID numérico
+                    id: convocatoriaActiva.uuid, // CORREGIDO: usar UUID, no ID numérico
                     attributes: {
                         nombre: convocatoriaActiva.nombre,
                         pasantiasDisponibles: convocatoriaActiva.pasantiasDisponibles,

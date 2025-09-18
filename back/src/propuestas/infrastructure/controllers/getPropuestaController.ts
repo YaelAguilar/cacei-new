@@ -1,4 +1,3 @@
-// src/propuestas/infrastructure/controllers/getPropuestaController.ts
 import { Request, Response } from 'express';
 import { GetPropuestaUseCase } from '../../application/getPropuestasUseCase';
 
@@ -16,28 +15,28 @@ export class GetPropuestaController {
                     type: "propuesta",
                     id: propuesta.getUuid(),
                     attributes: {
-                        idConvocatoria: propuesta.getIdConvocatoria(),
+                        idConvocatoria: propuesta.getConvocatoriaId(),
                         tutorAcademico: {
-                            id: propuesta.getTutorAcademicoId(),
-                            nombre: propuesta.getTutorAcademicoNombre(),
-                            email: propuesta.getTutorAcademicoEmail()
+                            id: propuesta.getAcademicTutorId(),        // CORREGIDO
+                            nombre: propuesta.getAcademicTutorName(),   // CORREGIDO
+                            email: propuesta.getAcademicTutorEmail()    // CORREGIDO
                         },
-                        tipoPasantia: propuesta.getTipoPasantia(),
+                        tipoPasantia: propuesta.getInternshipType(),   // CORREGIDO
                         proyecto: {
-                            nombre: propuesta.getNombreProyecto(),
-                            descripcion: propuesta.getDescripcionProyecto(),
-                            entregables: propuesta.getEntregables(),
-                            tecnologias: propuesta.getTecnologias(),
-                            supervisor: propuesta.getSupervisorProyecto(),
-                            actividades: propuesta.getActividades(),
-                            fechaInicio: propuesta.getFechaInicio(),
-                            fechaFin: propuesta.getFechaFin()
+                            nombre: propuesta.getProjectName(),                    // CORREGIDO
+                            descripcion: propuesta.getProjectProblemDescription(), // CORREGIDO
+                            entregables: propuesta.getProjectPlannedDeliverables(),// CORREGIDO
+                            tecnologias: propuesta.getProjectTechnologies(),       // CORREGIDO
+                            supervisor: propuesta.getSupervisorName(),             // CORREGIDO
+                            actividades: propuesta.getProjectMainActivities(),     // CORREGIDO
+                            fechaInicio: propuesta.getProjectStartDate(),          // CORREGIDO
+                            fechaFin: propuesta.getProjectEndDate()                // CORREGIDO
                         },
                         empresa: {
-                            nombre: propuesta.getNombreEmpresa(),
-                            sector: propuesta.getSectorEmpresa(),
-                            personaContacto: propuesta.getPersonaContacto(),
-                            paginaWeb: propuesta.getPaginaWebEmpresa()
+                            nombre: propuesta.getCompanyShortName(),               // CORREGIDO
+                            sector: propuesta.getContactArea(),                    // CORREGIDO
+                            personaContacto: propuesta.getContactName(),           // CORREGIDO
+                            paginaWeb: propuesta.getCompanyWebsite()               // CORREGIDO
                         },
                         active: propuesta.isActive(),
                         createdAt: propuesta.getCreatedAt(),
