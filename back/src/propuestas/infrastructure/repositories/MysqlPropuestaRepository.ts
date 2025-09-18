@@ -7,81 +7,118 @@ import { v4 as uuidv4 } from 'uuid';
 export class MysqlPropuestaRepository implements PropuestaRepository {
 
     async createPropuesta(data: PropuestaCreateData): Promise<Propuesta | null> {
-        // Primero obtener los datos del tutor académico
-        const tutorSql = `
-            SELECT 
-                CONCAT(u.name, ' ', u.lastName, ' ', IFNULL(u.secondLastName, '')) as nombre_completo,
-                u.email
-            FROM users u
-            WHERE u.id = ? AND u.active = true
+        const sql = `
+            INSERT INTO project_proposals (
+                uuid, convocatoria_id, student_id, academic_tutor_id, academic_tutor_name, 
+                academic_tutor_email, internship_type,
+                company_short_name, company_legal_name, company_tax_id,
+                company_state, company_municipality, company_settlement_type, company_settlement_name,
+                company_street_type, company_street_name, company_exterior_number, company_interior_number,
+                company_postal_code, company_website, company_linkedin,
+                contact_name, contact_position, contact_email, contact_phone, contact_area,
+                supervisor_name, supervisor_area, supervisor_email, supervisor_phone,
+                project_name, project_start_date, project_end_date, project_problem_context,
+                project_problem_description, project_general_objective, project_specific_objectives,
+                project_main_activities, project_planned_deliverables, project_technologies,
+                user_creation
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        
+
+        const uuid = uuidv4();
+        const params: any[] = [
+            uuid,
+            data.convocatoriaId,
+            data.studentId,
+            data.academicTutorId,
+            data.academicTutorName,
+            data.academicTutorEmail,
+            data.internshipType,
+            data.companyShortName,
+            data.companyLegalName,
+            data.companyTaxId,
+            data.companyState,
+            data.companyMunicipality,
+            data.companySettlementType,
+            data.companySettlementName,
+            data.companyStreetType,
+            data.companyStreetName,
+            data.companyExteriorNumber,
+            data.companyInteriorNumber,
+            data.companyPostalCode,
+            data.companyWebsite,
+            data.companyLinkedin,
+            data.contactName,
+            data.contactPosition,
+            data.contactEmail,
+            data.contactPhone,
+            data.contactArea,
+            data.supervisorName,
+            data.supervisorArea,
+            data.supervisorEmail,
+            data.supervisorPhone,
+            data.projectName,
+            data.projectStartDate,
+            data.projectEndDate,
+            data.projectProblemContext,
+            data.projectProblemDescription,
+            data.projectGeneralObjective,
+            data.projectSpecificObjectives,
+            data.projectMainActivities,
+            data.projectPlannedDeliverables,
+            data.projectTechnologies,
+            data.userCreation
+        ];
+
         try {
-            const tutorResult: any = await query(tutorSql, [data.tutorAcademicoId]);
-            if (tutorResult.length === 0) {
-                throw new Error("Tutor académico no encontrado o inactivo");
-            }
-
-            const tutor = tutorResult[0];
-
-            const sql = `
-                INSERT INTO propuestas (
-                    uuid, id_convocatoria, id_alumno, tutor_academico_id, tutor_academico_nombre, 
-                    tutor_academico_email, tipo_pasantia, nombre_proyecto, descripcion_proyecto,
-                    entregables, tecnologias, supervisor_proyecto, actividades, fecha_inicio,
-                    fecha_fin, nombre_empresa, sector_empresa, persona_contacto, pagina_web_empresa
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `;
-
-            const uuid = uuidv4();
-            const params: any[] = [
-                uuid,
-                data.idConvocatoria,
-                data.idAlumno,
-                data.tutorAcademicoId,
-                tutor.nombre_completo,
-                tutor.email,
-                data.tipoPasantia,
-                data.nombreProyecto,
-                data.descripcionProyecto,
-                data.entregables,
-                data.tecnologias,
-                data.supervisorProyecto,
-                data.actividades,
-                data.fechaInicio,
-                data.fechaFin,
-                data.nombreEmpresa,
-                data.sectorEmpresa,
-                data.personaContacto,
-                data.paginaWebEmpresa
-            ];
-
             const result: any = await query(sql, params);
             
             return new Propuesta(
                 result.insertId,
-                data.idConvocatoria,
-                data.idAlumno,
-                data.tutorAcademicoId,
-                tutor.nombre_completo,
-                tutor.email,
-                data.tipoPasantia,
-                data.nombreProyecto,
-                data.descripcionProyecto,
-                data.entregables,
-                data.tecnologias,
-                data.supervisorProyecto,
-                data.actividades,
-                data.fechaInicio,
-                data.fechaFin,
-                data.nombreEmpresa,
-                data.sectorEmpresa,
-                data.personaContacto,
-                data.paginaWebEmpresa,
                 uuid,
-                true,
-                new Date(),
-                new Date()
+                data.convocatoriaId,
+                data.studentId,
+                data.academicTutorId,
+                data.academicTutorName,
+                data.academicTutorEmail,
+                data.internshipType,
+                data.companyShortName,
+                data.companyLegalName,
+                data.companyTaxId,
+                data.companyState,
+                data.companyMunicipality,
+                data.companySettlementType,
+                data.companySettlementName,
+                data.companyStreetType,
+                data.companyStreetName,
+                data.companyExteriorNumber,
+                data.companyInteriorNumber,
+                data.companyPostalCode,
+                data.companyWebsite,
+                data.companyLinkedin,
+                data.contactName,
+                data.contactPosition,
+                data.contactEmail,
+                data.contactPhone,
+                data.contactArea,
+                data.supervisorName,
+                data.supervisorArea,
+                data.supervisorEmail,
+                data.supervisorPhone,
+                data.projectName,
+                data.projectStartDate,
+                data.projectEndDate,
+                data.projectProblemContext,
+                data.projectProblemDescription,
+                data.projectGeneralObjective,
+                data.projectSpecificObjectives,
+                data.projectMainActivities,
+                data.projectPlannedDeliverables,
+                data.projectTechnologies,
+                true, // active
+                new Date(), // created_at
+                new Date(), // updated_at
+                data.userCreation,
+                null // user_update
             );
         } catch (error) {
             console.error("Error creating propuesta:", error);
@@ -91,7 +128,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
 
     async getPropuestas(): Promise<Propuesta[] | null> {
         const sql = `
-            SELECT * FROM propuestas 
+            SELECT * FROM project_proposals 
             WHERE active = true 
             ORDER BY created_at DESC
         `;
@@ -100,33 +137,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             const result: any = await query(sql);
             
             if (result.length > 0) {
-                return result.map((row: any) => new Propuesta(
-                    row.id,
-                    row.id_convocatoria,
-                    row.id_alumno,
-                    row.tutor_academico_id,
-                    row.tutor_academico_nombre,
-                    row.tutor_academico_email,
-                    row.tipo_pasantia,
-                    row.nombre_proyecto,
-                    row.descripcion_proyecto,
-                    row.entregables,
-                    row.tecnologias,
-                    row.supervisor_proyecto,
-                    row.actividades,
-                    new Date(row.fecha_inicio),
-                    new Date(row.fecha_fin),
-                    row.nombre_empresa,
-                    row.sector_empresa,
-                    row.persona_contacto,
-                    row.pagina_web_empresa,
-                    row.uuid,
-                    row.active,
-                    row.created_at,
-                    row.updated_at,
-                    row.user_creation,
-                    row.user_update
-                ));
+                return result.map((row: any) => this.mapRowToPropuesta(row));
             }
             return [];
         } catch (error) {
@@ -137,8 +148,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
 
     async getPropuestasByConvocatoria(convocatoriaId: number): Promise<Propuesta[] | null> {
         const sql = `
-            SELECT * FROM propuestas 
-            WHERE id_convocatoria = ? AND active = true 
+            SELECT * FROM project_proposals 
+            WHERE convocatoria_id = ? AND active = true 
             ORDER BY created_at DESC
         `;
 
@@ -146,33 +157,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             const result: any = await query(sql, [convocatoriaId]);
             
             if (result.length > 0) {
-                return result.map((row: any) => new Propuesta(
-                    row.id,
-                    row.id_convocatoria,
-                    row.id_alumno,
-                    row.tutor_academico_id,
-                    row.tutor_academico_nombre,
-                    row.tutor_academico_email,
-                    row.tipo_pasantia,
-                    row.nombre_proyecto,
-                    row.descripcion_proyecto,
-                    row.entregables,
-                    row.tecnologias,
-                    row.supervisor_proyecto,
-                    row.actividades,
-                    new Date(row.fecha_inicio),
-                    new Date(row.fecha_fin),
-                    row.nombre_empresa,
-                    row.sector_empresa,
-                    row.persona_contacto,
-                    row.pagina_web_empresa,
-                    row.uuid,
-                    row.active,
-                    row.created_at,
-                    row.updated_at,
-                    row.user_creation,
-                    row.user_update
-                ));
+                return result.map((row: any) => this.mapRowToPropuesta(row));
             }
             return [];
         } catch (error) {
@@ -181,87 +166,34 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         }
     }
 
-    async getPropuestasByAlumno(alumnoId: number): Promise<Propuesta[] | null> {
+    async getPropuestasByStudent(studentId: number): Promise<Propuesta[] | null> {
         const sql = `
-            SELECT * FROM propuestas 
-            WHERE id_alumno = ? AND active = true 
+            SELECT * FROM project_proposals 
+            WHERE student_id = ? AND active = true 
             ORDER BY created_at DESC
         `;
 
         try {
-            const result: any = await query(sql, [alumnoId]);
+            const result: any = await query(sql, [studentId]);
             
             if (result.length > 0) {
-                return result.map((row: any) => new Propuesta(
-                    row.id,
-                    row.id_convocatoria,
-                    row.id_alumno,
-                    row.tutor_academico_id,
-                    row.tutor_academico_nombre,
-                    row.tutor_academico_email,
-                    row.tipo_pasantia,
-                    row.nombre_proyecto,
-                    row.descripcion_proyecto,
-                    row.entregables,
-                    row.tecnologias,
-                    row.supervisor_proyecto,
-                    row.actividades,
-                    new Date(row.fecha_inicio),
-                    new Date(row.fecha_fin),
-                    row.nombre_empresa,
-                    row.sector_empresa,
-                    row.persona_contacto,
-                    row.pagina_web_empresa,
-                    row.uuid,
-                    row.active,
-                    row.created_at,
-                    row.updated_at,
-                    row.user_creation,
-                    row.user_update
-                ));
+                return result.map((row: any) => this.mapRowToPropuesta(row));
             }
             return [];
         } catch (error) {
-            console.error("Error getting propuestas by alumno:", error);
-            throw new Error(`Error al obtener las propuestas del alumno: ${error}`);
+            console.error("Error getting propuestas by student:", error);
+            throw new Error(`Error al obtener las propuestas del estudiante: ${error}`);
         }
     }
 
     async getPropuesta(uuid: string): Promise<Propuesta | null> {
-        const sql = `SELECT * FROM propuestas WHERE uuid = ? AND active = true`;
+        const sql = `SELECT * FROM project_proposals WHERE uuid = ? AND active = true`;
         
         try {
             const result: any = await query(sql, [uuid]);
             
             if (result.length > 0) {
-                const row = result[0];
-                return new Propuesta(
-                    row.id,
-                    row.id_convocatoria,
-                    row.id_alumno,
-                    row.tutor_academico_id,
-                    row.tutor_academico_nombre,
-                    row.tutor_academico_email,
-                    row.tipo_pasantia,
-                    row.nombre_proyecto,
-                    row.descripcion_proyecto,
-                    row.entregables,
-                    row.tecnologias,
-                    row.supervisor_proyecto,
-                    row.actividades,
-                    new Date(row.fecha_inicio),
-                    new Date(row.fecha_fin),
-                    row.nombre_empresa,
-                    row.sector_empresa,
-                    row.persona_contacto,
-                    row.pagina_web_empresa,
-                    row.uuid,
-                    row.active,
-                    row.created_at,
-                    row.updated_at,
-                    row.user_creation,
-                    row.user_update
-                );
+                return this.mapRowToPropuesta(result[0]);
             }
             return null;
         } catch (error) {
@@ -274,89 +206,158 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         const fields: string[] = [];
         const params: any[] = [];
 
-        // Si se actualiza el tutor académico, obtener sus datos
-        if (data.tutorAcademicoId !== undefined) {
-            const tutorSql = `
-                SELECT 
-                    CONCAT(u.name, ' ', u.lastName, ' ', IFNULL(u.secondLastName, '')) as nombre_completo,
-                    u.email
-                FROM users u
-                WHERE u.id = ? AND u.active = true
-            `;
-            
-            const tutorResult: any = await query(tutorSql, [data.tutorAcademicoId]);
-            if (tutorResult.length === 0) {
-                throw new Error("Tutor académico no encontrado o inactivo");
-            }
-
-            const tutor = tutorResult[0];
-            fields.push("tutor_academico_id = ?", "tutor_academico_nombre = ?", "tutor_academico_email = ?");
-            params.push(data.tutorAcademicoId, tutor.nombre_completo, tutor.email);
+        // Agregar todos los campos que se pueden actualizar
+        if (data.companyShortName !== undefined) {
+            fields.push("company_short_name = ?");
+            params.push(data.companyShortName);
         }
-
-        if (data.tipoPasantia !== undefined) {
-            fields.push("tipo_pasantia = ?");
-            params.push(data.tipoPasantia);
+        if (data.companyLegalName !== undefined) {
+            fields.push("company_legal_name = ?");
+            params.push(data.companyLegalName);
         }
-
-        if (data.nombreProyecto !== undefined) {
-            fields.push("nombre_proyecto = ?");
-            params.push(data.nombreProyecto);
+        if (data.companyTaxId !== undefined) {
+            fields.push("company_tax_id = ?");
+            params.push(data.companyTaxId);
         }
-
-        if (data.descripcionProyecto !== undefined) {
-            fields.push("descripcion_proyecto = ?");
-            params.push(data.descripcionProyecto);
+        if (data.companyState !== undefined) {
+            fields.push("company_state = ?");
+            params.push(data.companyState);
         }
-
-        if (data.entregables !== undefined) {
-            fields.push("entregables = ?");
-            params.push(data.entregables);
+        if (data.companyMunicipality !== undefined) {
+            fields.push("company_municipality = ?");
+            params.push(data.companyMunicipality);
         }
-
-        if (data.tecnologias !== undefined) {
-            fields.push("tecnologias = ?");
-            params.push(data.tecnologias);
+        if (data.companySettlementType !== undefined) {
+            fields.push("company_settlement_type = ?");
+            params.push(data.companySettlementType);
         }
-
-        if (data.supervisorProyecto !== undefined) {
-            fields.push("supervisor_proyecto = ?");
-            params.push(data.supervisorProyecto);
+        if (data.companySettlementName !== undefined) {
+            fields.push("company_settlement_name = ?");
+            params.push(data.companySettlementName);
         }
-
-        if (data.actividades !== undefined) {
-            fields.push("actividades = ?");
-            params.push(data.actividades);
+        if (data.companyStreetType !== undefined) {
+            fields.push("company_street_type = ?");
+            params.push(data.companyStreetType);
         }
-
-        if (data.fechaInicio !== undefined) {
-            fields.push("fecha_inicio = ?");
-            params.push(data.fechaInicio);
+        if (data.companyStreetName !== undefined) {
+            fields.push("company_street_name = ?");
+            params.push(data.companyStreetName);
         }
-
-        if (data.fechaFin !== undefined) {
-            fields.push("fecha_fin = ?");
-            params.push(data.fechaFin);
+        if (data.companyExteriorNumber !== undefined) {
+            fields.push("company_exterior_number = ?");
+            params.push(data.companyExteriorNumber);
         }
-
-        if (data.nombreEmpresa !== undefined) {
-            fields.push("nombre_empresa = ?");
-            params.push(data.nombreEmpresa);
+        if (data.companyInteriorNumber !== undefined) {
+            fields.push("company_interior_number = ?");
+            params.push(data.companyInteriorNumber);
         }
-
-        if (data.sectorEmpresa !== undefined) {
-            fields.push("sector_empresa = ?");
-            params.push(data.sectorEmpresa);
+        if (data.companyPostalCode !== undefined) {
+            fields.push("company_postal_code = ?");
+            params.push(data.companyPostalCode);
         }
-
-        if (data.personaContacto !== undefined) {
-            fields.push("persona_contacto = ?");
-            params.push(data.personaContacto);
+        if (data.companyWebsite !== undefined) {
+            fields.push("company_website = ?");
+            params.push(data.companyWebsite);
         }
-
-        if (data.paginaWebEmpresa !== undefined) {
-            fields.push("pagina_web_empresa = ?");
-            params.push(data.paginaWebEmpresa);
+        if (data.companyLinkedin !== undefined) {
+            fields.push("company_linkedin = ?");
+            params.push(data.companyLinkedin);
+        }
+        if (data.contactName !== undefined) {
+            fields.push("contact_name = ?");
+            params.push(data.contactName);
+        }
+        if (data.contactPosition !== undefined) {
+            fields.push("contact_position = ?");
+            params.push(data.contactPosition);
+        }
+        if (data.contactEmail !== undefined) {
+            fields.push("contact_email = ?");
+            params.push(data.contactEmail);
+        }
+        if (data.contactPhone !== undefined) {
+            fields.push("contact_phone = ?");
+            params.push(data.contactPhone);
+        }
+        if (data.contactArea !== undefined) {
+            fields.push("contact_area = ?");
+            params.push(data.contactArea);
+        }
+        if (data.supervisorName !== undefined) {
+            fields.push("supervisor_name = ?");
+            params.push(data.supervisorName);
+        }
+        if (data.supervisorArea !== undefined) {
+            fields.push("supervisor_area = ?");
+            params.push(data.supervisorArea);
+        }
+        if (data.supervisorEmail !== undefined) {
+            fields.push("supervisor_email = ?");
+            params.push(data.supervisorEmail);
+        }
+        if (data.supervisorPhone !== undefined) {
+            fields.push("supervisor_phone = ?");
+            params.push(data.supervisorPhone);
+        }
+        if (data.projectName !== undefined) {
+            fields.push("project_name = ?");
+            params.push(data.projectName);
+        }
+        if (data.projectStartDate !== undefined) {
+            fields.push("project_start_date = ?");
+            params.push(data.projectStartDate);
+        }
+        if (data.projectEndDate !== undefined) {
+            fields.push("project_end_date = ?");
+            params.push(data.projectEndDate);
+        }
+        if (data.projectProblemContext !== undefined) {
+            fields.push("project_problem_context = ?");
+            params.push(data.projectProblemContext);
+        }
+        if (data.projectProblemDescription !== undefined) {
+            fields.push("project_problem_description = ?");
+            params.push(data.projectProblemDescription);
+        }
+        if (data.projectGeneralObjective !== undefined) {
+            fields.push("project_general_objective = ?");
+            params.push(data.projectGeneralObjective);
+        }
+        if (data.projectSpecificObjectives !== undefined) {
+            fields.push("project_specific_objectives = ?");
+            params.push(data.projectSpecificObjectives);
+        }
+        if (data.projectMainActivities !== undefined) {
+            fields.push("project_main_activities = ?");
+            params.push(data.projectMainActivities);
+        }
+        if (data.projectPlannedDeliverables !== undefined) {
+            fields.push("project_planned_deliverables = ?");
+            params.push(data.projectPlannedDeliverables);
+        }
+        if (data.projectTechnologies !== undefined) {
+            fields.push("project_technologies = ?");
+            params.push(data.projectTechnologies);
+        }
+        if (data.academicTutorId !== undefined) {
+            fields.push("academic_tutor_id = ?");
+            params.push(data.academicTutorId);
+        }
+        if (data.academicTutorName !== undefined) {
+            fields.push("academic_tutor_name = ?");
+            params.push(data.academicTutorName);
+        }
+        if (data.academicTutorEmail !== undefined) {
+            fields.push("academic_tutor_email = ?");
+            params.push(data.academicTutorEmail);
+        }
+        if (data.internshipType !== undefined) {
+            fields.push("internship_type = ?");
+            params.push(data.internshipType);
+        }
+        if (data.userUpdate !== undefined) {
+            fields.push("user_update = ?");
+            params.push(data.userUpdate);
         }
 
         if (fields.length === 0) {
@@ -366,7 +367,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         fields.push("updated_at = CURRENT_TIMESTAMP");
         params.push(uuid);
 
-        const sql = `UPDATE propuestas SET ${fields.join(", ")} WHERE uuid = ? AND active = true`;
+        const sql = `UPDATE project_proposals SET ${fields.join(", ")} WHERE uuid = ? AND active = true`;
 
         try {
             const result: any = await query(sql, params);
@@ -375,7 +376,6 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
                 return null;
             }
 
-            // Obtener la propuesta actualizada
             return await this.getPropuesta(uuid);
         } catch (error) {
             console.error("Error updating propuesta:", error);
@@ -383,15 +383,15 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         }
     }
 
-    async checkExistingPropuesta(alumnoId: number, convocatoriaId: number): Promise<boolean> {
+    async checkExistingPropuesta(studentId: number, convocatoriaId: number): Promise<boolean> {
         const sql = `
             SELECT COUNT(*) as count 
-            FROM propuestas 
-            WHERE id_alumno = ? AND id_convocatoria = ? AND active = true
+            FROM project_proposals 
+            WHERE student_id = ? AND convocatoria_id = ? AND active = true
         `;
 
         try {
-            const result: any = await query(sql, [alumnoId, convocatoriaId]);
+            const result: any = await query(sql, [studentId, convocatoriaId]);
             return result[0].count > 0;
         } catch (error) {
             console.error("Error checking existing propuesta:", error);
@@ -426,5 +426,56 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             console.error("Error getting active convocatoria:", error);
             throw new Error(`Error al obtener la convocatoria activa: ${error}`);
         }
+    }
+
+    private mapRowToPropuesta(row: any): Propuesta {
+        return new Propuesta(
+            row.id,
+            row.uuid,
+            row.convocatoria_id,
+            row.student_id,
+            row.academic_tutor_id,
+            row.academic_tutor_name,
+            row.academic_tutor_email,
+            row.internship_type,
+            row.company_short_name,
+            row.company_legal_name,
+            row.company_tax_id,
+            row.company_state,
+            row.company_municipality,
+            row.company_settlement_type,
+            row.company_settlement_name,
+            row.company_street_type,
+            row.company_street_name,
+            row.company_exterior_number,
+            row.company_interior_number,
+            row.company_postal_code,
+            row.company_website,
+            row.company_linkedin,
+            row.contact_name,
+            row.contact_position,
+            row.contact_email,
+            row.contact_phone,
+            row.contact_area,
+            row.supervisor_name,
+            row.supervisor_area,
+            row.supervisor_email,
+            row.supervisor_phone,
+            row.project_name,
+            new Date(row.project_start_date),
+            new Date(row.project_end_date),
+            row.project_problem_context,
+            row.project_problem_description,
+            row.project_general_objective,
+            row.project_specific_objectives,
+            row.project_main_activities,
+            row.project_planned_deliverables,
+            row.project_technologies,
+            row.active,
+            row.created_at,
+            row.updated_at,
+            row.user_creation,
+            row.user_update
+        );
     }
 }

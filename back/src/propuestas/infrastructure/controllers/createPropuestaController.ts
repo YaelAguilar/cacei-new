@@ -10,24 +10,55 @@ export class CreatePropuestaController {
         console.log('📝 Body recibido:', req.body);
         
         const {
-            tutorAcademicoId,
-            tipoPasantia,
-            nombreProyecto,
-            descripcionProyecto,
-            entregables,
-            tecnologias,
-            supervisorProyecto,
-            actividades,
-            fechaInicio,
-            fechaFin,
-            nombreEmpresa,
-            sectorEmpresa,
-            personaContacto,
-            paginaWebEmpresa
+            academicTutorId,
+            internshipType,
+            
+            // Información de la empresa
+            companyShortName,
+            companyLegalName,
+            companyTaxId,
+            
+            // Dirección de la empresa
+            companyState,
+            companyMunicipality,
+            companySettlementType,
+            companySettlementName,
+            companyStreetType,
+            companyStreetName,
+            companyExteriorNumber,
+            companyInteriorNumber,
+            companyPostalCode,
+            companyWebsite,
+            companyLinkedin,
+            
+            // Información de contacto
+            contactName,
+            contactPosition,
+            contactEmail,
+            contactPhone,
+            contactArea,
+            
+            // Supervisor del proyecto
+            supervisorName,
+            supervisorArea,
+            supervisorEmail,
+            supervisorPhone,
+            
+            // Datos del proyecto
+            projectName,
+            projectStartDate,
+            projectEndDate,
+            projectProblemContext,
+            projectProblemDescription,
+            projectGeneralObjective,
+            projectSpecificObjectives,
+            projectMainActivities,
+            projectPlannedDeliverables,
+            projectTechnologies
         } = req.body;
 
         try {
-            // Obtener el ID del alumno del token JWT
+            // Obtener el ID del estudiante del token JWT
             console.log('🔍 Verificando token...');
             const userFromToken = (req as any).user;
             
@@ -45,7 +76,7 @@ export class CreatePropuestaController {
 
             console.log('✅ Token válido, UUID:', userFromToken.uuid);
 
-            // Obtener el ID del alumno desde la base de datos usando el UUID del token
+            // Obtener el ID del estudiante desde la base de datos usando el UUID del token
             console.log('🔍 Consultando usuario en BD...');
             const { query } = require('../../../database/mysql');
             const userResult = await query('SELECT id FROM users WHERE uuid = ? AND active = true', [userFromToken.uuid]);
@@ -62,33 +93,33 @@ export class CreatePropuestaController {
                 return;
             }
 
-            const idAlumno = userResult[0].id;
-            console.log('✅ ID del alumno encontrado:', idAlumno);
+            const studentId = userResult[0].id;
+            console.log('✅ ID del estudiante encontrado:', studentId);
 
-            // Validar campos requeridos
+            // Validar campos requeridos básicos
             console.log('🔍 Validando campos requeridos...');
-            if (!tutorAcademicoId || !tipoPasantia || !nombreProyecto || !descripcionProyecto || 
-                !entregables || !tecnologias || !supervisorProyecto || !actividades || 
-                !fechaInicio || !fechaFin || !nombreEmpresa || !sectorEmpresa || !personaContacto) {
-                console.log('❌ Faltan campos requeridos');
+            if (!academicTutorId || !internshipType || !companyShortName || !companyLegalName || 
+                !companyTaxId || !companyState || !companyMunicipality || !projectName || 
+                !contactName || !supervisorName) {
+                console.log('❌ Faltan campos requeridos básicos');
                 res.status(400).json({
                     errors: [{
                         status: "400",
                         title: "Bad Request",
-                        detail: "Todos los campos obligatorios deben ser proporcionados"
+                        detail: "Faltan campos obligatorios básicos"
                     }]
                 });
                 return;
             }
 
-            console.log('✅ Campos validados');
+            console.log('✅ Campos básicos validados');
 
             // Convertir fechas
             console.log('🔍 Convirtiendo fechas...');
-            const fechaInicioDate = new Date(fechaInicio);
-            const fechaFinDate = new Date(fechaFin);
+            const startDate = new Date(projectStartDate);
+            const endDate = new Date(projectEndDate);
             
-            if (isNaN(fechaInicioDate.getTime()) || isNaN(fechaFinDate.getTime())) {
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
                 console.log('❌ Formato de fechas inválido');
                 res.status(400).json({
                     errors: [{
@@ -104,52 +135,86 @@ export class CreatePropuestaController {
 
             console.log('🔍 Ejecutando createPropuestaUseCase...');
             const propuesta = await this.createPropuestaUseCase.run(
-                idAlumno,
-                tutorAcademicoId,
-                tipoPasantia,
-                nombreProyecto,
-                descripcionProyecto,
-                entregables,
-                tecnologias,
-                supervisorProyecto,
-                actividades,
-                fechaInicioDate,
-                fechaFinDate,
-                nombreEmpresa,
-                sectorEmpresa,
-                personaContacto,
-                paginaWebEmpresa || null
+                studentId,
+                academicTutorId,
+                internshipType,
+                
+                // Información de la empresa
+                companyShortName,
+                companyLegalName,
+                companyTaxId,
+                
+                // Dirección
+                companyState,
+                companyMunicipality,
+                companySettlementType,
+                companySettlementName,
+                companyStreetType,
+                companyStreetName,
+                companyExteriorNumber,
+                companyInteriorNumber,
+                companyPostalCode,
+                companyWebsite,
+                companyLinkedin,
+                
+                // Contacto
+                contactName,
+                contactPosition,
+                contactEmail,
+                contactPhone,
+                contactArea,
+                
+                // Supervisor
+                supervisorName,
+                supervisorArea,
+                supervisorEmail,
+                supervisorPhone,
+                
+                // Proyecto
+                projectName,
+                startDate,
+                endDate,
+                projectProblemContext,
+                projectProblemDescription,
+                projectGeneralObjective,
+                projectSpecificObjectives,
+                projectMainActivities,
+                projectPlannedDeliverables,
+                projectTechnologies,
+                
+                studentId // userCreation
             );
 
             console.log('📋 Propuesta creada:', propuesta ? 'exitosamente' : 'falló');
 
             if (propuesta) {
+                // Formatear respuesta para compatibilidad con frontend existente
                 const formattedPropuesta = {
                     type: "propuesta",
                     id: propuesta.getUuid(),
                     attributes: {
-                        idConvocatoria: propuesta.getIdConvocatoria(),
+                        idConvocatoria: propuesta.getConvocatoriaId(),
                         tutorAcademico: {
-                            id: propuesta.getTutorAcademicoId(),
-                            nombre: propuesta.getTutorAcademicoNombre(),
-                            email: propuesta.getTutorAcademicoEmail()
+                            id: propuesta.getAcademicTutorId(),
+                            nombre: propuesta.getAcademicTutorName(),
+                            email: propuesta.getAcademicTutorEmail()
                         },
-                        tipoPasantia: propuesta.getTipoPasantia(),
+                        tipoPasantia: propuesta.getInternshipType(),
                         proyecto: {
-                            nombre: propuesta.getNombreProyecto(),
-                            descripcion: propuesta.getDescripcionProyecto(),
-                            entregables: propuesta.getEntregables(),
-                            tecnologias: propuesta.getTecnologias(),
-                            supervisor: propuesta.getSupervisorProyecto(),
-                            actividades: propuesta.getActividades(),
-                            fechaInicio: propuesta.getFechaInicio(),
-                            fechaFin: propuesta.getFechaFin()
+                            nombre: propuesta.getProjectName(),
+                            descripcion: propuesta.getProjectProblemDescription(),
+                            entregables: propuesta.getProjectPlannedDeliverables(),
+                            tecnologias: propuesta.getProjectTechnologies(),
+                            supervisor: propuesta.getSupervisorName(),
+                            actividades: propuesta.getProjectMainActivities(),
+                            fechaInicio: propuesta.getProjectStartDate(),
+                            fechaFin: propuesta.getProjectEndDate()
                         },
                         empresa: {
-                            nombre: propuesta.getNombreEmpresa(),
-                            sector: propuesta.getSectorEmpresa(),
-                            personaContacto: propuesta.getPersonaContacto(),
-                            paginaWeb: propuesta.getPaginaWebEmpresa()
+                            nombre: propuesta.getCompanyShortName(),
+                            sector: propuesta.getContactArea(),
+                            personaContacto: propuesta.getContactName(),
+                            paginaWeb: propuesta.getCompanyWebsite()
                         },
                         active: propuesta.isActive(),
                         createdAt: propuesta.getCreatedAt(),
@@ -182,7 +247,8 @@ export class CreatePropuestaController {
                     "es obligatorio",
                     "no puede ser anterior",
                     "debe ser posterior",
-                    "no está disponible en la convocatoria actual"
+                    "no está disponible en la convocatoria actual",
+                    "debe tener una duración mínima"
                 ];
                 
                 if (businessErrors.some(msg => errorMessage.includes(msg))) {

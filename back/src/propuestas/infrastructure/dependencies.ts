@@ -1,7 +1,8 @@
+// src/propuestas/infrastructure/dependencies.ts
 
 // Casos de uso
 import { CreatePropuestaUseCase } from "../application/createPropuestaUseCase";
-import { GetPropuestasUseCase, GetPropuestaUseCase, GetPropuestasByAlumnoUseCase, GetActiveConvocatoriaUseCase } from "../application/getPropuestasUseCase";
+import { GetPropuestasUseCase, GetPropuestaUseCase, GetPropuestasByStudentUseCase, GetActiveConvocatoriaUseCase } from "../application/getPropuestasUseCase";
 import { UpdatePropuestaUseCase } from "../application/updatePropuestaUseCase";
 
 // Controladores
@@ -10,7 +11,7 @@ import { GetPropuestasController } from "./controllers/getPropuestasController";
 import { GetPropuestaController } from "./controllers/getPropuestaController";
 import { UpdatePropuestaController } from "./controllers/updatePropuestaController";
 import { GetActiveConvocatoriaController } from "./controllers/getActiveConvocatoriaController";
-import { GetPropuestasByAlumnoController } from "./controllers/getPropuestasByAlumnoController";
+import { GetPropuestasByStudentController } from "./controllers/getPropuestasByStudentController";
 
 // Repositorio
 import { MysqlPropuestaRepository } from "./repositories/MysqlPropuestaRepository";
@@ -24,7 +25,7 @@ const getPropuestasUseCase = new GetPropuestasUseCase(propuestaRepository);
 const getPropuestaUseCase = new GetPropuestaUseCase(propuestaRepository);
 const updatePropuestaUseCase = new UpdatePropuestaUseCase(propuestaRepository);
 const getActiveConvocatoriaUseCase = new GetActiveConvocatoriaUseCase(propuestaRepository);
-const getPropuestasByAlumnoUseCase = new GetPropuestasByAlumnoUseCase(propuestaRepository);
+const getPropuestasByStudentUseCase = new GetPropuestasByStudentUseCase(propuestaRepository);
 
 // Controladores exportados
 export const createPropuestaController = new CreatePropuestaController(createPropuestaUseCase);
@@ -32,4 +33,4 @@ export const getPropuestasController = new GetPropuestasController(getPropuestas
 export const getPropuestaController = new GetPropuestaController(getPropuestaUseCase);
 export const updatePropuestaController = new UpdatePropuestaController(updatePropuestaUseCase);
 export const getActiveConvocatoriaController = new GetActiveConvocatoriaController(getActiveConvocatoriaUseCase);
-export const getPropuestasByAlumnoController = new GetPropuestasByAlumnoController(getPropuestasByAlumnoUseCase);
+export const getPropuestasByStudentController = new GetPropuestasByStudentController(getPropuestasByStudentUseCase);
