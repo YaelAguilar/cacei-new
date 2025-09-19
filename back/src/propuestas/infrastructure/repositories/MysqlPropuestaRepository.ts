@@ -408,18 +408,23 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         `;
 
         try {
-            const result: any = await query(sql);
-            
-            if (result.length > 0) {
-                const row = result[0];
-                return {
-                    id: row.id,
-                    uuid: row.uuid,
-                    nombre: row.nombre,
-                    pasantiasDisponibles: row.pasantias_disponibles,
-                    profesoresDisponibles: row.profesores_disponibles
-                };
-            }
+        const result: any = await query(sql);
+        
+        if (result.length > 0) {
+            const row = result[0];
+            return {
+                id: row.id,
+                uuid: row.uuid,
+                nombre: row.nombre,
+                // Asegurar que sean arrays
+                pasantiasDisponibles: Array.isArray(row.pasantias_disponibles) 
+                    ? row.pasantias_disponibles 
+                    : JSON.parse(row.pasantias_disponibles || '[]'),
+                profesoresDisponibles: Array.isArray(row.profesores_disponibles)
+                    ? row.profesores_disponibles
+                    : JSON.parse(row.profesores_disponibles || '[]')
+            };
+        }
             return null;
         } catch (error) {
             console.error("Error getting active convocatoria:", error);

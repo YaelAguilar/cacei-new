@@ -1,6 +1,7 @@
 import { PropuestaRepository } from "../domain/interfaces/propuestaRepository";
 import { Propuesta } from "../domain/models/propuesta";
 
+// src/propuestas/application/getPropuestasByStudentUseCase.ts
 export class GetPropuestasByStudentUseCase {
     constructor(private readonly propuestaRepository: PropuestaRepository) {}
 
