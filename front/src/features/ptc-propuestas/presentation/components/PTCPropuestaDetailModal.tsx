@@ -175,7 +175,7 @@ const PTCPropuestaDetailModal: React.FC<PTCPropuestaDetailModalProps> = observer
                   <div>
                     <p className="text-sm font-semibold text-purple-700 mb-1">Persona de Contacto</p>
                     <p className="text-purple-900 font-medium">
-                      {propuesta.getEmpresa().getPersonaContacto()}
+                      {propuesta.getEmpresa().getContacto()}
                     </p>
                   </div>
 

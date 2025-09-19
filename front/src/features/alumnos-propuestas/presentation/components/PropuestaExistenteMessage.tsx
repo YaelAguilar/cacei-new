@@ -60,7 +60,7 @@ const PropuestaExistenteMessage: React.FC<PropuestaExistenteMessageProps> = obse
                 <div>
                   <p className="text-sm text-gray-500">Empresa:</p>
                   <p className="font-medium text-gray-900">
-                    {propuestaActual.getEmpresa().getNombre()}
+                    {propuestaActual.getEmpresa().getNombreCorto()}
                   </p>
                 </div>
                 <div>
