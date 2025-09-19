@@ -3,8 +3,9 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { PropuestaRepository } from "../../data/repository/PropuestaRepository";
 import { GetPropuestasByAlumnoUseCase } from "../../domain/GetPropuestasByAlumnoUseCase";
 import { PropuestaCompleta } from "../../data/models/Propuesta";
+import { PropuestaDetailViewModelInterface } from "../../../shared/components/PropuestaDetailModal";
 
-export class VisualizarPropuestasViewModel {
+export class VisualizarPropuestasViewModel implements PropuestaDetailViewModelInterface {
   // Estados de UI
   loading: boolean = false;
   error: string | null = null;

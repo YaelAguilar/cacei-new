@@ -4,8 +4,9 @@ import { PTCPropuestaRepository } from "../../data/repository/PTCPropuestaReposi
 import { GetAllPropuestasUseCase } from "../../domain/GetAllPropuestasUseCase";
 import { GetPropuestaDetailsUseCase } from "../../domain/GetPropuestaDetailsUseCase";
 import { PropuestaCompleta } from "../../../alumnos-propuestas/data/models/Propuesta";
+import { PropuestaDetailViewModelInterface } from "../../../shared/components/PropuestaDetailModal";
 
-export class PTCPropuestasViewModel {
+export class PTCPropuestasViewModel implements PropuestaDetailViewModelInterface {
   // Estados de UI
   loading: boolean = false;
   error: string | null = null;

@@ -1,23 +1,33 @@
-// src/features/ptc-propuestas/presentation/components/PTCPropuestaDetailModal.tsx
+// front/src/features/shared/components/PropuestaDetailModal.tsx
 import React from "react";
 import { observer } from "mobx-react-lite";
 import { motion } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
-import { PropuestaCompleta } from "../../../alumnos-propuestas/data/models/Propuesta";
-import { PTCPropuestasViewModel } from "../viewModels/PTCPropuestasViewModel";
-import Status from "../../../shared/components/Status";
+import { PropuestaCompleta } from "../../alumnos-propuestas/data/models/Propuesta";
+import Status from "./Status";
 import { 
   FiCalendar, FiUser, FiBriefcase, FiFileText, FiTarget, FiTool, 
   FiActivity, FiClock, FiMail, FiGlobe, FiPhone, FiMapPin, FiBook
 } from "react-icons/fi";
 
-interface PTCPropuestaDetailModalProps {
+// Interface genérica para el ViewModel
+export interface PropuestaDetailViewModelInterface {
+  getPropuestaStatus(propuesta: PropuestaCompleta): {
+    status: 'active' | 'inactive';
+    label: string;
+    color: string;
+  };
+  formatDate(date: Date): string;
+  formatDateTime(date: Date): string;
+}
+
+interface PropuestaDetailModalProps {
   propuesta: PropuestaCompleta;
-  viewModel: PTCPropuestasViewModel;
+  viewModel: PropuestaDetailViewModelInterface;
   onClose: () => void;
 }
 
-const PTCPropuestaDetailModal: React.FC<PTCPropuestaDetailModalProps> = observer(({ 
+const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({ 
   propuesta, 
   viewModel, 
   onClose 
@@ -41,13 +51,13 @@ const PTCPropuestaDetailModal: React.FC<PTCPropuestaDetailModalProps> = observer
         transition={{ duration: 0.3 }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header del modal */}
+        {/* Header */}
         <div className="flex flex-row items-center justify-between mb-4">
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-gray-900 truncate">
               {propuesta.getProyecto().getNombre()}
             </h1>
-            <p className="text-md font-light text-gray-600">Detalles completos de la propuesta de proyecto</p>
+            <p className="text-md font-light text-gray-600">Detalles completos de la propuesta</p>
           </div>
           <div className="flex items-center gap-4 ml-4">
             <Status 
@@ -59,16 +69,16 @@ const PTCPropuestaDetailModal: React.FC<PTCPropuestaDetailModalProps> = observer
               onClick={onClose} 
               className="text-blue-500 hover:bg-blue-100 rounded-full p-3 cursor-pointer"
             >
-              <AiOutlineClose size={17} className="text-blue-500" />
+              <AiOutlineClose size={17} />
             </button>
           </div>
         </div>
 
-        {/* Contenido del modal */}
+        {/* Contenido */}
         <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             
-            {/* Columna izquierda - Información del proyecto */}
+            {/* Columna principal - Información del proyecto */}
             <div className="xl:col-span-2 space-y-6">
               
               {/* Tipo de pasantía y fechas */}
@@ -201,7 +211,7 @@ const PTCPropuestaDetailModal: React.FC<PTCPropuestaDetailModalProps> = observer
               </div>
             </div>
 
-            {/* Columna derecha - Información de contactos y empresa */}
+            {/* Columna lateral - Información de empresa y contactos */}
             <div className="space-y-6">
               
               {/* Información de la Empresa */}
@@ -443,4 +453,4 @@ const PTCPropuestaDetailModal: React.FC<PTCPropuestaDetailModalProps> = observer
   );
 });
 
-export default PTCPropuestaDetailModal;
+export default PropuestaDetailModal;

@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import MainContainer from "../../../shared/layout/MainContainer";
 import { VisualizarPropuestasViewModel } from "../viewModels/VisualizarPropuestasViewModel";
 import PropuestaCard from "../components/PropuestaCard";
-import PropuestaDetailModal from "../components/PropuestaDetailModal";
+import PropuestaDetailModal from "../../../shared/components/PropuestaDetailModal";
 import { FiRefreshCw, FiAlertCircle, FiFileText, FiPlus } from "react-icons/fi";
 
 const VisualizarPropuestas: React.FC = observer(() => {
