@@ -1,4 +1,4 @@
-// src/features/alumnos-propuestas/data/models/PropuestaDTO.ts
+// front/src/features/alumnos-propuestas/data/models/PropuestaDTO.ts
 
 export interface CreatePropuestaRequest {
   academicTutorId: number;
@@ -37,8 +37,8 @@ export interface CreatePropuestaRequest {
   
   // Datos del proyecto
   projectName: string;
-  projectStartDate: string; // ISO format
-  projectEndDate: string; // ISO format
+  projectStartDate: string;
+  projectEndDate: string;
   projectProblemContext: string;
   projectProblemDescription: string;
   projectGeneralObjective: string;
@@ -54,47 +54,81 @@ export interface TutorAcademicoDTO {
   email: string;
 }
 
-export interface ProyectoDTO {
+export interface DireccionEmpresaDTO {
+  estado: string;
+  municipio: string;
+  tipoAsentamiento: string;
+  nombreAsentamiento: string;
+  tipoVialidad: string;
+  nombreVia: string;
+  numeroExterior: string;
+  numeroInterior?: string | null;
+  codigoPostal: string;
+}
+
+export interface EmpresaCompletaDTO {
+  nombreCorto: string;
+  razonSocial: string;
+  rfc: string;
+  direccion: DireccionEmpresaDTO;
+  paginaWeb?: string | null;
+  linkedin?: string | null;
+  sector: string;
+}
+
+export interface ContactoDTO {
   nombre: string;
-  descripcion: string;
-  entregables: string;
-  tecnologias: string;
-  supervisor: string;
-  actividades: string;
+  puesto: string;
+  email: string;
+  telefono: string;
+  area: string;
+}
+
+export interface SupervisorDTO {
+  nombre: string;
+  area: string;
+  email: string;
+  telefono: string;
+}
+
+export interface ProyectoCompletoDTO {
+  nombre: string;
   fechaInicio: string;
   fechaFin: string;
+  contextoProblema: string;
+  descripcionProblema: string;
+  objetivoGeneral: string;
+  objetivosEspecificos: string;
+  actividadesPrincipales: string;
+  entregablesPlaneados: string;
+  tecnologias: string;
 }
 
-export interface EmpresaDTO {
-  nombre: string;
-  sector: string;
-  personaContacto: string;
-  paginaWeb?: string | null;
-}
-
-export interface PropuestaResponseAttributes {
+export interface PropuestaCompletaResponseAttributes {
   idConvocatoria: number;
   tutorAcademico: TutorAcademicoDTO;
   tipoPasantia: string;
-  proyecto: ProyectoDTO;
-  empresa: EmpresaDTO;
+  empresa: EmpresaCompletaDTO;
+  contacto: ContactoDTO;
+  supervisor: SupervisorDTO;
+  proyecto: ProyectoCompletoDTO;
   active: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface PropuestaResponseDTO {
+export interface PropuestaCompletaResponseDTO {
   type: string;
   id: string;
-  attributes: PropuestaResponseAttributes;
+  attributes: PropuestaCompletaResponseAttributes;
 }
 
-export interface JsonApiPropuestaResponse {
-  data: PropuestaResponseDTO;
+export interface JsonApiPropuestaCompletaResponse {
+  data: PropuestaCompletaResponseDTO;
 }
 
-export interface JsonApiPropuestasListResponse {
-  data: PropuestaResponseDTO[];
+export interface JsonApiPropuestasCompletasListResponse {
+  data: PropuestaCompletaResponseDTO[];
 }
 
 export interface ConvocatoriaActivaAttributes {

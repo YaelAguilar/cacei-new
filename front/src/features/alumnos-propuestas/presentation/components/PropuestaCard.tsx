@@ -2,13 +2,12 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
 import { FiBriefcase, FiEye } from "react-icons/fi";
-
-import { Propuesta } from "../../data/models/Propuesta";
+import { PropuestaCompleta } from "../../data/models/Propuesta";
 import { VisualizarPropuestasViewModel } from "../viewModels/VisualizarPropuestasViewModel";
 import Status from "../../../shared/components/Status";
 
 interface PropuestaCardProps {
-  propuesta: Propuesta;
+  propuesta: PropuestaCompleta;
   viewModel: VisualizarPropuestasViewModel;
 }
 
@@ -53,7 +52,7 @@ const PropuestaCard: React.FC<PropuestaCardProps> = observer(({
           <div className="min-w-0 flex-1">
             <p className="text-xs text-gray-500">Empresa</p>
             <p className="text-sm font-medium text-gray-900 truncate">
-              {propuesta.getEmpresa().getNombre()}
+              {propuesta.getEmpresa().getNombreCorto()}
             </p>
           </div>
         </div>

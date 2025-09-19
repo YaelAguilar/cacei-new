@@ -1,3 +1,4 @@
+// back/src/propuestas/infrastructure/controllers/updatePropuestaController.ts
 import { Request, Response } from 'express';
 import { UpdatePropuestaUseCase } from '../../application/updatePropuestaUseCase';
 
@@ -57,28 +58,70 @@ export class UpdatePropuestaController {
                     id: propuesta.getUuid(),
                     attributes: {
                         idConvocatoria: propuesta.getConvocatoriaId(),
+                        
+                        // Tutor Académico
                         tutorAcademico: {
                             id: propuesta.getAcademicTutorId(),
                             nombre: propuesta.getAcademicTutorName(),
                             email: propuesta.getAcademicTutorEmail()
                         },
+                        
+                        // Tipo de pasantía
                         tipoPasantia: propuesta.getInternshipType(),
+                        
+                        // Información completa de la empresa
+                        empresa: {
+                            nombreCorto: propuesta.getCompanyShortName(),
+                            razonSocial: propuesta.getCompanyLegalName(),
+                            rfc: propuesta.getCompanyTaxId(),
+                            direccion: {
+                                estado: propuesta.getCompanyState(),
+                                municipio: propuesta.getCompanyMunicipality(),
+                                tipoAsentamiento: propuesta.getCompanySettlementType(),
+                                nombreAsentamiento: propuesta.getCompanySettlementName(),
+                                tipoVialidad: propuesta.getCompanyStreetType(),
+                                nombreVia: propuesta.getCompanyStreetName(),
+                                numeroExterior: propuesta.getCompanyExteriorNumber(),
+                                numeroInterior: propuesta.getCompanyInteriorNumber(),
+                                codigoPostal: propuesta.getCompanyPostalCode()
+                            },
+                            paginaWeb: propuesta.getCompanyWebsite(),
+                            linkedin: propuesta.getCompanyLinkedin(),
+                            sector: propuesta.getContactArea()
+                        },
+                        
+                        // Información de contacto
+                        contacto: {
+                            nombre: propuesta.getContactName(),
+                            puesto: propuesta.getContactPosition(),
+                            email: propuesta.getContactEmail(),
+                            telefono: propuesta.getContactPhone(),
+                            area: propuesta.getContactArea()
+                        },
+                        
+                        // Supervisor del proyecto
+                        supervisor: {
+                            nombre: propuesta.getSupervisorName(),
+                            area: propuesta.getSupervisorArea(),
+                            email: propuesta.getSupervisorEmail(),
+                            telefono: propuesta.getSupervisorPhone()
+                        },
+                        
+                        // Proyecto completo
                         proyecto: {
                             nombre: propuesta.getProjectName(),
-                            descripcion: propuesta.getProjectProblemDescription(),
-                            entregables: propuesta.getProjectPlannedDeliverables(),
-                            tecnologias: propuesta.getProjectTechnologies(),
-                            supervisor: propuesta.getSupervisorName(),
-                            actividades: propuesta.getProjectMainActivities(),
                             fechaInicio: propuesta.getProjectStartDate(),
-                            fechaFin: propuesta.getProjectEndDate()
+                            fechaFin: propuesta.getProjectEndDate(),
+                            contextoProblema: propuesta.getProjectProblemContext(),
+                            descripcionProblema: propuesta.getProjectProblemDescription(),
+                            objetivoGeneral: propuesta.getProjectGeneralObjective(),
+                            objetivosEspecificos: propuesta.getProjectSpecificObjectives(),
+                            actividadesPrincipales: propuesta.getProjectMainActivities(),
+                            entregablesPlaneados: propuesta.getProjectPlannedDeliverables(),
+                            tecnologias: propuesta.getProjectTechnologies()
                         },
-                        empresa: {
-                            nombre: propuesta.getCompanyShortName(),
-                            sector: propuesta.getContactArea(),
-                            personaContacto: propuesta.getContactName(),
-                            paginaWeb: propuesta.getCompanyWebsite()
-                        },
+                        
+                        // Metadata
                         active: propuesta.isActive(),
                         createdAt: propuesta.getCreatedAt(),
                         updatedAt: propuesta.getUpdatedAt()

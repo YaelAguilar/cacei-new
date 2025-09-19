@@ -3,7 +3,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { PTCPropuestaRepository } from "../../data/repository/PTCPropuestaRepository";
 import { GetAllPropuestasUseCase } from "../../domain/GetAllPropuestasUseCase";
 import { GetPropuestaDetailsUseCase } from "../../domain/GetPropuestaDetailsUseCase";
-import { Propuesta } from "../../../alumnos-propuestas/data/models/Propuesta";
+import { PropuestaCompleta } from "../../../alumnos-propuestas/data/models/Propuesta";
 
 export class PTCPropuestasViewModel {
   // Estados de UI
@@ -12,8 +12,8 @@ export class PTCPropuestasViewModel {
   isInitialized: boolean = false;
 
   // Estados de datos
-  propuestas: Propuesta[] = [];
-  selectedPropuesta: Propuesta | null = null;
+  propuestas: PropuestaCompleta[] = [];
+  selectedPropuesta: PropuestaCompleta | null = null;
   showDetailModal: boolean = false;
 
   // Estados de filtros y búsqueda
@@ -49,11 +49,11 @@ export class PTCPropuestasViewModel {
     this.error = error;
   }
 
-  setPropuestas(propuestas: Propuesta[]) {
+  setPropuestas(propuestas: PropuestaCompleta[]) {
     this.propuestas = propuestas;
   }
 
-  setSelectedPropuesta(propuesta: Propuesta | null) {
+  setSelectedPropuesta(propuesta: PropuestaCompleta | null) {
     this.selectedPropuesta = propuesta;
   }
 
@@ -132,7 +132,7 @@ export class PTCPropuestasViewModel {
   }
 
   // Abrir modal de detalles
-  async openDetailModal(propuesta: Propuesta) {
+  async openDetailModal(propuesta: PropuestaCompleta) {
     this.setSelectedPropuesta(propuesta);
     this.setShowDetailModal(true);
   }
@@ -149,7 +149,7 @@ export class PTCPropuestasViewModel {
   }
 
   // Propuestas filtradas y buscadas
-  get filteredPropuestas(): Propuesta[] {
+  get filteredPropuestas(): PropuestaCompleta[] {
     let filtered = [...this.propuestas];
 
     // Filtro por búsqueda
@@ -157,7 +157,7 @@ export class PTCPropuestasViewModel {
       const searchLower = this.searchTerm.toLowerCase();
       filtered = filtered.filter(propuesta => 
         propuesta.getProyecto().getNombre().toLowerCase().includes(searchLower) ||
-        propuesta.getEmpresa().getNombre().toLowerCase().includes(searchLower) ||
+        propuesta.getEmpresa().getNombreCorto().toLowerCase().includes(searchLower) ||
         propuesta.getTutorAcademico().getNombre().toLowerCase().includes(searchLower) ||
         propuesta.getTipoPasantia().toLowerCase().includes(searchLower)
       );
@@ -189,8 +189,8 @@ export class PTCPropuestasViewModel {
           valueB = b.getProyecto().getNombre();
           break;
         case "empresa":
-          valueA = a.getEmpresa().getNombre();
-          valueB = b.getEmpresa().getNombre();
+          valueA = a.getEmpresa().getNombreCorto();
+          valueB = b.getEmpresa().getNombreCorto();
           break;
         case "tutor":
           valueA = a.getTutorAcademico().getNombre();
@@ -225,7 +225,7 @@ export class PTCPropuestasViewModel {
   }
 
   // Propuestas paginadas
-  get paginatedPropuestas(): Propuesta[] {
+  get paginatedPropuestas(): PropuestaCompleta[] {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     return this.filteredPropuestas.slice(startIndex, endIndex);
@@ -296,7 +296,7 @@ export class PTCPropuestasViewModel {
   }
 
   // Obtener el estado de una propuesta
-  getPropuestaStatus(propuesta: Propuesta): {
+  getPropuestaStatus(propuesta: PropuestaCompleta): {
     status: 'active' | 'inactive';
     label: string;
     color: string;

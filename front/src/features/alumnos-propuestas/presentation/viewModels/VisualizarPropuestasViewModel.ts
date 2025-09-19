@@ -2,7 +2,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { PropuestaRepository } from "../../data/repository/PropuestaRepository";
 import { GetPropuestasByAlumnoUseCase } from "../../domain/GetPropuestasByAlumnoUseCase";
-import { Propuesta } from "../../data/models/Propuesta";
+import { PropuestaCompleta } from "../../data/models/Propuesta";
 
 export class VisualizarPropuestasViewModel {
   // Estados de UI
@@ -11,8 +11,8 @@ export class VisualizarPropuestasViewModel {
   isInitialized: boolean = false;
 
   // Estados de datos
-  propuestas: Propuesta[] = [];
-  selectedPropuesta: Propuesta | null = null;
+  propuestas: PropuestaCompleta[] = [];
+  selectedPropuesta: PropuestaCompleta | null = null;
   showDetailModal: boolean = false;
 
   // Casos de uso
@@ -35,11 +35,11 @@ export class VisualizarPropuestasViewModel {
     this.error = error;
   }
 
-  setPropuestas(propuestas: Propuesta[]) {
+  setPropuestas(propuestas: PropuestaCompleta[]) {
     this.propuestas = propuestas;
   }
 
-  setSelectedPropuesta(propuesta: Propuesta | null) {
+  setSelectedPropuesta(propuesta: PropuestaCompleta | null) {
     this.selectedPropuesta = propuesta;
   }
 
@@ -85,7 +85,7 @@ export class VisualizarPropuestasViewModel {
   }
 
   // Abrir modal de detalles
-  openDetailModal(propuesta: Propuesta) {
+  openDetailModal(propuesta: PropuestaCompleta) {
     this.setSelectedPropuesta(propuesta);
     this.setShowDetailModal(true);
   }
@@ -101,16 +101,16 @@ export class VisualizarPropuestasViewModel {
     return this.propuestas.length > 0;
   }
 
-  get propuestasActivas(): Propuesta[] {
+  get propuestasActivas(): PropuestaCompleta[] {
     return this.propuestas.filter(propuesta => propuesta.isActive());
   }
 
-  get propuestasInactivas(): Propuesta[] {
+  get propuestasInactivas(): PropuestaCompleta[] {
     return this.propuestas.filter(propuesta => !propuesta.isActive());
   }
 
   // Obtener el estado de una propuesta
-  getPropuestaStatus(propuesta: Propuesta): {
+  getPropuestaStatus(propuesta: PropuestaCompleta): {
     status: 'active' | 'inactive';
     label: string;
     color: string;
