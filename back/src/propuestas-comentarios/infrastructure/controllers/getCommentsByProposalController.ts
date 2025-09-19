@@ -6,10 +6,15 @@ export class GetCommentsByProposalController {
     constructor(private readonly getCommentsByProposalUseCase: GetCommentsByProposalUseCase) {}
 
     async run(req: Request, res: Response): Promise<void> {
+        console.log('🎯 getCommentsByProposalController.run() called');
+        console.log('📦 req.params:', req.params);
+
         const { proposalId } = req.params;
+        console.log('📦 proposalId extraído:', proposalId);
 
         try {
             const comments = await this.getCommentsByProposalUseCase.run(proposalId);
+             console.log('📥 Comentarios obtenidos:', comments?.length || 0);
 
             const formattedComments = comments ? comments.map(comment => ({
                 type: "proposal-comment",

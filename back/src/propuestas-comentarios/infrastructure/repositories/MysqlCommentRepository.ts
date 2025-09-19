@@ -37,9 +37,9 @@ export class MysqlCommentRepository implements CommentRepository {
                 data.subsectionName,
                 data.commentText,
                 data.voteStatus,
-                true, // active
-                new Date(), // created_at
-                new Date() // updated_at
+                true,
+                new Date(),
+                new Date()
             );
         } catch (error) {
             console.error("Error creating comment:", error);
@@ -85,16 +85,42 @@ export class MysqlCommentRepository implements CommentRepository {
     }
 
     async getCommentsByProposal(proposalId: string): Promise<ProposalComment[] | null> {
+        console.log('🔍 getCommentsByProposal called with:', proposalId);
+        
+        let numericProposalId: number;
+        
+        // Verificar si es UUID o ID numérico
+        if (isNaN(Number(proposalId))) {
+            console.log('📝 proposalId es UUID, convirtiendo a ID numérico...');
+            // Es un UUID, convertir a ID numérico
+            const proposalQuery = `SELECT id FROM project_proposals WHERE uuid = ? AND active = true`;
+            try {
+                const proposalResult: any = await query(proposalQuery, [proposalId]);
+                if (proposalResult.length === 0) {
+                    console.log('❌ No se encontró propuesta con UUID:', proposalId);
+                    return [];
+                }
+                numericProposalId = proposalResult[0].id;
+                console.log('✅ ID numérico encontrado:', numericProposalId);
+            } catch (error) {
+                console.error("Error getting proposal ID:", error);
+                return [];
+            }
+        } else {
+            // Ya es un ID numérico
+            numericProposalId = Number(proposalId);
+            console.log('📝 proposalId ya es numérico:', numericProposalId);
+        }
+
         const sql = `
-            SELECT pc.* 
-            FROM proposal_comments pc
-            INNER JOIN project_proposals pp ON pp.id = pc.proposal_id
-            WHERE pp.uuid = ? AND pc.active = true 
-            ORDER BY pc.created_at DESC
+            SELECT * FROM proposal_comments_with_details 
+            WHERE proposal_id = ? AND active = true 
+            ORDER BY created_at DESC
         `;
 
         try {
-            const result: any = await query(sql, [proposalId]);
+            const result: any = await query(sql, [numericProposalId]);
+            console.log(`✅ Comentarios encontrados: ${result.length}`);
             
             if (result.length > 0) {
                 return result.map((row: any) => this.mapRowToComment(row));

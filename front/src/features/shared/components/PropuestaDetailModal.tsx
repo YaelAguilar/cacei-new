@@ -53,6 +53,12 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
   useEffect(() => {
     const initializeComments = async () => {
       try {
+        // Usar el UUID de la propuesta (getId() devuelve el UUID)
+        const proposalUuid = propuesta.getId();
+        
+        console.log('🔍 Inicializando comentarios...');
+        console.log('📦 UUID de propuesta:', proposalUuid);
+        
         await commentsViewModel.initialize(propuesta.getId());
       } catch (error) {
         console.error("Error al cargar comentarios:", error);
@@ -64,7 +70,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
     return () => {
       commentsViewModel.reset();
     };
-  }, [propuesta, commentsViewModel]);
+}, [propuesta, commentsViewModel]);
 
   return (
     <motion.div

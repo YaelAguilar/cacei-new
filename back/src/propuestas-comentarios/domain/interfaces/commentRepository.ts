@@ -2,7 +2,7 @@
 import { ProposalComment } from "../models/proposalComment";
 
 export interface CommentCreateData {
-    proposalId: number;
+    proposalId: string;  // ⭐ Cambiar de number a string (UUID)
     tutorId: number;
     sectionName: string;
     subsectionName: string;

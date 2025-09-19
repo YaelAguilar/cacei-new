@@ -3,7 +3,7 @@ export class ProposalComment {
     constructor(
         private readonly id: number,
         private readonly uuid: string,
-        private readonly proposalId: number,
+        private readonly proposalId: string,  // ⭐ Cambiar de number a string
         private readonly tutorId: number,
         private readonly sectionName: string,
         private readonly subsectionName: string,
@@ -28,7 +28,7 @@ export class ProposalComment {
     // Getters básicos
     getId(): number { return this.id; }
     getUuid(): string { return this.uuid; }
-    getProposalId(): number { return this.proposalId; }
+    getProposalId(): string { return this.proposalId; }  // ⭐ Ahora retorna string
     getTutorId(): number { return this.tutorId; }
     getSectionName(): string { return this.sectionName; }
     getSubsectionName(): string { return this.subsectionName; }

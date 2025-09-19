@@ -50,22 +50,33 @@ export class CommentRepository {
         }
     }
 
-    async getCommentsByProposal(proposalId: string): Promise<ProposalComment[]> {  // ← string
-        try {
-            const response = await ApiClient.get<JsonApiCommentsListResponse>(
-                `/propuestas/${proposalId}/comentarios`
-            );
-            
-            if (response.status === 200 && response.data.data) {
-                return response.data.data.map(dto => this.mapDTOToModel(dto));
-            }
-            
-            return [];
-        } catch (error) {
-            console.error("Error en getCommentsByProposal:", error);
-            throw error;
+    async getCommentsByProposal(proposalId: string): Promise<ProposalComment[]> {
+    console.log('🔍 CommentRepository.getCommentsByProposal() called');
+    console.log('📦 proposalId recibido:', proposalId);
+    
+    try {
+        const url = `/propuestas/${proposalId}/comentarios`;
+        console.log('📤 URL completa:', url);
+        console.log('📤 Haciendo GET request...');
+        
+        const response = await ApiClient.get<JsonApiCommentsListResponse>(url);
+        
+        console.log('📥 Response status:', response.status);
+        console.log('📥 Response data:', response.data);
+        
+        if (response.status === 200 && response.data.data) {
+            const mappedComments = response.data.data.map(dto => this.mapDTOToModel(dto));
+            console.log('✅ Comentarios mapeados:', mappedComments.length);
+            return mappedComments;
         }
+        
+        console.log('⚠️ No se encontraron comentarios');
+        return [];
+    } catch (error) {
+        console.error("❌ Error en getCommentsByProposal:", error);
+        throw error;
     }
+}
 
     async getMyComments(): Promise<ProposalComment[]> {
         try {

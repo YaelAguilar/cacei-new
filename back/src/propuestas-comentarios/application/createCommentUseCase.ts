@@ -6,7 +6,7 @@ export class CreateCommentUseCase {
     constructor(private readonly commentRepository: CommentRepository) {}
 
     async run(
-        proposalId: number,
+        proposalId: string | number,  // ⭐ Cambiar a string | number
         tutorId: number,
         sectionName: string,
         subsectionName: string,
@@ -24,7 +24,7 @@ export class CreateCommentUseCase {
 
             // Verificar si ya existe un comentario del tutor en esta subsección
             const existingComment = await this.commentRepository.checkExistingComment(
-                proposalId,
+                typeof proposalId === 'string' ? parseInt(proposalId) : proposalId,
                 tutorId,
                 subsectionName
             );
@@ -38,7 +38,7 @@ export class CreateCommentUseCase {
 
             // Crear el comentario
             const commentData: CommentCreateData = {
-                proposalId,
+                proposalId: typeof proposalId === 'string' ? proposalId : proposalId.toString(),  // ⭐ Asegurar que sea string
                 tutorId,
                 sectionName: sectionName.trim(),
                 subsectionName: subsectionName.trim(),

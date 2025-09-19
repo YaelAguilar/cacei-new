@@ -75,7 +75,7 @@ const InlineComments: React.FC<InlineCommentsProps> = observer(({
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                             <InlineCommentForm
                                 viewModel={viewModel}
-                                proposalId={proposalId} // ← Asegúrate que se pasa correctamente
+                                proposalId={proposalId}
                                 sectionName={sectionName}
                                 subsectionName={subsectionName}
                                 onSuccess={() => setShowForm(false)}

@@ -88,33 +88,47 @@ export class CommentsViewModel {
 
     // Método de inicialización
     async initialize(proposalIdOrUuid: string): Promise<void> {
+        console.log('🚀 CommentsViewModel.initialize() called');
+        console.log('📦 proposalIdOrUuid recibido:', proposalIdOrUuid);
+        console.log('📦 Tipo de dato:', typeof proposalIdOrUuid);
+        
         this.setLoading(true);
         this.setError(null);
 
         try {
-        this.setCurrentProposalId(proposalIdOrUuid);  // ← Ya no convertir
-        await this.loadComments(proposalIdOrUuid);    // ← Pasar directo
-    } catch (error: any) {
-        this.setError(error.message || "Error al cargar los comentarios");
-    } finally {
-        runInAction(() => {
-            this.isInitialized = true;
-            this.setLoading(false);
-        });
+            this.setCurrentProposalId(proposalIdOrUuid);
+            console.log('📤 Llamando a loadComments con:', proposalIdOrUuid);
+            await this.loadComments(proposalIdOrUuid);
+        } catch (error: any) {
+            console.error('❌ Error en initialize:', error);
+            this.setError(error.message || "Error al cargar los comentarios");
+        } finally {
+            runInAction(() => {
+                this.isInitialized = true;
+                this.setLoading(false);
+            });
+        }
     }
-}
 
     // Cargar comentarios
     async loadComments(proposalId: string): Promise<void> {
+        console.log('🔍 loadComments() called');
+        console.log('📦 proposalId:', proposalId);
+        
         this.setLoading(true);
         this.setError(null);
 
         try {
+            console.log('📤 Ejecutando getCommentsByProposalUseCase...');
             const comments = await this.getCommentsByProposalUseCase.execute(proposalId);
+            console.log('📥 Comentarios recibidos:', comments);
+            console.log('📊 Cantidad de comentarios:', comments?.length || 0);
+            
             runInAction(() => {
                 this.setComments(comments);
             });
         } catch (error: any) {
+            console.error('❌ Error en loadComments:', error);
             runInAction(() => {
                 this.setError(error.message || "Error al cargar los comentarios");
                 this.setComments([]);

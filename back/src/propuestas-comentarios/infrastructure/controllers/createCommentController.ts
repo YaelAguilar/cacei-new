@@ -10,7 +10,7 @@ export class CreateCommentController {
         console.log('📝 Body recibido:', req.body);
         
         const {
-            proposalId,
+            proposalId,  // Este viene del frontend (puede ser UUID)
             sectionName,
             subsectionName,
             commentText,
@@ -55,6 +55,35 @@ export class CreateCommentController {
             const tutorId = tutorResult[0].id;
             console.log('✅ ID del tutor encontrado:', tutorId);
 
+            // ⭐ NUEVO: Convertir proposalId (UUID) a ID numérico
+            let numericProposalId: number;
+            
+            if (isNaN(Number(proposalId))) {
+                // Es un UUID, convertir a ID numérico
+                console.log('🔄 Convirtiendo UUID a ID numérico:', proposalId);
+                const proposalQuery = 'SELECT id FROM project_proposals WHERE uuid = ? AND active = true';
+                const proposalResult = await query(proposalQuery, [proposalId]);
+                
+                if (proposalResult.length === 0) {
+                    console.log('❌ Propuesta no encontrada con UUID:', proposalId);
+                    res.status(404).json({
+                        errors: [{
+                            status: "404",
+                            title: "Proposal not found",
+                            detail: "Propuesta no encontrada"
+                        }]
+                    });
+                    return;
+                }
+                
+                numericProposalId = proposalResult[0].id;
+                console.log('✅ ID numérico de propuesta encontrado:', numericProposalId);
+            } else {
+                // Ya es un ID numérico
+                numericProposalId = Number(proposalId);
+                console.log('✅ proposalId ya es numérico:', numericProposalId);
+            }
+
             // Validar campos requeridos
             if (!proposalId || !sectionName || !subsectionName || !commentText || !voteStatus) {
                 console.log('❌ Faltan campos requeridos');
@@ -68,9 +97,9 @@ export class CreateCommentController {
                 return;
             }
 
-            console.log('🔍 Ejecutando createCommentUseCase...');
+            console.log('🔍 Ejecutando createCommentUseCase con ID numérico:', numericProposalId);
             const comment = await this.createCommentUseCase.run(
-                proposalId,
+                numericProposalId,  // ⭐ Ahora pasamos el ID numérico
                 tutorId,
                 sectionName,
                 subsectionName,
