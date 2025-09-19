@@ -125,6 +125,7 @@ export class TutorAcademico {
 export class PropuestaCompleta {
   constructor(
     private readonly id: string,
+    private readonly numericId: number,
     private readonly idConvocatoria: number,
     private readonly tutorAcademico: TutorAcademico,
     private readonly tipoPasantia: string,
@@ -139,6 +140,7 @@ export class PropuestaCompleta {
 
   // Getters principales
   getId(): string { return this.id; }
+  getNumericId(): number { return this.numericId; }
   getIdConvocatoria(): number { return this.idConvocatoria; }
   getTutorAcademico(): TutorAcademico { return this.tutorAcademico; }
   getTipoPasantia(): string { return this.tipoPasantia; }

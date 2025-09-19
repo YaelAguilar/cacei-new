@@ -106,6 +106,7 @@ export class PTCPropuestaRepository {
 
     return new PropuestaCompleta(
       data.id,
+      data.id,
       attrs.idConvocatoria,
       tutorAcademico,
       attrs.tipoPasantia,

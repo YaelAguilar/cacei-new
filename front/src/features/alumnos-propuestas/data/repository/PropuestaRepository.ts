@@ -174,6 +174,7 @@ export class PropuestaRepository {
     // Crear Propuesta Completa
     return new PropuestaCompleta(
       data.id,
+      data.id,
       attrs.idConvocatoria,
       tutorAcademico,
       attrs.tipoPasantia,

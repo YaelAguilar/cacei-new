@@ -62,3 +62,67 @@ html {
   }
 }
 
+/* Animaciones para comentarios inline */
+.inline-comment-enter {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+.inline-comment-exit {
+  animation: slideOutToRight 0.3s ease-in;
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+/* Estilos para formularios inline compactos */
+.inline-form-compact textarea {
+  resize: vertical;
+  min-height: 60px;
+  max-height: 200px;
+}
+
+/* Mejorar el hover en botones de votación */
+.vote-button {
+  transition: all 0.2s ease;
+}
+
+.vote-button:hover {
+  transform: scale(1.1);
+}
+
+.vote-button:active {
+  transform: scale(0.95);
+}
+
+/* Indicador de carga inline */
+.inline-loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

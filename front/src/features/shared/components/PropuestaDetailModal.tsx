@@ -1,5 +1,5 @@
-// front/src/features/shared/components/PropuestaDetailModal.tsx
-import React from "react";
+// src/features/shared/components/PropuestaDetailModal.tsx
+import React, { useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { motion } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
@@ -9,6 +9,10 @@ import {
   FiCalendar, FiUser, FiBriefcase, FiFileText, FiTarget, FiTool, 
   FiActivity, FiClock, FiMail, FiGlobe, FiPhone, FiMapPin, FiBook
 } from "react-icons/fi";
+import { CommentsViewModel } from "../../propuestas-comentarios/presentation/viewModels/CommentsViewModel";
+import InlineComments from "../../propuestas-comentarios/presentation/components/InlineComments";
+import CommentsSummary from "../../propuestas-comentarios/presentation/components/CommentsSummary";
+import { useAuth } from "../../../core/utils/AuthContext";
 
 // Interface genérica para el ViewModel
 export interface PropuestaDetailViewModelInterface {
@@ -33,6 +37,34 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
   onClose 
 }) => {
   const statusInfo = viewModel.getPropuestaStatus(propuesta);
+  const authViewModel = useAuth();
+  
+  // Crear instancia del ViewModel de comentarios
+  const commentsViewModel = useMemo(() => new CommentsViewModel(), []);
+  
+  // Verificar si el usuario puede comentar (es tutor)
+  const canComment = authViewModel.userRoles.some(role => 
+    ['PTC', 'PA', 'Director'].includes(role.name)
+  );
+  
+  const currentUserEmail = authViewModel.currentUser?.getEmail();
+
+  // Inicializar comentarios cuando se abre el modal
+  useEffect(() => {
+    const initializeComments = async () => {
+      try {
+        await commentsViewModel.initialize(propuesta.getId());
+      } catch (error) {
+        console.error("Error al cargar comentarios:", error);
+      }
+    };
+
+    initializeComments();
+
+    return () => {
+      commentsViewModel.reset();
+    };
+  }, [propuesta, commentsViewModel]);
 
   return (
     <motion.div
@@ -74,7 +106,12 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
           </div>
         </div>
 
-        {/* Contenido */}
+        {/* Resumen de Comentarios */}
+        {canComment && (
+          <CommentsSummary viewModel={commentsViewModel} />
+        )}
+
+        {/* Contenido con scroll */}
         <div className="flex-1 overflow-y-auto">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             
@@ -109,6 +146,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-red-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getContextoProblema()}
                     </p>
+                    
+                    <InlineComments
+                      viewModel={commentsViewModel}
+                      proposalId={propuesta.getId()}
+                      sectionName="Contexto y Problemática"
+                      subsectionName="Contexto del Problema"
+                      currentUserEmail={currentUserEmail}
+                      canComment={canComment}
+                    />
                   </div>
 
                   <div className="bg-orange-50 p-4 rounded-lg">
@@ -116,6 +162,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-orange-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getDescripcionProblema()}
                     </p>
+                    
+                    <InlineComments
+                      viewModel={commentsViewModel}
+                      proposalId={propuesta.getId()}
+                      sectionName="Contexto y Problemática"
+                      subsectionName="Descripción del Problema"
+                      currentUserEmail={currentUserEmail}
+                      canComment={canComment}
+                    />
                   </div>
                 </div>
               </div>
@@ -133,6 +188,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-green-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getObjetivoGeneral()}
                     </p>
+                    
+                    <InlineComments
+                      viewModel={commentsViewModel}
+                      proposalId={propuesta.getId()}
+                      sectionName="Objetivos del Proyecto"
+                      subsectionName="Objetivo General"
+                      currentUserEmail={currentUserEmail}
+                      canComment={canComment}
+                    />
                   </div>
 
                   <div className="bg-emerald-50 p-4 rounded-lg">
@@ -140,6 +204,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-emerald-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getObjetivosEspecificos()}
                     </p>
+                    
+                    <InlineComments
+                      viewModel={commentsViewModel}
+                      proposalId={propuesta.getId()}
+                      sectionName="Objetivos del Proyecto"
+                      subsectionName="Objetivos Específicos"
+                      currentUserEmail={currentUserEmail}
+                      canComment={canComment}
+                    />
                   </div>
                 </div>
               </div>
@@ -160,6 +233,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-purple-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getActividadesPrincipales()}
                     </p>
+                    
+                    <InlineComments
+                      viewModel={commentsViewModel}
+                      proposalId={propuesta.getId()}
+                      sectionName="Plan de Trabajo"
+                      subsectionName="Actividades Principales"
+                      currentUserEmail={currentUserEmail}
+                      canComment={canComment}
+                    />
                   </div>
 
                   <div className="bg-violet-50 p-4 rounded-lg">
@@ -170,6 +252,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-violet-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getEntregablesPlaneados()}
                     </p>
+                    
+                    <InlineComments
+                      viewModel={commentsViewModel}
+                      proposalId={propuesta.getId()}
+                      sectionName="Plan de Trabajo"
+                      subsectionName="Entregables Planeados"
+                      currentUserEmail={currentUserEmail}
+                      canComment={canComment}
+                    />
                   </div>
                 </div>
               </div>
@@ -185,6 +276,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                   <p className="text-cyan-800 leading-relaxed whitespace-pre-wrap">
                     {propuesta.getProyecto().getTecnologias()}
                   </p>
+                  
+                  <InlineComments
+                    viewModel={commentsViewModel}
+                    proposalId={propuesta.getId()}
+                    sectionName="Plan de Trabajo"
+                    subsectionName="Tecnologías"
+                    currentUserEmail={currentUserEmail}
+                    canComment={canComment}
+                  />
                 </div>
               </div>
 
@@ -208,6 +308,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </p>
                   </div>
                 </div>
+                
+                <InlineComments
+                  viewModel={commentsViewModel}
+                  proposalId={propuesta.getId()}
+                  sectionName="Calendario"
+                  subsectionName="Fechas del Proyecto"
+                  currentUserEmail={currentUserEmail}
+                  canComment={canComment}
+                />
               </div>
             </div>
 
@@ -279,6 +388,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </div>
                   )}
                 </div>
+                
+                <InlineComments
+                  viewModel={commentsViewModel}
+                  proposalId={propuesta.getId()}
+                  sectionName="Información de la Empresa"
+                  subsectionName="Datos Generales"
+                  currentUserEmail={currentUserEmail}
+                  canComment={canComment}
+                />
               </div>
 
               {/* Dirección de la Empresa */}
@@ -293,6 +411,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     {propuesta.getEmpresa().getDireccion().getDireccionCompleta()}
                   </p>
                 </div>
+                
+                <InlineComments
+                  viewModel={commentsViewModel}
+                  proposalId={propuesta.getId()}
+                  sectionName="Información de la Empresa"
+                  subsectionName="Dirección"
+                  currentUserEmail={currentUserEmail}
+                  canComment={canComment}
+                />
               </div>
 
               {/* Persona de Contacto */}
@@ -345,6 +472,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </a>
                   </div>
                 </div>
+                
+                <InlineComments
+                  viewModel={commentsViewModel}
+                  proposalId={propuesta.getId()}
+                  sectionName="Información de la Empresa"
+                  subsectionName="Información de Contacto"
+                  currentUserEmail={currentUserEmail}
+                  canComment={canComment}
+                />
               </div>
 
               {/* Supervisor del Proyecto */}
@@ -390,6 +526,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </a>
                   </div>
                 </div>
+                
+                <InlineComments
+                  viewModel={commentsViewModel}
+                  proposalId={propuesta.getId()}
+                  sectionName="Supervisor del Proyecto"
+                  subsectionName="Información del Supervisor"
+                  currentUserEmail={currentUserEmail}
+                  canComment={canComment}
+                />
               </div>
 
               {/* Tutor Académico */}

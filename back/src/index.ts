@@ -105,6 +105,15 @@ try {
   console.error('❌ Error en propuestaRouter:', error);
 }
 
+try {
+  console.log('8️⃣ Cargando commentRouter...');
+  const { commentRouter } = require('./propuestas-comentarios/infrastructure/commentRouter');
+  app.use("/api/v1", authMiddleware, commentRouter);
+  console.log('✅ commentRouter registrado');
+} catch (error) {
+  console.error('❌ Error en commentRouter:', error);
+}
+
 console.log('🎯 Intentando iniciar servidor...');
 
 app.listen(port, () => {
