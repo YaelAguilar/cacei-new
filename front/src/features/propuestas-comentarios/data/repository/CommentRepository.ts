@@ -50,7 +50,7 @@ export class CommentRepository {
         }
     }
 
-    async getCommentsByProposal(proposalId: number): Promise<ProposalComment[]> {
+    async getCommentsByProposal(proposalId: string): Promise<ProposalComment[]> {  // ← string
         try {
             const response = await ApiClient.get<JsonApiCommentsListResponse>(
                 `/propuestas/${proposalId}/comentarios`

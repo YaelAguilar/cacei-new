@@ -5,7 +5,7 @@ import { ProposalComment } from "../data/models/ProposalComment";
 export class GetCommentsByProposalUseCase {
     constructor(private repository: CommentRepository) {}
 
-    async execute(proposalId: number): Promise<ProposalComment[]> {
+    async execute(proposalId: string): Promise<ProposalComment[]> {
         try {
             return await this.repository.getCommentsByProposal(proposalId);
         } catch (error) {

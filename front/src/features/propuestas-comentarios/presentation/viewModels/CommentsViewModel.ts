@@ -17,7 +17,7 @@ export class CommentsViewModel {
     // Estados de datos
     comments: ProposalComment[] = [];
     selectedComment: ProposalComment | null = null;
-    currentProposalId: number | null = null;
+    currentProposalId: string | null = null;
 
     // Estados de modales
     showCommentModal: boolean = false;
@@ -62,7 +62,7 @@ export class CommentsViewModel {
         this.selectedComment = comment;
     }
 
-    setCurrentProposalId(id: number | null) {
+    setCurrentProposalId(id: string | null) {
         this.currentProposalId = id;
     }
 
@@ -87,34 +87,25 @@ export class CommentsViewModel {
     }
 
     // Método de inicialización
-    async initialize(proposalIdOrUuid: string | number): Promise<void> {
+    async initialize(proposalIdOrUuid: string): Promise<void> {
         this.setLoading(true);
         this.setError(null);
 
         try {
-            // Si es un string (UUID), convertirlo a ID numérico
-            let proposalId: number;
-            
-            if (typeof proposalIdOrUuid === 'string') {
-                proposalId = parseInt(proposalIdOrUuid);
-            } else {
-                proposalId = proposalIdOrUuid;
-            }
-
-            this.setCurrentProposalId(proposalId);
-            await this.loadComments(proposalId);
-        } catch (error: any) {
-            this.setError(error.message || "Error al cargar los comentarios");
-        } finally {
-            runInAction(() => {
-                this.isInitialized = true;
-                this.setLoading(false);
-            });
-        }
+        this.setCurrentProposalId(proposalIdOrUuid);  // ← Ya no convertir
+        await this.loadComments(proposalIdOrUuid);    // ← Pasar directo
+    } catch (error: any) {
+        this.setError(error.message || "Error al cargar los comentarios");
+    } finally {
+        runInAction(() => {
+            this.isInitialized = true;
+            this.setLoading(false);
+        });
     }
+}
 
     // Cargar comentarios
-    async loadComments(proposalId: number): Promise<void> {
+    async loadComments(proposalId: string): Promise<void> {
         this.setLoading(true);
         this.setError(null);
 
