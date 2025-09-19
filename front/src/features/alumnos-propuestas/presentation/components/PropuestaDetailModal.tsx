@@ -8,7 +8,7 @@ import { VisualizarPropuestasViewModel } from "../viewModels/VisualizarPropuesta
 import Status from "../../../shared/components/Status";
 import { 
   FiCalendar, FiUser, FiBriefcase, FiFileText, FiTarget, FiTool, 
-  FiActivity, FiClock, FiMail, FiGlobe, FiMapPin, FiPhone, FiBuilding 
+  FiActivity, FiClock, FiMail, FiGlobe, FiPhone 
 } from "react-icons/fi";
 
 interface PropuestaDetailModalProps {
@@ -212,7 +212,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
               {/* Supervisor del Proyecto */}
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <FiBuilding className="w-6 h-6 text-teal-600" />
+                  <FiUser className="w-6 h-6 text-teal-600" />
                   <h3 className="text-xl font-bold text-gray-900">Supervisor del Proyecto</h3>
                 </div>
                 
