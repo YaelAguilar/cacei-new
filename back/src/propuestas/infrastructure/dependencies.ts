@@ -1,8 +1,10 @@
-// src/propuestas/infrastructure/dependencies.ts
-
-// Casos de uso
+// back/src/propuestas/infrastructure/dependencies.ts
+// Casos de uso - IMPORTACIONES CORREGIDAS
 import { CreatePropuestaUseCase } from "../application/createPropuestaUseCase";
-import { GetPropuestasUseCase, GetPropuestaUseCase, GetPropuestasByStudentUseCase, GetActiveConvocatoriaUseCase } from "../application/getPropuestasUseCase";
+import { GetPropuestasUseCase } from "../application/getPropuestasUseCase";
+import { GetPropuestaUseCase } from "../application/getPropuestaUseCase";
+import { GetPropuestasByStudentUseCase } from "../application/getPropuestasByStudentUseCase";
+import { GetActiveConvocatoriaUseCase } from "../application/getActiveConvocatoriaUseCase";
 import { UpdatePropuestaUseCase } from "../application/updatePropuestaUseCase";
 
 // Controladores

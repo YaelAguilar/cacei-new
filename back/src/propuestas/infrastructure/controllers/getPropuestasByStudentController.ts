@@ -1,6 +1,6 @@
 // back/src/propuestas/infrastructure/controllers/getPropuestasByStudentController.ts
 import { Request, Response } from 'express';
-import { GetPropuestasByStudentUseCase } from '../../application/getPropuestasUseCase';
+import { GetPropuestasByStudentUseCase } from '../../application/getPropuestasByStudentUseCase';
 
 export class GetPropuestasByStudentController {
     constructor(private readonly getPropuestasByStudentUseCase: GetPropuestasByStudentUseCase) {}

@@ -1,6 +1,6 @@
 // back/src/propuestas/infrastructure/controllers/getPropuestaController.ts
 import { Request, Response } from 'express';
-import { GetPropuestaUseCase } from '../../application/getPropuestasUseCase';
+import { GetPropuestaUseCase } from '../../application/getPropuestaUseCase';
 
 export class GetPropuestaController {
     constructor(private readonly getPropuestaUseCase: GetPropuestaUseCase) {}

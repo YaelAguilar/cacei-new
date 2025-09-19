@@ -1,21 +1,23 @@
-// src/features/ptc-propuestas/data/repository/PTCPropuestaRepository.ts
 import ApiClient from "../../../../core/API/ApiClient";
 import { 
-  JsonApiPropuestasListResponse,
-  JsonApiPropuestaResponse 
+  JsonApiPropuestasCompletasListResponse,
+  JsonApiPropuestaCompletaResponse 
 } from "../../../alumnos-propuestas/data/models/PropuestaDTO";
 import { 
-  Propuesta, 
-  TutorAcademico, 
-  ProyectoInfo, 
-  EmpresaInfo 
+  PropuestaCompleta,
+  TutorAcademico,
+  DireccionEmpresa,
+  EmpresaCompleta,
+  Contacto,
+  Supervisor,
+  ProyectoCompleto
 } from "../../../alumnos-propuestas/data/models/Propuesta";
 
 export class PTCPropuestaRepository {
   
-  async getAllPropuestas(): Promise<Propuesta[]> {
+  async getAllPropuestas(): Promise<PropuestaCompleta[]> {
     try {
-      const response = await ApiClient.get<JsonApiPropuestasListResponse>('/propuestas');
+      const response = await ApiClient.get<JsonApiPropuestasCompletasListResponse>('/propuestas');
       
       if (response.status === 200 && response.data.data) {
         return response.data.data.map(item => this.mapResponseToPropuesta(item));
@@ -28,9 +30,9 @@ export class PTCPropuestaRepository {
     }
   }
 
-  async getPropuesta(uuid: string): Promise<Propuesta | null> {
+  async getPropuesta(uuid: string): Promise<PropuestaCompleta | null> {
     try {
-      const response = await ApiClient.get<JsonApiPropuestaResponse>(`/propuestas/${uuid}`);
+      const response = await ApiClient.get<JsonApiPropuestaCompletaResponse>(`/propuestas/${uuid}`);
       
       if (response.status === 200 && response.data.data) {
         return this.mapResponseToPropuesta(response.data.data);
@@ -43,7 +45,7 @@ export class PTCPropuestaRepository {
     }
   }
 
-  private mapResponseToPropuesta(data: any): Propuesta {
+  private mapResponseToPropuesta(data: any): PropuestaCompleta {
     const attrs = data.attributes;
     
     const tutorAcademico = new TutorAcademico(
@@ -52,31 +54,65 @@ export class PTCPropuestaRepository {
       attrs.tutorAcademico.email
     );
 
-    const proyecto = new ProyectoInfo(
+    const direccion = new DireccionEmpresa(
+      attrs.empresa.direccion.estado,
+      attrs.empresa.direccion.municipio,
+      attrs.empresa.direccion.tipoAsentamiento,
+      attrs.empresa.direccion.nombreAsentamiento,
+      attrs.empresa.direccion.tipoVialidad,
+      attrs.empresa.direccion.nombreVia,
+      attrs.empresa.direccion.numeroExterior,
+      attrs.empresa.direccion.numeroInterior,
+      attrs.empresa.direccion.codigoPostal
+    );
+
+    const empresa = new EmpresaCompleta(
+      attrs.empresa.nombreCorto,
+      attrs.empresa.razonSocial,
+      attrs.empresa.rfc,
+      direccion,
+      attrs.empresa.paginaWeb,
+      attrs.empresa.linkedin,
+      attrs.empresa.sector
+    );
+
+    const contacto = new Contacto(
+      attrs.contacto.nombre,
+      attrs.contacto.puesto,
+      attrs.contacto.email,
+      attrs.contacto.telefono,
+      attrs.contacto.area
+    );
+
+    const supervisor = new Supervisor(
+      attrs.supervisor.nombre,
+      attrs.supervisor.area,
+      attrs.supervisor.email,
+      attrs.supervisor.telefono
+    );
+
+    const proyecto = new ProyectoCompleto(
       attrs.proyecto.nombre,
-      attrs.proyecto.descripcion,
-      attrs.proyecto.entregables,
-      attrs.proyecto.tecnologias,
-      attrs.proyecto.supervisor,
-      attrs.proyecto.actividades,
       new Date(attrs.proyecto.fechaInicio),
-      new Date(attrs.proyecto.fechaFin)
+      new Date(attrs.proyecto.fechaFin),
+      attrs.proyecto.contextoProblema,
+      attrs.proyecto.descripcionProblema,
+      attrs.proyecto.objetivoGeneral,
+      attrs.proyecto.objetivosEspecificos,
+      attrs.proyecto.actividadesPrincipales,
+      attrs.proyecto.entregablesPlaneados,
+      attrs.proyecto.tecnologias
     );
 
-    const empresa = new EmpresaInfo(
-      attrs.empresa.nombre,
-      attrs.empresa.sector,
-      attrs.empresa.personaContacto,
-      attrs.empresa.paginaWeb
-    );
-
-    return new Propuesta(
+    return new PropuestaCompleta(
       data.id,
       attrs.idConvocatoria,
       tutorAcademico,
       attrs.tipoPasantia,
-      proyecto,
       empresa,
+      contacto,
+      supervisor,
+      proyecto,
       attrs.active,
       new Date(attrs.createdAt),
       new Date(attrs.updatedAt)

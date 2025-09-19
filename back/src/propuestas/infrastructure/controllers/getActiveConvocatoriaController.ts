@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { GetActiveConvocatoriaUseCase } from '../../application/getPropuestasUseCase';
+import { GetActiveConvocatoriaUseCase } from '../../application/getActiveConvocatoriaUseCase';
 
 export class GetActiveConvocatoriaController {
     constructor(private readonly getActiveConvocatoriaUseCase: GetActiveConvocatoriaUseCase) {}
