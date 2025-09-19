@@ -84,11 +84,13 @@ export class MysqlCommentRepository implements CommentRepository {
         }
     }
 
-    async getCommentsByProposal(proposalId: number): Promise<ProposalComment[] | null> {
+    async getCommentsByProposal(proposalId: string): Promise<ProposalComment[] | null> {
         const sql = `
-            SELECT * FROM proposal_comments_with_details 
-            WHERE proposal_id = ? AND active = true 
-            ORDER BY created_at DESC
+            SELECT pc.* 
+            FROM proposal_comments pc
+            INNER JOIN project_proposals pp ON pp.id = pc.proposal_id
+            WHERE pp.uuid = ? AND pc.active = true 
+            ORDER BY pc.created_at DESC
         `;
 
         try {

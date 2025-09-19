@@ -9,7 +9,7 @@ export class GetCommentsByProposalController {
         const { proposalId } = req.params;
 
         try {
-            const comments = await this.getCommentsByProposalUseCase.run(Number(proposalId));
+            const comments = await this.getCommentsByProposalUseCase.run(proposalId);
 
             const formattedComments = comments ? comments.map(comment => ({
                 type: "proposal-comment",

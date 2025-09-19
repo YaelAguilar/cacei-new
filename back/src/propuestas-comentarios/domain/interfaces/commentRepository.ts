@@ -20,7 +20,7 @@ export interface CommentRepository {
     
     updateComment(uuid: string, data: CommentUpdateData): Promise<ProposalComment | null>;
     
-    getCommentsByProposal(proposalId: number): Promise<ProposalComment[] | null>;
+    getCommentsByProposal(proposalId: string): Promise<ProposalComment[] | null>;
     
     getCommentsByTutor(tutorId: number): Promise<ProposalComment[] | null>;
     

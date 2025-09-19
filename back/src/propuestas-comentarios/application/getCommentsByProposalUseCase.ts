@@ -5,7 +5,7 @@ import { ProposalComment } from "../domain/models/proposalComment";
 export class GetCommentsByProposalUseCase {
     constructor(private readonly commentRepository: CommentRepository) {}
 
-    async run(proposalId: number): Promise<ProposalComment[] | null> {
+    async run(proposalId: string): Promise<ProposalComment[] | null> {
         try {
             return await this.commentRepository.getCommentsByProposal(proposalId);
         } catch (error) {
