@@ -1,20 +1,51 @@
 // src/features/alumnos-propuestas/data/models/PropuestaDTO.ts
 
 export interface CreatePropuestaRequest {
-  tutorAcademicoId: number;
-  tipoPasantia: string;
-  nombreProyecto: string;
-  descripcionProyecto: string;
-  entregables: string;
-  tecnologias: string;
-  supervisorProyecto: string;
-  actividades: string;
-  fechaInicio: string; // ISO format
-  fechaFin: string; // ISO format
-  nombreEmpresa: string;
-  sectorEmpresa: string;
-  personaContacto: string;
-  paginaWebEmpresa?: string | null;
+  academicTutorId: number;
+  internshipType: string;
+  
+  // Información de la empresa
+  companyShortName: string;
+  companyLegalName: string;
+  companyTaxId: string;
+  
+  // Dirección de la empresa
+  companyState: string;
+  companyMunicipality: string;
+  companySettlementType: string;
+  companySettlementName: string;
+  companyStreetType: string;
+  companyStreetName: string;
+  companyExteriorNumber: string;
+  companyInteriorNumber?: string | null;
+  companyPostalCode: string;
+  companyWebsite?: string | null;
+  companyLinkedin?: string | null;
+  
+  // Información de contacto
+  contactName: string;
+  contactPosition: string;
+  contactEmail: string;
+  contactPhone: string;
+  contactArea: string;
+  
+  // Supervisor del proyecto
+  supervisorName: string;
+  supervisorArea: string;
+  supervisorEmail: string;
+  supervisorPhone: string;
+  
+  // Datos del proyecto
+  projectName: string;
+  projectStartDate: string; // ISO format
+  projectEndDate: string; // ISO format
+  projectProblemContext: string;
+  projectProblemDescription: string;
+  projectGeneralObjective: string;
+  projectSpecificObjectives: string;
+  projectMainActivities: string;
+  projectPlannedDeliverables: string;
+  projectTechnologies: string;
 }
 
 export interface TutorAcademicoDTO {
@@ -93,18 +124,49 @@ export interface ErrorResponse {
 }
 
 export interface UpdatePropuestaRequest {
-  tutorAcademicoId?: number;
-  tipoPasantia?: string;
-  nombreProyecto?: string;
-  descripcionProyecto?: string;
-  entregables?: string;
-  tecnologias?: string;
-  supervisorProyecto?: string;
-  actividades?: string;
-  fechaInicio?: string;
-  fechaFin?: string;
-  nombreEmpresa?: string;
-  sectorEmpresa?: string;
-  personaContacto?: string;
-  paginaWebEmpresa?: string | null;
+  academicTutorId?: number;
+  internshipType?: string;
+  
+  // Información de la empresa
+  companyShortName?: string;
+  companyLegalName?: string;
+  companyTaxId?: string;
+  
+  // Dirección de la empresa
+  companyState?: string;
+  companyMunicipality?: string;
+  companySettlementType?: string;
+  companySettlementName?: string;
+  companyStreetType?: string;
+  companyStreetName?: string;
+  companyExteriorNumber?: string;
+  companyInteriorNumber?: string | null;
+  companyPostalCode?: string;
+  companyWebsite?: string | null;
+  companyLinkedin?: string | null;
+  
+  // Información de contacto
+  contactName?: string;
+  contactPosition?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  contactArea?: string;
+  
+  // Supervisor del proyecto
+  supervisorName?: string;
+  supervisorArea?: string;
+  supervisorEmail?: string;
+  supervisorPhone?: string;
+  
+  // Datos del proyecto
+  projectName?: string;
+  projectStartDate?: string;
+  projectEndDate?: string;
+  projectProblemContext?: string;
+  projectProblemDescription?: string;
+  projectGeneralObjective?: string;
+  projectSpecificObjectives?: string;
+  projectMainActivities?: string;
+  projectPlannedDeliverables?: string;
+  projectTechnologies?: string;
 }

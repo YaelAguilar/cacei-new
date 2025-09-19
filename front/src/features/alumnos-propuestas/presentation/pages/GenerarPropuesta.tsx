@@ -9,8 +9,9 @@ import { PropuestaViewModel } from '../viewModels/PropuestaViewModel';
 // Componentes
 import StepIndicator from '../components/StepIndicator';
 import Step1AlumnoInfo from '../components/Step1AlumnoInfo';
-import Step2ProyectoInfo from '../components/Step2ProyectoInfo';
-import Step3EmpresaInfo from '../components/Step3EmpresaInfo';
+import Step2EmpresaInfo from '../components/Step2EmpresaInfo';
+import Step3SupervisorInfo from '../components/Step3SupervisorInfo';
+import Step4ProyectoInfo from '../components/Step4ProyectoInfo';
 import NoConvocatoriaMessage from '../components/NoConvocatoriaMessage';
 import PropuestaExistenteMessage from '../components/PropuestaExistenteMessage';
 import SuccessMessage from '../components/SuccessMessage';
@@ -49,37 +50,37 @@ const GenerarPropuesta: React.FC = observer(() => {
 
   // Determinar qué vista mostrar basado en el estado del ViewModel
   const determineViewState = () => {
-  console.log('🔍 Debugging view state:', {
-    isInitialized: propuestaViewModel.isInitialized,
-    hasConvocatoriaActiva: propuestaViewModel.hasConvocatoriaActiva,
-    convocatoriaActivaId: propuestaViewModel.convocatoriaActiva?.getId(),
-    misPropuestasCount: propuestaViewModel.misPropuestas.length,
-    hasPropuestaEnConvocatoriaActual: propuestaViewModel.hasPropuestaEnConvocatoriaActual
-  });
+    console.log('🔍 Debugging view state:', {
+      isInitialized: propuestaViewModel.isInitialized,
+      hasConvocatoriaActiva: propuestaViewModel.hasConvocatoriaActiva,
+      convocatoriaActivaId: propuestaViewModel.convocatoriaActiva?.getId(),
+      misPropuestasCount: propuestaViewModel.misPropuestas.length,
+      hasPropuestaEnConvocatoriaActual: propuestaViewModel.hasPropuestaEnConvocatoriaActual
+    });
 
-  if (!propuestaViewModel.isInitialized) {
-    setViewState('loading');
-    return;
-  }
+    if (!propuestaViewModel.isInitialized) {
+      setViewState('loading');
+      return;
+    }
 
-  if (!propuestaViewModel.hasConvocatoriaActiva) {
-    setViewState('no-convocatoria');
-    return;
-  }
+    if (!propuestaViewModel.hasConvocatoriaActiva) {
+      setViewState('no-convocatoria');
+      return;
+    }
 
-  if (propuestaViewModel.hasPropuestaEnConvocatoriaActual) {
-    console.log('✅ Usuario tiene propuesta en convocatoria actual - mostrando PropuestaExistenteMessage');
-    setViewState('propuesta-existente');
-    return;
-  }
+    if (propuestaViewModel.hasPropuestaEnConvocatoriaActual) {
+      console.log('✅ Usuario tiene propuesta en convocatoria actual - mostrando PropuestaExistenteMessage');
+      setViewState('propuesta-existente');
+      return;
+    }
 
-  if (propuestaViewModel.lastCreatedPropuesta) {
-    setViewState('success');
-    return;
-  }
+    if (propuestaViewModel.lastCreatedPropuesta) {
+      setViewState('success');
+      return;
+    }
 
-  setViewState('form');
-};
+    setViewState('form');
+  };
 
   // Re-evaluar el estado cuando cambie el ViewModel
   useEffect(() => {
@@ -115,6 +116,8 @@ const GenerarPropuesta: React.FC = observer(() => {
         return propuestaViewModel.isStep1Valid;
       case 3:
         return propuestaViewModel.isStep1Valid && propuestaViewModel.isStep2Valid;
+      case 4:
+        return propuestaViewModel.isStep1Valid && propuestaViewModel.isStep2Valid && propuestaViewModel.isStep3Valid;
       default:
         return false;
     }
@@ -152,8 +155,9 @@ const GenerarPropuesta: React.FC = observer(() => {
   // Títulos de los steps
   const stepTitles = [
     'Información del Alumno',
-    'Información del Proyecto', 
-    'Información de la Empresa'
+    'Información de la Empresa', 
+    'Supervisor del Proyecto',
+    'Información del Proyecto'
   ];
 
   // Renderizar contenido según el estado
@@ -201,7 +205,7 @@ const GenerarPropuesta: React.FC = observer(() => {
             {/* Indicador de steps */}
             <StepIndicator
               currentStep={propuestaViewModel.currentStep}
-              totalSteps={3}
+              totalSteps={4}
               stepTitles={stepTitles}
               onStepClick={handleStepClick}
               canNavigateToStep={canNavigateToStep}
@@ -238,7 +242,7 @@ const GenerarPropuesta: React.FC = observer(() => {
             )}
 
             {propuestaViewModel.currentStep === 2 && (
-              <Step2ProyectoInfo
+              <Step2EmpresaInfo
                 viewModel={propuestaViewModel}
                 onNext={handleNextStep}
                 onPrevious={handlePreviousStep}
@@ -246,7 +250,15 @@ const GenerarPropuesta: React.FC = observer(() => {
             )}
 
             {propuestaViewModel.currentStep === 3 && (
-              <Step3EmpresaInfo
+              <Step3SupervisorInfo
+                viewModel={propuestaViewModel}
+                onNext={handleNextStep}
+                onPrevious={handlePreviousStep}
+              />
+            )}
+
+            {propuestaViewModel.currentStep === 4 && (
+              <Step4ProyectoInfo
                 viewModel={propuestaViewModel}
                 onSubmit={handleSubmitPropuesta}
                 onPrevious={handlePreviousStep}
@@ -264,10 +276,11 @@ const GenerarPropuesta: React.FC = observer(() => {
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-[23px] md:text-[36px] font-semibold text-black">
+              Registrar Nueva Propuesta
             </h1>
             <p className="text-[14px] md:text-[24px] font-light text-black">
               {viewState === 'form' 
-                ? 'Completa los 3 pasos para registrar tu propuesta de proyecto.'
+                ? 'Completa los 4 pasos para registrar tu propuesta de proyecto de pasantía.'
                 : 'Gestión de propuestas de proyectos de pasantías.'
               }
             </p>

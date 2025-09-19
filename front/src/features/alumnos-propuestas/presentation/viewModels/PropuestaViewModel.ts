@@ -8,24 +8,51 @@ import { ConvocatoriaActiva, Propuesta, TutorAcademico } from "../../data/models
 
 export interface PropuestaFormData {
   // Step 1: Información del alumno
-  tutorAcademicoId: number | null;
-  tipoPasantia: string;
+  academicTutorId: number | null;
+  internshipType: string;
   
-  // Step 2: Información del proyecto
-  nombreProyecto: string;
-  descripcionProyecto: string;
-  entregables: string;
-  tecnologias: string;
-  supervisorProyecto: string;
-  actividades: string;
-  fechaInicio: Date | null;
-  fechaFin: Date | null;
+  // Step 2: Información de la empresa
+  companyShortName: string;
+  companyLegalName: string;
+  companyTaxId: string;
   
-  // Step 3: Información de la empresa
-  nombreEmpresa: string;
-  sectorEmpresa: string;
-  personaContacto: string;
-  paginaWebEmpresa: string;
+  // Dirección de la empresa
+  companyState: string;
+  companyMunicipality: string;
+  companySettlementType: string;
+  companySettlementName: string;
+  companyStreetType: string;
+  companyStreetName: string;
+  companyExteriorNumber: string;
+  companyInteriorNumber: string;
+  companyPostalCode: string;
+  companyWebsite: string;
+  companyLinkedin: string;
+  
+  // Información de contacto
+  contactName: string;
+  contactPosition: string;
+  contactEmail: string;
+  contactPhone: string;
+  contactArea: string;
+  
+  // Step 3: Supervisor del proyecto
+  supervisorName: string;
+  supervisorArea: string;
+  supervisorEmail: string;
+  supervisorPhone: string;
+  
+  // Step 4: Información del proyecto
+  projectName: string;
+  projectStartDate: Date | null;
+  projectEndDate: Date | null;
+  projectProblemContext: string;
+  projectProblemDescription: string;
+  projectGeneralObjective: string;
+  projectSpecificObjectives: string;
+  projectMainActivities: string;
+  projectPlannedDeliverables: string;
+  projectTechnologies: string;
 }
 
 export class PropuestaViewModel {
@@ -47,20 +74,46 @@ export class PropuestaViewModel {
 
   // Datos del formulario
   formData: PropuestaFormData = {
-    tutorAcademicoId: null,
-    tipoPasantia: '',
-    nombreProyecto: '',
-    descripcionProyecto: '',
-    entregables: '',
-    tecnologias: '',
-    supervisorProyecto: '',
-    actividades: '',
-    fechaInicio: null,
-    fechaFin: null,
-    nombreEmpresa: '',
-    sectorEmpresa: '',
-    personaContacto: '',
-    paginaWebEmpresa: ''
+    academicTutorId: null,
+    internshipType: '',
+    
+    companyShortName: '',
+    companyLegalName: '',
+    companyTaxId: '',
+    
+    companyState: '',
+    companyMunicipality: '',
+    companySettlementType: '',
+    companySettlementName: '',
+    companyStreetType: '',
+    companyStreetName: '',
+    companyExteriorNumber: '',
+    companyInteriorNumber: '',
+    companyPostalCode: '',
+    companyWebsite: '',
+    companyLinkedin: '',
+    
+    contactName: '',
+    contactPosition: '',
+    contactEmail: '',
+    contactPhone: '',
+    contactArea: '',
+    
+    supervisorName: '',
+    supervisorArea: '',
+    supervisorEmail: '',
+    supervisorPhone: '',
+    
+    projectName: '',
+    projectStartDate: null,
+    projectEndDate: null,
+    projectProblemContext: '',
+    projectProblemDescription: '',
+    projectGeneralObjective: '',
+    projectSpecificObjectives: '',
+    projectMainActivities: '',
+    projectPlannedDeliverables: '',
+    projectTechnologies: ''
   };
 
   // Casos de uso
@@ -184,20 +237,51 @@ export class PropuestaViewModel {
 
     try {
       const params: CreatePropuestaParams = {
-        tutorAcademicoId: this.formData.tutorAcademicoId!,
-        tipoPasantia: this.formData.tipoPasantia,
-        nombreProyecto: this.formData.nombreProyecto,
-        descripcionProyecto: this.formData.descripcionProyecto,
-        entregables: this.formData.entregables,
-        tecnologias: this.formData.tecnologias,
-        supervisorProyecto: this.formData.supervisorProyecto,
-        actividades: this.formData.actividades,
-        fechaInicio: this.formData.fechaInicio!,
-        fechaFin: this.formData.fechaFin!,
-        nombreEmpresa: this.formData.nombreEmpresa,
-        sectorEmpresa: this.formData.sectorEmpresa,
-        personaContacto: this.formData.personaContacto,
-        paginaWebEmpresa: this.formData.paginaWebEmpresa || null
+        academicTutorId: this.formData.academicTutorId!,
+        internshipType: this.formData.internshipType,
+        
+        // Información de la empresa
+        companyShortName: this.formData.companyShortName,
+        companyLegalName: this.formData.companyLegalName,
+        companyTaxId: this.formData.companyTaxId,
+        
+        // Dirección de la empresa
+        companyState: this.formData.companyState,
+        companyMunicipality: this.formData.companyMunicipality,
+        companySettlementType: this.formData.companySettlementType,
+        companySettlementName: this.formData.companySettlementName,
+        companyStreetType: this.formData.companyStreetType,
+        companyStreetName: this.formData.companyStreetName,
+        companyExteriorNumber: this.formData.companyExteriorNumber,
+        companyInteriorNumber: this.formData.companyInteriorNumber || null,
+        companyPostalCode: this.formData.companyPostalCode,
+        companyWebsite: this.formData.companyWebsite || null,
+        companyLinkedin: this.formData.companyLinkedin || null,
+        
+        // Información de contacto
+        contactName: this.formData.contactName,
+        contactPosition: this.formData.contactPosition,
+        contactEmail: this.formData.contactEmail,
+        contactPhone: this.formData.contactPhone,
+        contactArea: this.formData.contactArea,
+        
+        // Supervisor del proyecto
+        supervisorName: this.formData.supervisorName,
+        supervisorArea: this.formData.supervisorArea,
+        supervisorEmail: this.formData.supervisorEmail,
+        supervisorPhone: this.formData.supervisorPhone,
+        
+        // Datos del proyecto
+        projectName: this.formData.projectName,
+        projectStartDate: this.formData.projectStartDate!,
+        projectEndDate: this.formData.projectEndDate!,
+        projectProblemContext: this.formData.projectProblemContext,
+        projectProblemDescription: this.formData.projectProblemDescription,
+        projectGeneralObjective: this.formData.projectGeneralObjective,
+        projectSpecificObjectives: this.formData.projectSpecificObjectives,
+        projectMainActivities: this.formData.projectMainActivities,
+        projectPlannedDeliverables: this.formData.projectPlannedDeliverables,
+        projectTechnologies: this.formData.projectTechnologies
       };
 
       const propuesta = await this.createPropuestaUseCase.execute(params);
@@ -221,7 +305,7 @@ export class PropuestaViewModel {
 
   // Navegación entre steps
   nextStep() {
-    if (this.currentStep < 3) {
+    if (this.currentStep < 4) {
       this.setCurrentStep(this.currentStep + 1);
     }
   }
@@ -233,7 +317,7 @@ export class PropuestaViewModel {
   }
 
   goToStep(step: number) {
-    if (step >= 1 && step <= 3) {
+    if (step >= 1 && step <= 4) {
       this.setCurrentStep(step);
     }
   }
@@ -252,33 +336,18 @@ export class PropuestaViewModel {
   }
 
   get hasPropuestaEnConvocatoriaActual(): boolean {
-  if (!this.convocatoriaActiva) {
-    console.log('🔍 hasPropuestaEnConvocatoriaActual: No hay convocatoria activa');
-    return false;
-  }
-  
-  const convocatoriaId = this.convocatoriaActiva.getId();
-  console.log('🔍 hasPropuestaEnConvocatoriaActual - Convocatoria ID:', convocatoriaId, typeof convocatoriaId);
-  console.log('🔍 hasPropuestaEnConvocatoriaActual - Propuestas:', this.misPropuestas.length);
-  
-  const result = this.misPropuestas.some(propuesta => {
-    const propuestaConvocatoriaId = propuesta.getIdConvocatoria();
-    console.log('🔍 Comparando:', {
-      propuestaId: propuesta.getId(),
-      propuestaConvocatoriaId: propuestaConvocatoriaId,
-      propuestaConvocatoriaIdType: typeof propuestaConvocatoriaId,
-      convocatoriaId: convocatoriaId,
-      convocatoriaIdType: typeof convocatoriaId,
-      sonIguales: propuestaConvocatoriaId.toString() === convocatoriaId.toString()
+    if (!this.convocatoriaActiva) {
+      return false;
+    }
+    
+    const convocatoriaId = this.convocatoriaActiva.getId();
+    const result = this.misPropuestas.some(propuesta => {
+      const propuestaConvocatoriaId = propuesta.getIdConvocatoria();
+      return propuestaConvocatoriaId.toString() === convocatoriaId.toString();
     });
     
-    // Comparar como strings para evitar problemas de tipos
-    return propuestaConvocatoriaId.toString() === convocatoriaId.toString();
-  });
-  
-  console.log('🔍 hasPropuestaEnConvocatoriaActual - Resultado:', result);
-  return result;
-}
+    return result;
+  }
 
   get canCreatePropuesta(): boolean {
     return this.hasConvocatoriaActiva && 
@@ -288,42 +357,64 @@ export class PropuestaViewModel {
   }
 
   get isStep1Valid(): boolean {
-    return this.formData.tutorAcademicoId !== null && 
-           this.formData.tipoPasantia !== '';
+    return this.formData.academicTutorId !== null && 
+           this.formData.internshipType !== '';
   }
 
   get isStep2Valid(): boolean {
-    return this.formData.nombreProyecto !== '' &&
-           this.formData.descripcionProyecto !== '' &&
-           this.formData.entregables !== '' &&
-           this.formData.tecnologias !== '' &&
-           this.formData.supervisorProyecto !== '' &&
-           this.formData.actividades !== '' &&
-           this.formData.fechaInicio !== null &&
-           this.formData.fechaFin !== null;
+    return this.formData.companyShortName !== '' &&
+           this.formData.companyLegalName !== '' &&
+           this.formData.companyTaxId !== '' &&
+           this.formData.companyState !== '' &&
+           this.formData.companyMunicipality !== '' &&
+           this.formData.companySettlementType !== '' &&
+           this.formData.companySettlementName !== '' &&
+           this.formData.companyStreetType !== '' &&
+           this.formData.companyStreetName !== '' &&
+           this.formData.companyExteriorNumber !== '' &&
+           this.formData.companyPostalCode !== '' &&
+           this.formData.contactName !== '' &&
+           this.formData.contactPosition !== '' &&
+           this.formData.contactEmail !== '' &&
+           this.formData.contactPhone !== '' &&
+           this.formData.contactArea !== '';
   }
 
   get isStep3Valid(): boolean {
-    return this.formData.nombreEmpresa !== '' &&
-           this.formData.sectorEmpresa !== '' &&
-           this.formData.personaContacto !== '';
+    return this.formData.supervisorName !== '' &&
+           this.formData.supervisorArea !== '' &&
+           this.formData.supervisorEmail !== '' &&
+           this.formData.supervisorPhone !== '';
+  }
+
+  get isStep4Valid(): boolean {
+    return this.formData.projectName !== '' &&
+           this.formData.projectProblemContext !== '' &&
+           this.formData.projectProblemDescription !== '' &&
+           this.formData.projectGeneralObjective !== '' &&
+           this.formData.projectSpecificObjectives !== '' &&
+           this.formData.projectMainActivities !== '' &&
+           this.formData.projectPlannedDeliverables !== '' &&
+           this.formData.projectTechnologies !== '' &&
+           this.formData.projectStartDate !== null &&
+           this.formData.projectEndDate !== null;
   }
 
   get isFormComplete(): boolean {
-    return this.isStep1Valid && this.isStep2Valid && this.isStep3Valid;
+    return this.isStep1Valid && this.isStep2Valid && this.isStep3Valid && this.isStep4Valid;
   }
 
   get stepProgress(): number {
-    const totalSteps = 3;
+    const totalSteps = 4;
     return (this.currentStep / totalSteps) * 100;
   }
 
   // Obtener tutor seleccionado
   get selectedTutor(): TutorAcademico | null {
-    if (!this.formData.tutorAcademicoId) return null;
+    if (!this.formData.academicTutorId) return null;
     
     return this.tutoresDisponibles.find(tutor => 
-      tutor.getId() === this.formData.tutorAcademicoId
+      tutor.getId() === this.formData.academicTutorId
     ) || null;
   }
 
@@ -347,20 +438,46 @@ export class PropuestaViewModel {
   // Resetear formulario
   resetForm() {
     this.formData = {
-      tutorAcademicoId: null,
-      tipoPasantia: '',
-      nombreProyecto: '',
-      descripcionProyecto: '',
-      entregables: '',
-      tecnologias: '',
-      supervisorProyecto: '',
-      actividades: '',
-      fechaInicio: null,
-      fechaFin: null,
-      nombreEmpresa: '',
-      sectorEmpresa: '',
-      personaContacto: '',
-      paginaWebEmpresa: ''
+      academicTutorId: null,
+      internshipType: '',
+      
+      companyShortName: '',
+      companyLegalName: '',
+      companyTaxId: '',
+      
+      companyState: '',
+      companyMunicipality: '',
+      companySettlementType: '',
+      companySettlementName: '',
+      companyStreetType: '',
+      companyStreetName: '',
+      companyExteriorNumber: '',
+      companyInteriorNumber: '',
+      companyPostalCode: '',
+      companyWebsite: '',
+      companyLinkedin: '',
+      
+      contactName: '',
+      contactPosition: '',
+      contactEmail: '',
+      contactPhone: '',
+      contactArea: '',
+      
+      supervisorName: '',
+      supervisorArea: '',
+      supervisorEmail: '',
+      supervisorPhone: '',
+      
+      projectName: '',
+      projectStartDate: null,
+      projectEndDate: null,
+      projectProblemContext: '',
+      projectProblemDescription: '',
+      projectGeneralObjective: '',
+      projectSpecificObjectives: '',
+      projectMainActivities: '',
+      projectPlannedDeliverables: '',
+      projectTechnologies: ''
     };
     this.setCurrentStep(1);
     this.clearError();

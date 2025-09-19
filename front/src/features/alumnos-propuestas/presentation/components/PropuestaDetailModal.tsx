@@ -6,7 +6,10 @@ import { AiOutlineClose } from "react-icons/ai";
 import { Propuesta } from "../../data/models/Propuesta";
 import { VisualizarPropuestasViewModel } from "../viewModels/VisualizarPropuestasViewModel";
 import Status from "../../../shared/components/Status";
-import { FiCalendar, FiUser, FiBriefcase, FiFileText, FiTarget, FiTool, FiActivity, FiClock, FiMail, FiGlobe } from "react-icons/fi";
+import { 
+  FiCalendar, FiUser, FiBriefcase, FiFileText, FiTarget, FiTool, 
+  FiActivity, FiClock, FiMail, FiGlobe, FiMapPin, FiPhone, FiBuilding 
+} from "react-icons/fi";
 
 interface PropuestaDetailModalProps {
   propuesta: Propuesta;
@@ -159,7 +162,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                 
                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-4">
                   <div>
-                    <p className="text-sm font-semibold text-purple-700 mb-1">Nombre</p>
+                    <p className="text-sm font-semibold text-purple-700 mb-1">Nombre Comercial</p>
                     <p className="text-purple-900 font-bold text-lg truncate">
                       {propuesta.getEmpresa().getNombre()}
                     </p>
@@ -169,13 +172,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-sm font-semibold text-purple-700 mb-1">Sector</p>
                     <p className="text-purple-900 font-medium">
                       {propuesta.getEmpresa().getSector()}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold text-purple-700 mb-1">Persona de Contacto</p>
-                    <p className="text-purple-900 font-medium">
-                      {propuesta.getEmpresa().getPersonaContacto?.() || 'No especificada'}
                     </p>
                   </div>
 
@@ -193,13 +189,37 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                       </a>
                     </div>
                   )}
+                </div>
+              </div>
 
+              {/* Persona de Contacto */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <FiPhone className="w-6 h-6 text-orange-600" />
+                  <h3 className="text-xl font-bold text-gray-900">Persona de Contacto</h3>
+                </div>
+                
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 space-y-3">
                   <div>
-                    <p className="text-sm font-semibold text-purple-700 mb-1">Supervisor del Proyecto</p>
-                    <p className="text-purple-900 font-medium">
-                      {propuesta.getProyecto().getSupervisor?.() || 'No especificado'}
+                    <p className="text-sm font-semibold text-orange-700 mb-1">Nombre</p>
+                    <p className="text-orange-900 font-medium">
+                      {propuesta.getEmpresa().getPersonaContacto()}
                     </p>
                   </div>
+                </div>
+              </div>
+
+              {/* Supervisor del Proyecto */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <FiBuilding className="w-6 h-6 text-teal-600" />
+                  <h3 className="text-xl font-bold text-gray-900">Supervisor del Proyecto</h3>
+                </div>
+                
+                <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                  <p className="font-bold text-teal-900 text-lg mb-2">
+                    {propuesta.getProyecto().getSupervisor()}
+                  </p>
                 </div>
               </div>
 

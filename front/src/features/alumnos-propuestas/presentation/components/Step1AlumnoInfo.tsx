@@ -12,14 +12,14 @@ interface Step1AlumnoInfoProps {
 
 const Step1AlumnoInfo: React.FC<Step1AlumnoInfoProps> = observer(({ viewModel, onNext }) => {
   const initialValues = {
-    tutorAcademicoId: viewModel.formData.tutorAcademicoId || '',
-    tipoPasantia: viewModel.formData.tipoPasantia || ''
+    academicTutorId: viewModel.formData.academicTutorId || '',
+    internshipType: viewModel.formData.internshipType || ''
   };
 
   const handleSubmit = (values: any) => {
     viewModel.updateFormData({
-      tutorAcademicoId: values.tutorAcademicoId ? Number(values.tutorAcademicoId) : null,
-      tipoPasantia: values.tipoPasantia
+      academicTutorId: values.academicTutorId ? Number(values.academicTutorId) : null,
+      internshipType: values.internshipType
     });
     onNext();
   };
@@ -41,13 +41,13 @@ const Step1AlumnoInfo: React.FC<Step1AlumnoInfoProps> = observer(({ viewModel, o
           <Form className="space-y-6">
             {/* Tutor Académico */}
             <div>
-              <label htmlFor="tutorAcademicoId" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="academicTutorId" className="block text-sm font-medium text-gray-700 mb-2">
                 Tutor Académico <span className="text-red-500">*</span>
               </label>
               <Field
                 as="select"
-                id="tutorAcademicoId"
-                name="tutorAcademicoId"
+                id="academicTutorId"
+                name="academicTutorId"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Selecciona un tutor académico</option>
@@ -57,18 +57,18 @@ const Step1AlumnoInfo: React.FC<Step1AlumnoInfoProps> = observer(({ viewModel, o
                   </option>
                 ))}
               </Field>
-              <ErrorMessage name="tutorAcademicoId" component="div" className="text-red-500 text-xs mt-1" />
+              <ErrorMessage name="academicTutorId" component="div" className="text-red-500 text-xs mt-1" />
             </div>
 
             {/* Tipo de Pasantía */}
             <div>
-              <label htmlFor="tipoPasantia" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="internshipType" className="block text-sm font-medium text-gray-700 mb-2">
                 Tipo de Pasantía <span className="text-red-500">*</span>
               </label>
               <Field
                 as="select"
-                id="tipoPasantia"
-                name="tipoPasantia"
+                id="internshipType"
+                name="internshipType"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Selecciona el tipo de pasantía</option>
@@ -78,7 +78,7 @@ const Step1AlumnoInfo: React.FC<Step1AlumnoInfoProps> = observer(({ viewModel, o
                   </option>
                 ))}
               </Field>
-              <ErrorMessage name="tipoPasantia" component="div" className="text-red-500 text-xs mt-1" />
+              <ErrorMessage name="internshipType" component="div" className="text-red-500 text-xs mt-1" />
             </div>
 
             {/* Información de la convocatoria */}
