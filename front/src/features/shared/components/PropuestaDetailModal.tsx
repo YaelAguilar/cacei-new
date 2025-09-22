@@ -8,7 +8,7 @@ import Status from "./Status";
 import { 
   FiCalendar, FiUser, FiBriefcase, FiFileText, FiTarget, FiTool, 
   FiActivity, FiClock, FiMail, FiGlobe, FiPhone, FiMapPin, FiBook,
-  FiMessageCircle, FiChevronDown, FiChevronUp
+  FiMessageCircle, FiChevronDown, FiChevronUp, FiCheckCircle, FiAlertTriangle
 } from "react-icons/fi";
 import { CommentsViewModel } from "../../propuestas-comentarios/presentation/viewModels/CommentsViewModel";
 import InlineComments from "../../propuestas-comentarios/presentation/components/InlineComments";
@@ -40,6 +40,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
   const statusInfo = viewModel.getPropuestaStatus(propuesta);
   const authViewModel = useAuth();
   const [showComments, setShowComments] = useState(false);
+  const [showApprovalConfirmation, setShowApprovalConfirmation] = useState(false);
   
   // Crear instancia del ViewModel de comentarios
   const commentsViewModel = useMemo(() => new CommentsViewModel(), []);
@@ -90,6 +91,30 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
     return commentsBySection;
   };
 
+  // ✅ NUEVO: Lógica para aprobar toda la propuesta
+  const isFullyApproved = commentsViewModel.isProposalFullyApproved;
+  const hasAnyComments = commentsViewModel.hasComments;
+  const hasTutorCommentedInProposal = currentUserEmail ? 
+    commentsViewModel.comments.some(comment => comment.getTutorEmail() === currentUserEmail) : false;
+
+  const handleApproveProposal = async () => {
+    if (hasAnyComments) {
+      // Mostrar confirmación si ya hay comentarios
+      setShowApprovalConfirmation(true);
+    } else {
+      // Proceder directamente si no hay comentarios
+      await executeApproval();
+    }
+  };
+
+  const executeApproval = async () => {
+    const success = await commentsViewModel.approveProposal(propuesta.getId());
+    if (success) {
+      console.log('✅ Propuesta aprobada completamente');
+      setShowApprovalConfirmation(false);
+    }
+  };
+
   return (
     <motion.div
       className="fixed inset-0 bg-black/20 backdrop-blur-xs flex items-center justify-center z-50"
@@ -121,6 +146,19 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
               label={statusInfo.label}
               className={statusInfo.color}
             />
+            
+            {/* ✅ ÚNICO BOTÓN DE APROBAR TODO - Posicionado en el header */}
+            {canComment && !isFullyApproved && !hasTutorCommentedInProposal && (
+              <button
+                onClick={handleApproveProposal}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                title="Aprobar toda la propuesta sin comentarios específicos"
+              >
+                <FiCheckCircle className="w-4 h-4" />
+                Aprobar Propuesta Completa
+              </button>
+            )}
+
             <button 
               onClick={onClose} 
               className="text-blue-500 hover:bg-blue-100 rounded-full p-3 cursor-pointer"
@@ -129,6 +167,70 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
             </button>
           </div>
         </div>
+
+        {/* ✅ CONFIRMACIÓN DE APROBACIÓN GLOBAL */}
+        {showApprovalConfirmation && (
+          <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <FiAlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="font-medium text-yellow-800 mb-2">
+                  ⚠️ Confirmar Aprobación Total de la Propuesta
+                </h4>
+                <p className="text-sm text-yellow-700 mb-3">
+                  Ya existen comentarios específicos en esta propuesta. Para aprobar toda la propuesta, 
+                  se eliminarán todos los comentarios existentes y se marcará como completamente aprobada.
+                </p>
+                <p className="text-sm font-medium text-yellow-800 mb-3">
+                  ¿Está seguro de que desea continuar?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={executeApproval}
+                    className="px-3 py-1.5 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors"
+                  >
+                    Sí, Aprobar Propuesta Completa
+                  </button>
+                  <button
+                    onClick={() => setShowApprovalConfirmation(false)}
+                    className="px-3 py-1.5 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ MENSAJE INFORMATIVO PARA USUARIOS QUE YA COMENTARON */}
+        {canComment && hasTutorCommentedInProposal && !isFullyApproved && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Información:</strong> Ya has realizado comentarios en esta propuesta. 
+              Solo los tutores que no han comentado pueden aprobar la propuesta completa.
+            </p>
+          </div>
+        )}
+
+        {/* ✅ MENSAJE DE PROPUESTA APROBADA */}
+        {isFullyApproved && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <FiCheckCircle className="w-5 h-5 text-green-600" />
+              <p className="text-sm text-green-800 font-medium">
+                ✅ Esta propuesta ha sido aprobada en su totalidad.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Error de aprobación */}
+        {commentsViewModel.error && commentsViewModel.error.includes("comentarios específicos") && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800">
+            <strong>❌ Error:</strong> {commentsViewModel.error}
+          </div>
+        )}
 
         {/* Resumen de Comentarios y botón para ver todos los comentarios */}
         {canComment && (

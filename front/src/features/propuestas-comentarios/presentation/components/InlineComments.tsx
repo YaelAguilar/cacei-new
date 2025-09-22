@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { CommentsViewModel } from "../viewModels/CommentsViewModel";
 import VoteStatusBadge from "./VoteStatusBadge";
-import { FiMessageSquare, FiPlus, FiChevronDown, FiChevronRight, FiCheckCircle } from "react-icons/fi";
+import { FiMessageSquare, FiPlus, FiChevronDown, FiChevronRight } from "react-icons/fi";
 import InlineCommentCard from "./InlineCommentCard";
 import InlineCommentForm from "./InlineCommentForm";
 
@@ -61,22 +61,7 @@ const InlineComments: React.FC<InlineCommentsProps> = observer(({
                 <div className="flex items-center gap-2">
                     <VoteStatusBadge status={subsectionStatus.status} size="sm" />
                     
-                    {/* Mostrar botón de aprobar toda la propuesta */}
-                    {canComment && isExpanded && !isFullyApproved && !hasTutorCommentedInSection && (
-                        <button
-                            onClick={async () => {
-                                const success = await viewModel.approveProposal(proposalId);
-                                if (success) {
-                                    console.log('✅ Propuesta aprobada completamente');
-                                }
-                            }}
-                            className="flex items-center gap-1 px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                            title="Aprobar toda la propuesta sin comentarios específicos"
-                        >
-                            <FiCheckCircle className="w-3 h-3" />
-                            Aprobar Todo
-                        </button>
-                    )}
+                    {/* ❌ ELIMINADO: Botón para aprobar toda la propuesta */}
                     
                     {/* Botón para agregar comentario específico */}
                     {canComment && isExpanded && !showForm && !isFullyApproved && !hasTutorCommentedInSection && (
@@ -102,6 +87,13 @@ const InlineComments: React.FC<InlineCommentsProps> = observer(({
             {isFullyApproved && (
                 <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded text-xs text-green-800">
                     <strong>✅ Propuesta Aprobada:</strong> Esta propuesta ha sido aprobada en su totalidad.
+                </div>
+            )}
+
+            {/* Error de aprobación - Solo mostrar errores relacionados con comentarios, no con aprobación general */}
+            {viewModel.error && !viewModel.error.includes("aprobar") && (
+                <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800">
+                    <strong>❌ Error:</strong> {viewModel.error}
                 </div>
             )}
 
