@@ -1,5 +1,5 @@
 // src/features/shared/components/PropuestaDetailModal.tsx
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { motion } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
@@ -7,11 +7,12 @@ import { PropuestaCompleta } from "../../alumnos-propuestas/data/models/Propuest
 import Status from "./Status";
 import { 
   FiCalendar, FiUser, FiBriefcase, FiFileText, FiTarget, FiTool, 
-  FiActivity, FiClock, FiMail, FiGlobe, FiPhone, FiMapPin, FiBook
+  FiActivity, FiClock, FiMail, FiGlobe, FiPhone, FiMapPin, FiBook,
+  FiMessageCircle, FiChevronDown, FiChevronUp
 } from "react-icons/fi";
 import { CommentsViewModel } from "../../propuestas-comentarios/presentation/viewModels/CommentsViewModel";
 import InlineComments from "../../propuestas-comentarios/presentation/components/InlineComments";
-import CommentsSummary from "../../propuestas-comentarios/presentation/components/CommentsSummary";
+import { ProposalComment } from "../../propuestas-comentarios/data/models/ProposalComment";
 import { useAuth } from "../../../core/utils/AuthContext";
 
 // Interface genérica para el ViewModel
@@ -38,6 +39,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
 }) => {
   const statusInfo = viewModel.getPropuestaStatus(propuesta);
   const authViewModel = useAuth();
+  const [showComments, setShowComments] = useState(false);
   
   // Crear instancia del ViewModel de comentarios
   const commentsViewModel = useMemo(() => new CommentsViewModel(), []);
@@ -71,6 +73,22 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
       commentsViewModel.reset();
     };
 }, [propuesta, commentsViewModel]);
+
+  // Función para obtener todos los comentarios agrupados por sección
+  const getCommentsBySection = () => {
+    const allComments = commentsViewModel.comments || [];
+    const commentsBySection: Record<string, ProposalComment[]> = {};
+    
+    allComments.forEach((comment: ProposalComment) => {
+      const sectionKey = `${comment.getSectionName()} - ${comment.getSubsectionName()}`;
+      if (!commentsBySection[sectionKey]) {
+        commentsBySection[sectionKey] = [];
+      }
+      commentsBySection[sectionKey].push(comment);
+    });
+    
+    return commentsBySection;
+  };
 
   return (
     <motion.div
@@ -112,9 +130,102 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
           </div>
         </div>
 
-        {/* Resumen de Comentarios */}
+        {/* Resumen de Comentarios y botón para ver todos los comentarios */}
         {canComment && (
-          <CommentsSummary viewModel={commentsViewModel} />
+          <div className="flex items-center justify-between mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-600">
+                <span className="font-medium text-gray-800">Resumen de Revisión:</span>
+                <span className="ml-2">
+                  {commentsViewModel.statistics.total > 0 ? (
+                    <>
+                      <span className="text-green-600 font-medium">{commentsViewModel.statistics.approved} ✓</span>
+                      <span className="mx-1">·</span>
+                      <span className="text-red-600 font-medium">{commentsViewModel.statistics.rejected} ✗</span>
+                      <span className="mx-1">·</span>
+                      <span className="text-yellow-600 font-medium">{commentsViewModel.statistics.needsUpdate} ↻</span>
+                    </>
+                  ) : (
+                    <span className="text-gray-500">Sin comentarios</span>
+                  )}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md transition-colors duration-200 text-sm"
+            >
+              <FiMessageCircle className="w-4 h-4" />
+              <span className="font-medium">
+                {showComments ? 'Ocultar' : 'Ver todos'}
+              </span>
+              {showComments ? (
+                <FiChevronUp className="w-3 h-3" />
+              ) : (
+                <FiChevronDown className="w-3 h-3" />
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Sección de comentarios desplegable */}
+        {canComment && showComments && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mb-6 overflow-hidden"
+          >
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-80 overflow-y-auto">
+              <div className="flex items-center gap-2 mb-4">
+                <FiMessageCircle className="w-5 h-5 text-gray-600" />
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Todos los comentarios del proyecto
+                </h3>
+              </div>
+              
+              {Object.keys(getCommentsBySection()).length === 0 ? (
+                <div className="text-center py-8">
+                  <FiMessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500">No hay comentarios en esta propuesta aún.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {Object.entries(getCommentsBySection()).map(([sectionKey, comments]) => (
+                    <div key={sectionKey} className="bg-white rounded-lg p-4 border border-gray-200">
+                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        {sectionKey}
+                      </h4>
+                      <div className="space-y-3">
+                        {comments.map((comment: ProposalComment, index: number) => (
+                          <div key={index} className="bg-gray-50 rounded-md p-3 border-l-4 border-blue-400">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-gray-700">
+                                {comment.getTutorEmail()}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-1 text-xs font-medium rounded-full border ${comment.getVoteStatusColor()}`}>
+                                  {comment.getVoteStatusIcon()} {comment.getVoteStatus()}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {commentsViewModel.formatDate(comment.getCreatedAt())}
+                                </span>
+                              </div>
+                            </div>
+                            <p className="text-gray-800 text-sm leading-relaxed">
+                              {comment.getCommentText()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
         )}
 
         {/* Contenido con scroll */}
