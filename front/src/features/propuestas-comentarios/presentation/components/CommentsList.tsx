@@ -43,7 +43,7 @@ const CommentsList: React.FC<CommentsListProps> = observer(({
                     comment={comment}
                     viewModel={viewModel}
                     canEdit={canEdit}
-                    canDelete={canDelete}
+                    canDelete={canDelete} // ✅ Ahora esta propiedad existe en CommentCard
                     currentUserEmail={currentUserEmail}
                 />
             ))}

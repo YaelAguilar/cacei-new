@@ -25,9 +25,9 @@ export class CommentRepository {
         }
     }
 
-    async updateComment(uuid: string, data: UpdateCommentRequest): Promise<ProposalComment> {
+    async updateComment(commentId: string, data: UpdateCommentRequest): Promise<ProposalComment> {
         try {
-            const response = await ApiClient.put<JsonApiCommentResponse>(`/comentarios/${uuid}`, data);
+            const response = await ApiClient.put<JsonApiCommentResponse>(`/comentarios/${commentId}`, data);
             
             if (response.status === 200 && response.data.data) {
                 return this.mapDTOToModel(response.data.data);
@@ -41,7 +41,7 @@ export class CommentRepository {
     }
 
     // ❌ Eliminar comentario DESHABILITADO
-    async deleteComment(uuid: string): Promise<boolean> {
+    async deleteComment(commentId: string): Promise<boolean> {
         throw new Error("Los comentarios no se pueden eliminar una vez creados");
     }
 

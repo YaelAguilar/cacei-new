@@ -15,6 +15,11 @@ interface InlineCommentFormProps {
     onCancel?: () => void;
 }
 
+interface FormValues {
+    commentText: string;
+    voteStatus: 'ACEPTADO' | 'RECHAZADO' | 'ACTUALIZA' | '';
+}
+
 const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({ 
     viewModel, 
     proposalId, 
@@ -23,25 +28,27 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
     onSuccess,
     onCancel 
 }) => {
-    const initialValues = {
+    const initialValues: FormValues = {
         commentText: "",
-        voteStatus: "" as 'ACEPTADO' | 'RECHAZADO' | 'ACTUALIZA' | ""
+        voteStatus: ""
     };
 
-    const handleSubmit = async (values: any) => {
+    const handleSubmit = async (values: FormValues) => {
         console.log('📝 InlineCommentForm - proposalId:', proposalId);
         console.log('📝 InlineCommentForm - values:', values);
 
-        const success = await viewModel.createComment({
-            proposalId,
-            sectionName,
-            subsectionName,
-            commentText: values.commentText,
-            voteStatus: values.voteStatus
-        });
+        if (values.voteStatus !== '') {
+            const success = await viewModel.createComment({
+                proposalId,
+                sectionName,
+                subsectionName,
+                commentText: values.commentText,
+                voteStatus: values.voteStatus as 'ACEPTADO' | 'RECHAZADO' | 'ACTUALIZA'
+            });
 
-        if (success && onSuccess) {
-            onSuccess();
+            if (success && onSuccess) {
+                onSuccess();
+            }
         }
     };
 
@@ -67,10 +74,10 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
             color: 'bg-yellow-600',
             description: 'Requiere actualización - Se puede editar'
         }
-    ];
+    ] as const;
 
     return (
-        <Formik
+        <Formik<FormValues>
             initialValues={initialValues}
             validationSchema={CommentValidationSchema}
             onSubmit={handleSubmit}

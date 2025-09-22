@@ -35,7 +35,7 @@ export class CommentsViewModel {
     private updateCommentUseCase: UpdateCommentUseCase;
     private getCommentsByProposalUseCase: GetCommentsByProposalUseCase;
     private deleteCommentUseCase: DeleteCommentUseCase;
-    private approveProposalUseCase: ApproveProposalUseCase; // ✅ NUEVO
+    private approveProposalUseCase: ApproveProposalUseCase;
 
     constructor() {
         makeAutoObservable(this);
@@ -45,7 +45,7 @@ export class CommentsViewModel {
         this.updateCommentUseCase = new UpdateCommentUseCase(this.repository);
         this.getCommentsByProposalUseCase = new GetCommentsByProposalUseCase(this.repository);
         this.deleteCommentUseCase = new DeleteCommentUseCase(this.repository);
-        this.approveProposalUseCase = new ApproveProposalUseCase(this.repository); // ✅ NUEVO
+        this.approveProposalUseCase = new ApproveProposalUseCase(this.repository);
     }
 
     // Setters básicos
@@ -163,13 +163,13 @@ export class CommentsViewModel {
     }
 
     // Actualizar comentario (solo ACTUALIZA)
-    async updateComment(uuid: string, data: UpdateCommentRequest): Promise<boolean> {
+    async updateComment(commentId: string, data: UpdateCommentRequest): Promise<boolean> {
         this.setLoading(true);
         this.setError(null);
 
         try {
             // ✅ Verificar que el comentario sea ACTUALIZA antes de intentar actualizar
-            const existingComment = this.comments.find(c => c.getId() === uuid);
+            const existingComment = this.comments.find(c => c.getId() === commentId);
             if (!existingComment) {
                 throw new Error("Comentario no encontrado");
             }
@@ -178,10 +178,10 @@ export class CommentsViewModel {
                 throw new Error("Solo se pueden editar comentarios con estado 'ACTUALIZA'");
             }
 
-            const updatedComment = await this.updateCommentUseCase.execute(uuid, data);
+            const updatedComment = await this.updateCommentUseCase.execute(commentId, data);
             runInAction(() => {
                 this.comments = this.comments.map(comment => 
-                    comment.getId() === uuid ? updatedComment : comment
+                    comment.getId() === commentId ? updatedComment : comment
                 );
             });
             return true;
@@ -196,7 +196,7 @@ export class CommentsViewModel {
     }
 
     // ❌ Eliminar comentario DESHABILITADO
-    async deleteComment(uuid: string): Promise<boolean> {
+    async deleteComment(commentId: string): Promise<boolean> {
         runInAction(() => {
             this.setError("Los comentarios no se pueden eliminar una vez creados");
         });
@@ -354,7 +354,7 @@ export class CommentsViewModel {
     }
 
     // ✅ NUEVO: Verificar si se puede eliminar un comentario (siempre false)
-    canDeleteComment(comment: ProposalComment): boolean {
+    canDeleteComment(_comment: ProposalComment): boolean {
         return false; // Los comentarios no se pueden eliminar
     }
 
