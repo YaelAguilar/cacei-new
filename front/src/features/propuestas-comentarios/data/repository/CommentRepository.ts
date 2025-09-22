@@ -40,43 +40,52 @@ export class CommentRepository {
         }
     }
 
+    // ❌ Eliminar comentario DESHABILITADO
     async deleteComment(uuid: string): Promise<boolean> {
+        throw new Error("Los comentarios no se pueden eliminar una vez creados");
+    }
+
+    // ✅ NUEVO: Aprobar toda la propuesta
+    async approveProposal(proposalId: string): Promise<boolean> {
         try {
-            const response = await ApiClient.delete(`/comentarios/${uuid}`);
+            const response = await ApiClient.post('/aprobar-propuesta', {
+                proposalId
+            });
+            
             return response.status === 200;
         } catch (error) {
-            console.error("Error en deleteComment:", error);
+            console.error("Error en approveProposal:", error);
             throw error;
         }
     }
 
     async getCommentsByProposal(proposalId: string): Promise<ProposalComment[]> {
-    console.log('🔍 CommentRepository.getCommentsByProposal() called');
-    console.log('📦 proposalId recibido:', proposalId);
-    
-    try {
-        const url = `/propuestas/${proposalId}/comentarios`;
-        console.log('📤 URL completa:', url);
-        console.log('📤 Haciendo GET request...');
+        console.log('🔍 CommentRepository.getCommentsByProposal() called');
+        console.log('📦 proposalId recibido:', proposalId);
         
-        const response = await ApiClient.get<JsonApiCommentsListResponse>(url);
-        
-        console.log('📥 Response status:', response.status);
-        console.log('📥 Response data:', response.data);
-        
-        if (response.status === 200 && response.data.data) {
-            const mappedComments = response.data.data.map(dto => this.mapDTOToModel(dto));
-            console.log('✅ Comentarios mapeados:', mappedComments.length);
-            return mappedComments;
+        try {
+            const url = `/propuestas/${proposalId}/comentarios`;
+            console.log('📤 URL completa:', url);
+            console.log('📤 Haciendo GET request...');
+            
+            const response = await ApiClient.get<JsonApiCommentsListResponse>(url);
+            
+            console.log('📥 Response status:', response.status);
+            console.log('📥 Response data:', response.data);
+            
+            if (response.status === 200 && response.data.data) {
+                const mappedComments = response.data.data.map(dto => this.mapDTOToModel(dto));
+                console.log('✅ Comentarios mapeados:', mappedComments.length);
+                return mappedComments;
+            }
+            
+            console.log('⚠️ No se encontraron comentarios');
+            return [];
+        } catch (error) {
+            console.error("❌ Error en getCommentsByProposal:", error);
+            throw error;
         }
-        
-        console.log('⚠️ No se encontraron comentarios');
-        return [];
-    } catch (error) {
-        console.error("❌ Error en getCommentsByProposal:", error);
-        throw error;
     }
-}
 
     async getMyComments(): Promise<ProposalComment[]> {
         try {

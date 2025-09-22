@@ -6,6 +6,7 @@ import { CreateCommentUseCase } from "../../domain/CreateCommentUseCase";
 import { UpdateCommentUseCase } from "../../domain/UpdateCommentUseCase";
 import { GetCommentsByProposalUseCase } from "../../domain/GetCommentsByProposalUseCase";
 import { DeleteCommentUseCase } from "../../domain/DeleteCommentUseCase";
+import { ApproveProposalUseCase } from "../../domain/ApproveProposalUseCase";
 import { CreateCommentRequest, UpdateCommentRequest } from "../../data/models/ProposalCommentDTO";
 
 export class CommentsViewModel {
@@ -34,6 +35,7 @@ export class CommentsViewModel {
     private updateCommentUseCase: UpdateCommentUseCase;
     private getCommentsByProposalUseCase: GetCommentsByProposalUseCase;
     private deleteCommentUseCase: DeleteCommentUseCase;
+    private approveProposalUseCase: ApproveProposalUseCase; // ✅ NUEVO
 
     constructor() {
         makeAutoObservable(this);
@@ -43,6 +45,7 @@ export class CommentsViewModel {
         this.updateCommentUseCase = new UpdateCommentUseCase(this.repository);
         this.getCommentsByProposalUseCase = new GetCommentsByProposalUseCase(this.repository);
         this.deleteCommentUseCase = new DeleteCommentUseCase(this.repository);
+        this.approveProposalUseCase = new ApproveProposalUseCase(this.repository); // ✅ NUEVO
     }
 
     // Setters básicos
@@ -159,12 +162,22 @@ export class CommentsViewModel {
         }
     }
 
-    // Actualizar comentario
+    // Actualizar comentario (solo ACTUALIZA)
     async updateComment(uuid: string, data: UpdateCommentRequest): Promise<boolean> {
         this.setLoading(true);
         this.setError(null);
 
         try {
+            // ✅ Verificar que el comentario sea ACTUALIZA antes de intentar actualizar
+            const existingComment = this.comments.find(c => c.getId() === uuid);
+            if (!existingComment) {
+                throw new Error("Comentario no encontrado");
+            }
+
+            if (existingComment.getVoteStatus() !== 'ACTUALIZA') {
+                throw new Error("Solo se pueden editar comentarios con estado 'ACTUALIZA'");
+            }
+
             const updatedComment = await this.updateCommentUseCase.execute(uuid, data);
             runInAction(() => {
                 this.comments = this.comments.map(comment => 
@@ -182,22 +195,29 @@ export class CommentsViewModel {
         }
     }
 
-    // Eliminar comentario
+    // ❌ Eliminar comentario DESHABILITADO
     async deleteComment(uuid: string): Promise<boolean> {
+        runInAction(() => {
+            this.setError("Los comentarios no se pueden eliminar una vez creados");
+        });
+        return false;
+    }
+
+    // ✅ NUEVO: Aprobar toda la propuesta
+    async approveProposal(proposalId: string): Promise<boolean> {
         this.setLoading(true);
         this.setError(null);
 
         try {
-            const deleted = await this.deleteCommentUseCase.execute(uuid);
-            if (deleted) {
-                runInAction(() => {
-                    this.comments = this.comments.filter(comment => comment.getId() !== uuid);
-                });
+            const approved = await this.approveProposalUseCase.execute(proposalId);
+            if (approved) {
+                // Recargar comentarios para mostrar la aprobación
+                await this.loadComments(proposalId);
             }
-            return deleted;
+            return approved;
         } catch (error: any) {
             runInAction(() => {
-                this.setError(error.message || "Error al eliminar el comentario");
+                this.setError(error.message || "Error al aprobar la propuesta");
             });
             return false;
         } finally {
@@ -213,8 +233,12 @@ export class CommentsViewModel {
         this.setShowCommentModal(true);
     }
 
-    // Abrir modal de edición
+    // Abrir modal de edición (solo para ACTUALIZA)
     openEditModal(comment: ProposalComment) {
+        if (comment.getVoteStatus() !== 'ACTUALIZA') {
+            this.setError("Solo se pueden editar comentarios con estado 'ACTUALIZA'");
+            return;
+        }
         this.setSelectedComment(comment);
         this.setIsEditMode(true);
         this.setShowEditModal(true);
@@ -249,6 +273,23 @@ export class CommentsViewModel {
         );
     }
 
+    // ✅ MEJORADO: Obtener comentarios de una sección completa
+    getCommentsForSection(sectionName: string): ProposalComment[] {
+        return this.comments.filter(comment => 
+            comment.getSectionName() === sectionName
+        ).sort((a, b) => 
+            new Date(b.getCreatedAt()).getTime() - new Date(a.getCreatedAt()).getTime()
+        );
+    }
+
+    // ✅ NUEVO: Verificar si un tutor ya comentó en una sección
+    hasTutorCommentInSection(sectionName: string, tutorEmail: string): boolean {
+        return this.comments.some(comment => 
+            comment.getSectionName() === sectionName && 
+            comment.getTutorEmail() === tutorEmail
+        );
+    }
+
     // Obtener el estado general de una subsección
     getSubsectionStatus(sectionName: string, subsectionName: string): {
         hasComments: boolean;
@@ -275,6 +316,15 @@ export class CommentsViewModel {
         };
     }
 
+    // ✅ NUEVO: Verificar si la propuesta está completamente aprobada
+    get isProposalFullyApproved(): boolean {
+        return this.comments.some(comment => 
+            comment.getSectionName() === 'APROBACIÓN_GENERAL' && 
+            comment.getSubsectionName() === 'PROPUESTA_COMPLETA' &&
+            comment.getVoteStatus() === 'ACEPTADO'
+        );
+    }
+
     // Estadísticas
     get statistics() {
         const total = this.comments.length;
@@ -296,6 +346,16 @@ export class CommentsViewModel {
             comment.getSectionName() === sectionName && 
             comment.getSubsectionName() === subsectionName
         );
+    }
+
+    // ✅ NUEVO: Verificar si se puede editar un comentario
+    canEditComment(comment: ProposalComment): boolean {
+        return comment.getVoteStatus() === 'ACTUALIZA';
+    }
+
+    // ✅ NUEVO: Verificar si se puede eliminar un comentario (siempre false)
+    canDeleteComment(comment: ProposalComment): boolean {
+        return false; // Los comentarios no se pueden eliminar
     }
 
     // Formatear fecha

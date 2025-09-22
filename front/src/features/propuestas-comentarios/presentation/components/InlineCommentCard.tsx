@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import { ProposalComment } from "../../data/models/ProposalComment";
 import { CommentsViewModel } from "../viewModels/CommentsViewModel";
 import VoteStatusBadge from "./VoteStatusBadge";
-import { FiEdit2, FiTrash2, FiUser } from "react-icons/fi";
+import { FiEdit2, FiUser } from "react-icons/fi";
 import InlineCommentEditForm from "./InlineCommentEditForm";
 
 interface InlineCommentCardProps {
@@ -12,24 +12,17 @@ interface InlineCommentCardProps {
     viewModel: CommentsViewModel;
     currentUserEmail?: string;
     canEdit?: boolean;
-    canDelete?: boolean;
 }
 
 const InlineCommentCard: React.FC<InlineCommentCardProps> = observer(({ 
     comment, 
     viewModel,
     currentUserEmail,
-    canEdit = false,
-    canDelete = false
+    canEdit = false
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const isOwnComment = currentUserEmail === comment.getTutorEmail();
-
-    const handleDelete = async () => {
-        if (window.confirm('¿Eliminar este comentario?')) {
-            await viewModel.deleteComment(comment.getId());
-        }
-    };
+    const canEditThisComment = isOwnComment && canEdit && viewModel.canEditComment(comment);
 
     if (isEditing) {
         return (
@@ -53,6 +46,7 @@ const InlineCommentCard: React.FC<InlineCommentCardProps> = observer(({
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-900">{comment.getTutorName()}</p>
+                        <p className="text-xs text-gray-500">{comment.getTutorEmail()}</p>
                         <p className="text-xs text-gray-500">{viewModel.formatDate(comment.getCreatedAt())}</p>
                     </div>
                 </div>
@@ -62,26 +56,23 @@ const InlineCommentCard: React.FC<InlineCommentCardProps> = observer(({
 
             <p className="text-sm text-gray-700 mb-2">{comment.getCommentText()}</p>
 
-            {isOwnComment && (canEdit || canDelete) && (
+            {/* Mostrar botón de editar solo para comentarios ACTUALIZA */}
+            {canEditThisComment && (
                 <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
-                    {canEdit && (
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                        >
-                            <FiEdit2 className="w-3 h-3" />
-                            Editar
-                        </button>
-                    )}
-                    {canDelete && (
-                        <button
-                            onClick={handleDelete}
-                            className="text-xs text-red-600 hover:text-red-700 flex items-center gap-1"
-                        >
-                            <FiTrash2 className="w-3 h-3" />
-                            Eliminar
-                        </button>
-                    )}
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    >
+                        <FiEdit2 className="w-3 h-3" />
+                        Editar
+                    </button>
+                </div>
+            )}
+
+            {/* Mensaje informativo para comentarios no editables */}
+            {isOwnComment && !canEditThisComment && comment.getVoteStatus() !== 'ACTUALIZA' && (
+                <div className="text-xs text-gray-500 pt-2 border-t border-gray-200">
+                    Los comentarios "{comment.getVoteStatus()}" no se pueden editar
                 </div>
             )}
         </div>

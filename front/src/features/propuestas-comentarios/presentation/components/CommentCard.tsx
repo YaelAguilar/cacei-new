@@ -3,14 +3,13 @@ import React from "react";
 import { observer } from "mobx-react-lite";
 import { ProposalComment } from "../../data/models/ProposalComment";
 import VoteStatusBadge from "./VoteStatusBadge";
-import { FiEdit2, FiTrash2, FiUser, FiClock } from "react-icons/fi";
+import { FiEdit2, FiUser, FiClock } from "react-icons/fi";
 import { CommentsViewModel } from "../viewModels/CommentsViewModel";
 
 interface CommentCardProps {
     comment: ProposalComment;
     viewModel: CommentsViewModel;
     canEdit?: boolean;
-    canDelete?: boolean;
     currentUserEmail?: string;
 }
 
@@ -18,18 +17,14 @@ const CommentCard: React.FC<CommentCardProps> = observer(({
     comment, 
     viewModel, 
     canEdit = false,
-    canDelete = false,
     currentUserEmail
 }) => {
     const isOwnComment = currentUserEmail === comment.getTutorEmail();
+    const canEditThisComment = isOwnComment && canEdit && viewModel.canEditComment(comment);
 
     const handleEdit = () => {
-        viewModel.openEditModal(comment);
-    };
-
-    const handleDelete = async () => {
-        if (window.confirm('¿Está seguro de eliminar este comentario?')) {
-            await viewModel.deleteComment(comment.getId());
+        if (canEditThisComment) {
+            viewModel.openEditModal(comment);
         }
     };
 
@@ -69,27 +64,23 @@ const CommentCard: React.FC<CommentCardProps> = observer(({
                     {viewModel.formatDate(comment.getCreatedAt())}
                 </div>
 
-                {/* Acciones (solo si es el propietario del comentario) */}
-                {isOwnComment && (
+                {/* Acciones (solo edición para comentarios ACTUALIZA) */}
+                {canEditThisComment && (
                     <div className="flex items-center gap-2">
-                        {canEdit && (
-                            <button
-                                onClick={handleEdit}
-                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                                title="Editar comentario"
-                            >
-                                <FiEdit2 className="w-4 h-4" />
-                            </button>
-                        )}
-                        {canDelete && (
-                            <button
-                                onClick={handleDelete}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                title="Eliminar comentario"
-                            >
-                                <FiTrash2 className="w-4 h-4" />
-                            </button>
-                        )}
+                        <button
+                            onClick={handleEdit}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                            title="Editar comentario (solo disponible para comentarios de 'ACTUALIZA')"
+                        >
+                            <FiEdit2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
+
+                {/* Mensaje informativo para comentarios no editables */}
+                {isOwnComment && !canEditThisComment && comment.getVoteStatus() !== 'ACTUALIZA' && (
+                    <div className="text-xs text-gray-500">
+                        Los comentarios "{comment.getVoteStatus()}" no se pueden editar
                     </div>
                 )}
             </div>

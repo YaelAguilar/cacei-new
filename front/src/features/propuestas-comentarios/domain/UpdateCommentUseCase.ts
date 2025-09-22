@@ -12,6 +12,11 @@ export class UpdateCommentUseCase {
                 throw new Error("El UUID del comentario es obligatorio");
             }
 
+            // ✅ NUEVO: Validación adicional de que solo comentarios ACTUALIZA se pueden editar
+            if (data.voteStatus && data.voteStatus !== 'ACTUALIZA') {
+                throw new Error("Solo se pueden cambiar comentarios a estado 'ACTUALIZA'");
+            }
+
             if (data.commentText && data.commentText.trim().length < 10) {
                 throw new Error("El comentario debe tener al menos 10 caracteres");
             }

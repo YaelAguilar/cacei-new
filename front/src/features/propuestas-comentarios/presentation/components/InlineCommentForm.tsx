@@ -46,9 +46,27 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
     };
 
     const voteOptions = [
-        { value: 'ACEPTADO', label: '✓', icon: <FiCheckCircle />, color: 'bg-green-600' },
-        { value: 'RECHAZADO', label: '✗', icon: <FiXCircle />, color: 'bg-red-600' },
-        { value: 'ACTUALIZA', label: '↻', icon: <FiRefreshCw />, color: 'bg-yellow-600' }
+        { 
+            value: 'ACEPTADO', 
+            label: '✓', 
+            icon: <FiCheckCircle />, 
+            color: 'bg-green-600',
+            description: 'Aprobado - No se puede editar después'
+        },
+        { 
+            value: 'RECHAZADO', 
+            label: '✗', 
+            icon: <FiXCircle />, 
+            color: 'bg-red-600',
+            description: 'Rechazado - No se puede editar después'
+        },
+        { 
+            value: 'ACTUALIZA', 
+            label: '↻', 
+            icon: <FiRefreshCw />, 
+            color: 'bg-yellow-600',
+            description: 'Requiere actualización - Se puede editar'
+        }
     ];
 
     return (
@@ -74,26 +92,39 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
                         />
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-medium text-gray-700 mb-2">
+                            Votación (⚠️ ACEPTADO y RECHAZADO no se pueden editar después):
+                        </p>
                         <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-gray-700">Votación:</span>
                             {voteOptions.map((option) => (
                                 <button
                                     key={option.value}
                                     type="button"
                                     onClick={() => setFieldValue('voteStatus', option.value)}
                                     className={`
-                                        w-8 h-8 rounded-full flex items-center justify-center transition-all
+                                        w-8 h-8 rounded-full flex items-center justify-center transition-all group relative
                                         ${values.voteStatus === option.value 
                                             ? `${option.color} text-white scale-110` 
                                             : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                                         }
                                     `}
-                                    title={option.label}
+                                    title={option.description}
                                 >
                                     {option.icon}
+                                    
+                                    {/* Tooltip */}
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                        {option.description}
+                                    </div>
                                 </button>
                             ))}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <div className="text-xs text-gray-600">
+                            <strong>Nota:</strong> Solo se permite un comentario por sección por tutor.
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -108,7 +139,7 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
                             )}
                             <button
                                 type="submit"
-                                disabled={isSubmitting || viewModel.loading}
+                                disabled={isSubmitting || viewModel.loading || !values.voteStatus}
                                 className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                             >
                                 {isSubmitting ? "Guardando..." : "Guardar"}

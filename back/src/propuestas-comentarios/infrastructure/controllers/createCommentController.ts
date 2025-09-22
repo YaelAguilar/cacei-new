@@ -10,7 +10,7 @@ export class CreateCommentController {
         console.log('📝 Body recibido:', req.body);
         
         const {
-            proposalId,  // Este viene del frontend (puede ser UUID)
+            proposalId,
             sectionName,
             subsectionName,
             commentText,
@@ -36,9 +36,12 @@ export class CreateCommentController {
 
             console.log('✅ Token válido, UUID:', userFromToken.uuid);
 
-            // Obtener el ID del tutor desde la base de datos
+            // Obtener información completa del tutor desde la base de datos
             const { query } = require('../../../database/mysql');
-            const tutorResult = await query('SELECT id FROM users WHERE uuid = ? AND active = true', [userFromToken.uuid]);
+            const tutorResult = await query(
+                'SELECT id, name, lastName, secondLastName, email FROM users WHERE uuid = ? AND active = true', 
+                [userFromToken.uuid]
+            );
             
             if (tutorResult.length === 0) {
                 console.log('❌ Tutor no encontrado en BD');
@@ -52,8 +55,13 @@ export class CreateCommentController {
                 return;
             }
 
-            const tutorId = tutorResult[0].id;
-            console.log('✅ ID del tutor encontrado:', tutorId);
+            const tutor = tutorResult[0];
+            const tutorFullName = `${tutor.name} ${tutor.lastName} ${tutor.secondLastName || ''}`.trim();
+            console.log('✅ Información completa del tutor obtenida:', {
+                id: tutor.id,
+                name: tutorFullName,
+                email: tutor.email
+            });
 
             // ⭐ NUEVO: Convertir proposalId (UUID) a ID numérico
             let numericProposalId: number;
@@ -99,8 +107,8 @@ export class CreateCommentController {
 
             console.log('🔍 Ejecutando createCommentUseCase con ID numérico:', numericProposalId);
             const comment = await this.createCommentUseCase.run(
-                numericProposalId,  // ⭐ Ahora pasamos el ID numérico
-                tutorId,
+                numericProposalId,  // ⭐ Pasamos el ID numérico
+                tutor.id,
                 sectionName,
                 subsectionName,
                 commentText,
@@ -116,6 +124,8 @@ export class CreateCommentController {
                     attributes: {
                         proposalId: comment.getProposalId(),
                         tutorId: comment.getTutorId(),
+                        tutorName: tutorFullName,  // ✅ Incluir nombre completo
+                        tutorEmail: tutor.email,   // ✅ Incluir email
                         sectionName: comment.getSectionName(),
                         subsectionName: comment.getSubsectionName(),
                         commentText: comment.getCommentText(),
@@ -146,6 +156,7 @@ export class CreateCommentController {
                 
                 const businessErrors = [
                     "Ya existe un comentario",
+                    "Solo se permite un comentario por sección",
                     "es obligatorio",
                     "debe tener al menos",
                     "debe ser ACEPTADO"
