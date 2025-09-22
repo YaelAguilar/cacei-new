@@ -6,7 +6,7 @@ export class CreateCommentUseCase {
     constructor(private readonly commentRepository: CommentRepository) {}
 
     async run(
-        proposalId: string | number,  // ⭐ Cambiar a string | number
+        proposalId: string | number,
         tutorId: number,
         sectionName: string,
         subsectionName: string,
@@ -14,6 +14,14 @@ export class CreateCommentUseCase {
         voteStatus: 'ACEPTADO' | 'RECHAZADO' | 'ACTUALIZA'
     ): Promise<ProposalComment | null> {
         try {
+            // MEJORAR el mensaje de error
+            console.log('🔍 CreateCommentUseCase - data recibida:', { proposalId, tutorId, sectionName, subsectionName, commentText, voteStatus });
+
+            if (!proposalId || proposalId.toString().trim() === '') {
+                console.error('❌ ID de propuesta inválido:', proposalId);
+                throw new Error(`El ID de la propuesta es obligatorio y debe ser un número válido. Recibido: ${proposalId}`);
+            }
+
             // Validaciones de negocio
             this.validateBusinessRules(
                 sectionName,
@@ -22,23 +30,23 @@ export class CreateCommentUseCase {
                 voteStatus
             );
 
-            // Verificar si ya existe un comentario del tutor en esta subsección
-            const existingComment = await this.commentRepository.checkExistingComment(
+            // ✅ NUEVO: Verificar si ya existe un comentario del tutor en esta SECCIÓN (no subsección)
+            const existingComment = await this.commentRepository.checkExistingCommentInSection(
                 typeof proposalId === 'string' ? parseInt(proposalId) : proposalId,
                 tutorId,
-                subsectionName
+                sectionName
             );
 
             if (existingComment) {
                 throw new Error(
-                    `Ya existe un comentario de este tutor en la subsección "${subsectionName}". ` +
-                    `Use actualización para modificarlo.`
+                    `Ya existe un comentario de este tutor en la sección "${sectionName}". ` +
+                    `Solo se permite un comentario por sección por tutor.`
                 );
             }
 
             // Crear el comentario
             const commentData: CommentCreateData = {
-                proposalId: typeof proposalId === 'string' ? proposalId : proposalId.toString(),  // ⭐ Asegurar que sea string
+                proposalId: typeof proposalId === 'string' ? proposalId : proposalId.toString(),
                 tutorId,
                 sectionName: sectionName.trim(),
                 subsectionName: subsectionName.trim(),

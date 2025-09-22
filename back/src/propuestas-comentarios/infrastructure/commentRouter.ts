@@ -5,7 +5,7 @@ import {
     updateCommentController,
     getCommentsByProposalController,
     getCommentsByTutorController,
-    deleteCommentController
+    approveProposalController
 } from './dependencies';
 
 export const commentRouter = express.Router();
@@ -42,7 +42,7 @@ commentRouter.get('/mis-comentarios', (req, res) => {
  * POST /comentarios
  * Crear un nuevo comentario
  * Body: {
- *   proposalId: number,
+ *   proposalId: string,
  *   sectionName: string,
  *   subsectionName: string,
  *   commentText: string,
@@ -56,7 +56,7 @@ commentRouter.post('/comentarios', (req, res) => {
 
 /**
  * PUT /comentarios/:uuid
- * Actualizar un comentario existente
+ * Actualizar un comentario existente (solo si es ACTUALIZA)
  * Body: {
  *   commentText?: string,
  *   voteStatus?: 'ACEPTADO' | 'RECHAZADO' | 'ACTUALIZA'
@@ -68,18 +68,43 @@ commentRouter.put('/comentarios/:uuid', (req, res) => {
 });
 
 /**
+ * ✅ NUEVA RUTA: POST /aprobar-propuesta
+ * Aprobar toda la propuesta sin necesidad de comentarios específicos
+ * Body: {
+ *   proposalId: string
+ * }
+ */
+commentRouter.post('/aprobar-propuesta', (req, res) => {
+    console.log('✅ Aprobando propuesta completa');
+    approveProposalController.run(req, res);
+});
+
+/**
  * DELETE /comentarios/:uuid
- * Eliminar (soft delete) un comentario
+ * ❌ DESHABILITADO - Los comentarios no se pueden eliminar
  */
 commentRouter.delete('/comentarios/:uuid', (req, res) => {
-    console.log(`🗑️ Eliminando comentario ${req.params.uuid}`);
-    deleteCommentController.run(req, res);
+    console.log(`🚫 Intento de eliminar comentario ${req.params.uuid} - OPERACIÓN NO PERMITIDA`);
+    res.status(403).json({
+        errors: [{
+            status: "403",
+            title: "Operation not allowed",
+            detail: "Los comentarios no se pueden eliminar una vez creados"
+        }]
+    });
 });
 
 // Ruta de prueba
 commentRouter.get('/test', (req, res) => {
     res.json({ 
         message: 'Comment router funcionando correctamente',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        features: [
+            'Crear comentarios',
+            'Actualizar comentarios (solo ACTUALIZA)',
+            'Ver comentarios',
+            'Aprobar propuesta completa',
+            'Eliminación deshabilitada'
+        ]
     });
 });

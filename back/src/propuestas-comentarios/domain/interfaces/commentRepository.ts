@@ -2,7 +2,7 @@
 import { ProposalComment } from "../models/proposalComment";
 
 export interface CommentCreateData {
-    proposalId: string;  // ⭐ Cambiar de number a string (UUID)
+    proposalId: string;
     tutorId: number;
     sectionName: string;
     subsectionName: string;
@@ -33,4 +33,19 @@ export interface CommentRepository {
         tutorId: number, 
         subsectionName: string
     ): Promise<ProposalComment | null>;
+
+    // ✅ NUEVO: Verificar comentario existente en toda la SECCIÓN (no solo subsección)
+    checkExistingCommentInSection(
+        proposalId: number, 
+        tutorId: number, 
+        sectionName: string
+    ): Promise<ProposalComment | null>;
+
+    // ✅ NUEVO: Aprobar toda la propuesta
+    approveEntireProposal(
+        proposalId: string,
+        tutorId: number,
+        tutorName: string,
+        tutorEmail: string
+    ): Promise<boolean>;
 }

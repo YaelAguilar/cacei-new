@@ -48,6 +48,16 @@ export class MysqlCommentRepository implements CommentRepository {
     }
 
     async updateComment(uuid: string, data: CommentUpdateData): Promise<ProposalComment | null> {
+        // ✅ NUEVO: Verificar que el comentario sea ACTUALIZA antes de permitir edición
+        const existingComment = await this.getComment(uuid);
+        if (!existingComment) {
+            throw new Error("Comentario no encontrado");
+        }
+
+        if (existingComment.getVoteStatus() !== 'ACTUALIZA') {
+            throw new Error("Solo se pueden editar comentarios con estado 'ACTUALIZA'");
+        }
+
         const fields: string[] = [];
         const params: any[] = [];
 
@@ -169,15 +179,8 @@ export class MysqlCommentRepository implements CommentRepository {
     }
 
     async deleteComment(uuid: string): Promise<boolean> {
-        const sql = `UPDATE proposal_comments SET active = false WHERE uuid = ?`;
-        
-        try {
-            const result: any = await query(sql, [uuid]);
-            return result.affectedRows > 0;
-        } catch (error) {
-            console.error("Error deleting comment:", error);
-            throw new Error(`Error al eliminar el comentario: ${error}`);
-        }
+        // ✅ COMENTARIOS NO SE PUEDEN ELIMINAR - Lanzar error
+        throw new Error("Los comentarios no se pueden eliminar una vez creados");
     }
 
     async checkExistingComment(
@@ -200,6 +203,90 @@ export class MysqlCommentRepository implements CommentRepository {
         } catch (error) {
             console.error("Error checking existing comment:", error);
             throw new Error(`Error al verificar comentario existente: ${error}`);
+        }
+    }
+
+    // ✅ NUEVO: Verificar comentario existente en toda la SECCIÓN
+    async checkExistingCommentInSection(
+        proposalId: number, 
+        tutorId: number, 
+        sectionName: string
+    ): Promise<ProposalComment | null> {
+        const sql = `
+            SELECT * FROM proposal_comments_with_details 
+            WHERE proposal_id = ? AND tutor_id = ? AND section_name = ? AND active = true
+        `;
+        
+        try {
+            const result: any = await query(sql, [proposalId, tutorId, sectionName]);
+            
+            if (result.length > 0) {
+                return this.mapRowToComment(result[0]);
+            }
+            return null;
+        } catch (error) {
+            console.error("Error checking existing comment in section:", error);
+            throw new Error(`Error al verificar comentario existente en sección: ${error}`);
+        }
+    }
+
+    // ✅ NUEVO: Aprobar toda la propuesta
+    async approveEntireProposal(
+        proposalId: string,
+        tutorId: number,
+        tutorName: string,
+        tutorEmail: string
+    ): Promise<boolean> {
+        try {
+            // Convertir proposalId si es UUID
+            let numericProposalId: number;
+            
+            if (isNaN(Number(proposalId))) {
+                const proposalQuery = `SELECT id FROM project_proposals WHERE uuid = ? AND active = true`;
+                const proposalResult: any = await query(proposalQuery, [proposalId]);
+                if (proposalResult.length === 0) {
+                    throw new Error("Propuesta no encontrada");
+                }
+                numericProposalId = proposalResult[0].id;
+            } else {
+                numericProposalId = Number(proposalId);
+            }
+
+            // Verificar si el tutor ya tiene comentarios en esta propuesta
+            const existingComments = await query(
+                `SELECT COUNT(*) as count FROM proposal_comments WHERE proposal_id = ? AND tutor_id = ? AND active = true`,
+                [numericProposalId, tutorId]
+            );
+
+            if (existingComments[0].count > 0) {
+                throw new Error("No se puede aprobar toda la propuesta si ya existen comentarios específicos. Elimine los comentarios existentes primero.");
+            }
+
+            // Crear un comentario especial de aprobación general
+            const uuid = uuidv4();
+            const sql = `
+                INSERT INTO proposal_comments (
+                    uuid, proposal_id, tutor_id, section_name, subsection_name, 
+                    comment_text, vote_status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            const params = [
+                uuid,
+                numericProposalId,
+                tutorId,
+                'APROBACIÓN_GENERAL',
+                'PROPUESTA_COMPLETA',
+                `Propuesta aprobada en su totalidad por ${tutorName} (${tutorEmail})`,
+                'ACEPTADO'
+            ];
+
+            const result: any = await query(sql, params);
+            return result.affectedRows > 0;
+
+        } catch (error) {
+            console.error("Error approving entire proposal:", error);
+            throw new Error(`Error al aprobar la propuesta completa: ${error}`);
         }
     }
 
