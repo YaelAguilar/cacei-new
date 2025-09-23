@@ -1,4 +1,6 @@
 // src/propuestas/domain/models/propuesta.ts
+export type ProposalStatus = 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' | 'ACTUALIZAR';
+
 export class Propuesta {
     constructor(
         private readonly id: number,
@@ -7,53 +9,59 @@ export class Propuesta {
         // Relaciones
         private readonly convocatoriaId: number,
         private readonly studentId: number,
-        private readonly academicTutorId: number,
+        
+        // INFORMACIÓN DEL ALUMNO (sección)
+        // Nombre del alumno se obtiene de users mediante student_id
+        private readonly academicTutorId: number, // tutor académico (subsección)
         private readonly academicTutorName: string,
         private readonly academicTutorEmail: string,
-        private readonly internshipType: string,
+        private readonly internshipType: string, // Pasantía a realizar (subsección)
         
-        // Información de la empresa
-        private readonly companyShortName: string,
-        private readonly companyLegalName: string,
-        private readonly companyTaxId: string,
+        // INFORMACIÓN DE LA EMPRESA (sección)
+        private readonly companyShortName: string | null, // Nombre corto (subsección) - OPCIONAL
+        private readonly companyLegalName: string, // Nombre legal (subsección)
+        private readonly companyTaxId: string, // RFC - Registro Federal de Contribuyentes (subsección)
         
-        // Dirección de la empresa
-        private readonly companyState: string,
-        private readonly companyMunicipality: string,
-        private readonly companySettlementType: string,
-        private readonly companySettlementName: string,
-        private readonly companyStreetType: string,
-        private readonly companyStreetName: string,
-        private readonly companyExteriorNumber: string,
-        private readonly companyInteriorNumber: string | null,
-        private readonly companyPostalCode: string,
-        private readonly companyWebsite: string | null,
-        private readonly companyLinkedin: string | null,
+        // DIRECCIÓN FÍSICA Y EN LA WEB DE LA EMPRESA (sección)
+        private readonly companyState: string, // Entidad federativa (subsección)
+        private readonly companyMunicipality: string, // Demarcación territorial (subsección)
+        private readonly companySettlementType: string, // Tipo de asentamiento humano (subsección)
+        private readonly companySettlementName: string, // Nombre del asentamiento humano (subsección)
+        private readonly companyStreetType: string, // Vialidad (subsección)
+        private readonly companyStreetName: string, // Nombre de la vía (subsección)
+        private readonly companyExteriorNumber: string, // Número exterior (subsección)
+        private readonly companyInteriorNumber: string | null, // Número interior (subsección) - OPCIONAL
+        private readonly companyPostalCode: string, // Código postal (subsección)
+        private readonly companyWebsite: string | null, // Página Web (subsección) - OPCIONAL
+        private readonly companyLinkedin: string | null, // LinkedIn (subsección) - OPCIONAL
         
-        // Información de contacto
-        private readonly contactName: string,
-        private readonly contactPosition: string,
-        private readonly contactEmail: string,
-        private readonly contactPhone: string,
-        private readonly contactArea: string,
+        // INFORMACIÓN DE CONTACTO EN LA EMPRESA (sección)
+        private readonly contactName: string, // Nombre de la persona de contacto (subsección)
+        private readonly contactPosition: string, // Puesto en la empresa de la persona de contacto (subsección)
+        private readonly contactEmail: string, // Dirección electrónica de correo (subsección)
+        private readonly contactPhone: string, // Número telefónico (subsección)
+        private readonly contactArea: string, // Nombre del área asociada (subsección)
         
-        // Supervisor del proyecto
-        private readonly supervisorName: string,
-        private readonly supervisorArea: string,
-        private readonly supervisorEmail: string,
-        private readonly supervisorPhone: string,
+        // SUPERVISOR DEL PROYECTO DE ESTANCIA O ESTADÍA (sección)
+        private readonly supervisorName: string, // Nombre del Supervisor (subsección)
+        private readonly supervisorArea: string, // Área de la empresa en la que se desarrollará el proyecto (subsección)
+        private readonly supervisorEmail: string, // Dirección electrónica de correo (subsección)
+        private readonly supervisorPhone: string, // Número de teléfono (subsección)
         
-        // Datos del proyecto
-        private readonly projectName: string,
-        private readonly projectStartDate: Date,
-        private readonly projectEndDate: Date,
-        private readonly projectProblemContext: string,
-        private readonly projectProblemDescription: string,
-        private readonly projectGeneralObjective: string,
-        private readonly projectSpecificObjectives: string,
-        private readonly projectMainActivities: string,
-        private readonly projectPlannedDeliverables: string,
-        private readonly projectTechnologies: string,
+        // DATOS DEL PROYECTO (sección)
+        private readonly projectName: string, // Nombre del proyecto (subsección)
+        private readonly projectStartDate: Date, // Fecha de inicio del proyecto (subsección)
+        private readonly projectEndDate: Date, // Fecha de cierre del proyecto (subsección)
+        private readonly projectProblemContext: string, // Contexto de la problemática (subsección)
+        private readonly projectProblemDescription: string, // Problemática (subsección)
+        private readonly projectGeneralObjective: string, // Objetivo general del proyecto a desarrollar (subsección)
+        private readonly projectSpecificObjectives: string, // Objetivos específicos del proyecto (subsección)
+        private readonly projectMainActivities: string, // Principales actividades a realizar en la estancia o estadía (subsección)
+        private readonly projectPlannedDeliverables: string, // Entregables planeados del proyecto (subsección)
+        private readonly projectTechnologies: string, // Tecnologías a aplicar en el proyecto (subsección)
+        
+        // ESTATUS DE LA PROPUESTA
+        private readonly proposalStatus: ProposalStatus, // Estatus de la propuesta
         
         // Campos de control
         private readonly active?: boolean,
@@ -70,53 +78,58 @@ export class Propuesta {
     // Getters de relaciones
     getConvocatoriaId(): number { return this.convocatoriaId; }
     getStudentId(): number { return this.studentId; }
-    getAcademicTutorId(): number { return this.academicTutorId; }
+    
+    // INFORMACIÓN DEL ALUMNO (sección) - Getters
+    getAcademicTutorId(): number { return this.academicTutorId; } // tutor académico (subsección)
     getAcademicTutorName(): string { return this.academicTutorName; }
     getAcademicTutorEmail(): string { return this.academicTutorEmail; }
-    getInternshipType(): string { return this.internshipType; }
+    getInternshipType(): string { return this.internshipType; } // Pasantía a realizar (subsección)
     
-    // Getters de información de empresa
-    getCompanyShortName(): string { return this.companyShortName; }
-    getCompanyLegalName(): string { return this.companyLegalName; }
-    getCompanyTaxId(): string { return this.companyTaxId; }
+    // INFORMACIÓN DE LA EMPRESA (sección) - Getters
+    getCompanyShortName(): string | null { return this.companyShortName; } // Nombre corto (subsección)
+    getCompanyLegalName(): string { return this.companyLegalName; } // Nombre legal (subsección)
+    getCompanyTaxId(): string { return this.companyTaxId; } // RFC (subsección)
     
-    // Getters de dirección
-    getCompanyState(): string { return this.companyState; }
-    getCompanyMunicipality(): string { return this.companyMunicipality; }
-    getCompanySettlementType(): string { return this.companySettlementType; }
-    getCompanySettlementName(): string { return this.companySettlementName; }
-    getCompanyStreetType(): string { return this.companyStreetType; }
-    getCompanyStreetName(): string { return this.companyStreetName; }
-    getCompanyExteriorNumber(): string { return this.companyExteriorNumber; }
-    getCompanyInteriorNumber(): string | null { return this.companyInteriorNumber; }
-    getCompanyPostalCode(): string { return this.companyPostalCode; }
-    getCompanyWebsite(): string | null { return this.companyWebsite; }
-    getCompanyLinkedin(): string | null { return this.companyLinkedin; }
+    // DIRECCIÓN FÍSICA Y EN LA WEB DE LA EMPRESA (sección) - Getters
+    getCompanyState(): string { return this.companyState; } // Entidad federativa (subsección)
+    getCompanyMunicipality(): string { return this.companyMunicipality; } // Demarcación territorial (subsección)
+    getCompanySettlementType(): string { return this.companySettlementType; } // Tipo de asentamiento humano (subsección)
+    getCompanySettlementName(): string { return this.companySettlementName; } // Nombre del asentamiento humano (subsección)
+    getCompanyStreetType(): string { return this.companyStreetType; } // Vialidad (subsección)
+    getCompanyStreetName(): string { return this.companyStreetName; } // Nombre de la vía (subsección)
+    getCompanyExteriorNumber(): string { return this.companyExteriorNumber; } // Número exterior (subsección)
+    getCompanyInteriorNumber(): string | null { return this.companyInteriorNumber; } // Número interior (subsección)
+    getCompanyPostalCode(): string { return this.companyPostalCode; } // Código postal (subsección)
+    getCompanyWebsite(): string | null { return this.companyWebsite; } // Página Web (subsección)
+    getCompanyLinkedin(): string | null { return this.companyLinkedin; } // LinkedIn (subsección)
     
-    // Getters de contacto
-    getContactName(): string { return this.contactName; }
-    getContactPosition(): string { return this.contactPosition; }
-    getContactEmail(): string { return this.contactEmail; }
-    getContactPhone(): string { return this.contactPhone; }
-    getContactArea(): string { return this.contactArea; }
+    // INFORMACIÓN DE CONTACTO EN LA EMPRESA (sección) - Getters
+    getContactName(): string { return this.contactName; } // Nombre de la persona de contacto (subsección)
+    getContactPosition(): string { return this.contactPosition; } // Puesto en la empresa (subsección)
+    getContactEmail(): string { return this.contactEmail; } // Dirección electrónica de correo (subsección)
+    getContactPhone(): string { return this.contactPhone; } // Número telefónico (subsección)
+    getContactArea(): string { return this.contactArea; } // Nombre del área asociada (subsección)
     
-    // Getters de supervisor
-    getSupervisorName(): string { return this.supervisorName; }
-    getSupervisorArea(): string { return this.supervisorArea; }
-    getSupervisorEmail(): string { return this.supervisorEmail; }
-    getSupervisorPhone(): string { return this.supervisorPhone; }
+    // SUPERVISOR DEL PROYECTO DE ESTANCIA O ESTADÍA (sección) - Getters
+    getSupervisorName(): string { return this.supervisorName; } // Nombre del Supervisor (subsección)
+    getSupervisorArea(): string { return this.supervisorArea; } // Área de la empresa (subsección)
+    getSupervisorEmail(): string { return this.supervisorEmail; } // Dirección electrónica de correo (subsección)
+    getSupervisorPhone(): string { return this.supervisorPhone; } // Número de teléfono (subsección)
     
-    // Getters de proyecto
-    getProjectName(): string { return this.projectName; }
-    getProjectStartDate(): Date { return this.projectStartDate; }
-    getProjectEndDate(): Date { return this.projectEndDate; }
-    getProjectProblemContext(): string { return this.projectProblemContext; }
-    getProjectProblemDescription(): string { return this.projectProblemDescription; }
-    getProjectGeneralObjective(): string { return this.projectGeneralObjective; }
-    getProjectSpecificObjectives(): string { return this.projectSpecificObjectives; }
-    getProjectMainActivities(): string { return this.projectMainActivities; }
-    getProjectPlannedDeliverables(): string { return this.projectPlannedDeliverables; }
-    getProjectTechnologies(): string { return this.projectTechnologies; }
+    // DATOS DEL PROYECTO (sección) - Getters
+    getProjectName(): string { return this.projectName; } // Nombre del proyecto (subsección)
+    getProjectStartDate(): Date { return this.projectStartDate; } // Fecha de inicio (subsección)
+    getProjectEndDate(): Date { return this.projectEndDate; } // Fecha de cierre (subsección)
+    getProjectProblemContext(): string { return this.projectProblemContext; } // Contexto de la problemática (subsección)
+    getProjectProblemDescription(): string { return this.projectProblemDescription; } // Problemática (subsección)
+    getProjectGeneralObjective(): string { return this.projectGeneralObjective; } // Objetivo general (subsección)
+    getProjectSpecificObjectives(): string { return this.projectSpecificObjectives; } // Objetivos específicos (subsección)
+    getProjectMainActivities(): string { return this.projectMainActivities; } // Principales actividades (subsección)
+    getProjectPlannedDeliverables(): string { return this.projectPlannedDeliverables; } // Entregables planeados (subsección)
+    getProjectTechnologies(): string { return this.projectTechnologies; } // Tecnologías a aplicar (subsección)
+    
+    // ESTATUS DE LA PROPUESTA - Getter
+    getProposalStatus(): ProposalStatus { return this.proposalStatus; }
     
     // Getters de control
     isActive(): boolean | undefined { return this.active; }
@@ -137,7 +150,7 @@ export class Propuesta {
     getProyecto() {
         return {
             getNombre: () => this.projectName,
-            getDescripcion: () => this.projectProblemDescription, // Usar descripción del problema como descripción
+            getDescripcion: () => this.projectProblemDescription,
             getEntregables: () => this.projectPlannedDeliverables,
             getTecnologias: () => this.projectTechnologies,
             getSupervisor: () => this.supervisorName,
@@ -149,8 +162,8 @@ export class Propuesta {
     
     getEmpresa() {
         return {
-            getNombre: () => this.companyShortName,
-            getSector: () => this.contactArea, // Usar área de contacto como sector
+            getNombre: () => this.companyShortName || this.companyLegalName,
+            getSector: () => this.contactArea,
             getPersonaContacto: () => this.contactName,
             getPaginaWeb: () => this.companyWebsite
         };

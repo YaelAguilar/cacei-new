@@ -1,11 +1,13 @@
 // back/src/propuestas/infrastructure/dependencies.ts
-// Casos de uso - IMPORTACIONES CORREGIDAS
+// Casos de uso - IMPORTACIONES ACTUALIZADAS
 import { CreatePropuestaUseCase } from "../application/createPropuestaUseCase";
 import { GetPropuestasUseCase } from "../application/getPropuestasUseCase";
 import { GetPropuestaUseCase } from "../application/getPropuestaUseCase";
 import { GetPropuestasByStudentUseCase } from "../application/getPropuestasByStudentUseCase";
 import { GetActiveConvocatoriaUseCase } from "../application/getActiveConvocatoriaUseCase";
 import { UpdatePropuestaUseCase } from "../application/updatePropuestaUseCase";
+import { UpdateProposalStatusUseCase } from "../application/updateProposalStatusUseCase";
+import { GetPropuestasByStatusUseCase } from "../application/getPropuestasByStatusUseCase";
 
 // Controladores
 import { CreatePropuestaController } from "./controllers/createPropuestaController";
@@ -14,6 +16,8 @@ import { GetPropuestaController } from "./controllers/getPropuestaController";
 import { UpdatePropuestaController } from "./controllers/updatePropuestaController";
 import { GetActiveConvocatoriaController } from "./controllers/getActiveConvocatoriaController";
 import { GetPropuestasByStudentController } from "./controllers/getPropuestasByStudentController";
+import { UpdateProposalStatusController } from "./controllers/updateProposalStatusController";
+import { GetPropuestasByStatusController } from "./controllers/getPropuestasByStatusController";
 
 // Repositorio
 import { MysqlPropuestaRepository } from "./repositories/MysqlPropuestaRepository";
@@ -28,6 +32,8 @@ const getPropuestaUseCase = new GetPropuestaUseCase(propuestaRepository);
 const updatePropuestaUseCase = new UpdatePropuestaUseCase(propuestaRepository);
 const getActiveConvocatoriaUseCase = new GetActiveConvocatoriaUseCase(propuestaRepository);
 const getPropuestasByStudentUseCase = new GetPropuestasByStudentUseCase(propuestaRepository);
+const updateProposalStatusUseCase = new UpdateProposalStatusUseCase(propuestaRepository);
+const getPropuestasByStatusUseCase = new GetPropuestasByStatusUseCase(propuestaRepository);
 
 // Controladores exportados
 export const createPropuestaController = new CreatePropuestaController(createPropuestaUseCase);
@@ -36,3 +42,5 @@ export const getPropuestaController = new GetPropuestaController(getPropuestaUse
 export const updatePropuestaController = new UpdatePropuestaController(updatePropuestaUseCase);
 export const getActiveConvocatoriaController = new GetActiveConvocatoriaController(getActiveConvocatoriaUseCase);
 export const getPropuestasByStudentController = new GetPropuestasByStudentController(getPropuestasByStudentUseCase);
+export const updateProposalStatusController = new UpdateProposalStatusController(updateProposalStatusUseCase);
+export const getPropuestasByStatusController = new GetPropuestasByStatusController(getPropuestasByStatusUseCase);

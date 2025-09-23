@@ -1,5 +1,5 @@
 import { PropuestaRepository, PropuestaCreateData, PropuestaUpdateData } from "../../domain/interfaces/propuestaRepository";
-import { Propuesta } from "../../domain/models/propuesta";
+import { Propuesta, ProposalStatus } from "../../domain/models/propuesta";
 import { query } from "../../../database/mysql";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -8,8 +8,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
     async createPropuesta(data: PropuestaCreateData): Promise<Propuesta | null> {
         const sql = `
             INSERT INTO project_proposals (
-                uuid, convocatoria_id, student_id, academic_tutor_id, academic_tutor_name, 
-                academic_tutor_email, internship_type,
+                uuid, convocatoria_id, student_id, 
+                academic_tutor_id, academic_tutor_name, academic_tutor_email, internship_type,
                 company_short_name, company_legal_name, company_tax_id,
                 company_state, company_municipality, company_settlement_type, company_settlement_name,
                 company_street_type, company_street_name, company_exterior_number, company_interior_number,
@@ -19,8 +19,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
                 project_name, project_start_date, project_end_date, project_problem_context,
                 project_problem_description, project_general_objective, project_specific_objectives,
                 project_main_activities, project_planned_deliverables, project_technologies,
-                user_creation
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                proposal_status, user_creation
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const uuid = uuidv4();
@@ -32,7 +32,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             data.academicTutorName,
             data.academicTutorEmail,
             data.internshipType,
-            data.companyShortName,
+            data.companyShortName ?? null,
             data.companyLegalName,
             data.companyTaxId,
             data.companyState,
@@ -65,6 +65,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             data.projectMainActivities,
             data.projectPlannedDeliverables,
             data.projectTechnologies,
+            'PENDIENTE', // Por defecto todas las propuestas se crean como PENDIENTE
             data.userCreation
         ];
 
@@ -80,7 +81,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
                 data.academicTutorName,
                 data.academicTutorEmail,
                 data.internshipType,
-                data.companyShortName,
+                data.companyShortName ?? null,
                 data.companyLegalName,
                 data.companyTaxId,
                 data.companyState,
@@ -113,6 +114,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
                 data.projectMainActivities,
                 data.projectPlannedDeliverables,
                 data.projectTechnologies,
+                'PENDIENTE',
                 true, // active
                 new Date(), // created_at
                 new Date(), // updated_at
@@ -185,6 +187,26 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         }
     }
 
+    async getPropuestasByStatus(status: ProposalStatus): Promise<Propuesta[] | null> {
+        const sql = `
+            SELECT * FROM project_proposals 
+            WHERE proposal_status = ? AND active = true 
+            ORDER BY created_at DESC
+        `;
+
+        try {
+            const result: any = await query(sql, [status]);
+            
+            if (result.length > 0) {
+                return result.map((row: any) => this.mapRowToPropuesta(row));
+            }
+            return [];
+        } catch (error) {
+            console.error("Error getting propuestas by status:", error);
+            throw new Error(`Error al obtener las propuestas por estatus: ${error}`);
+        }
+    }
+
     async getPropuesta(uuid: string): Promise<Propuesta | null> {
         const sql = `SELECT * FROM project_proposals WHERE uuid = ? AND active = true`;
         
@@ -205,7 +227,25 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         const fields: string[] = [];
         const params: any[] = [];
 
-        // Agregar todos los campos que se pueden actualizar
+        // INFORMACIÓN DEL ALUMNO (sección)
+        if (data.academicTutorId !== undefined) {
+            fields.push("academic_tutor_id = ?");
+            params.push(data.academicTutorId);
+        }
+        if (data.academicTutorName !== undefined) {
+            fields.push("academic_tutor_name = ?");
+            params.push(data.academicTutorName);
+        }
+        if (data.academicTutorEmail !== undefined) {
+            fields.push("academic_tutor_email = ?");
+            params.push(data.academicTutorEmail);
+        }
+        if (data.internshipType !== undefined) {
+            fields.push("internship_type = ?");
+            params.push(data.internshipType);
+        }
+
+        // INFORMACIÓN DE LA EMPRESA (sección)
         if (data.companyShortName !== undefined) {
             fields.push("company_short_name = ?");
             params.push(data.companyShortName);
@@ -218,6 +258,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             fields.push("company_tax_id = ?");
             params.push(data.companyTaxId);
         }
+
+        // DIRECCIÓN FÍSICA Y EN LA WEB DE LA EMPRESA (sección)
         if (data.companyState !== undefined) {
             fields.push("company_state = ?");
             params.push(data.companyState);
@@ -262,6 +304,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             fields.push("company_linkedin = ?");
             params.push(data.companyLinkedin);
         }
+
+        // INFORMACIÓN DE CONTACTO EN LA EMPRESA (sección)
         if (data.contactName !== undefined) {
             fields.push("contact_name = ?");
             params.push(data.contactName);
@@ -282,6 +326,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             fields.push("contact_area = ?");
             params.push(data.contactArea);
         }
+
+        // SUPERVISOR DEL PROYECTO DE ESTANCIA O ESTADÍA (sección)
         if (data.supervisorName !== undefined) {
             fields.push("supervisor_name = ?");
             params.push(data.supervisorName);
@@ -298,6 +344,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             fields.push("supervisor_phone = ?");
             params.push(data.supervisorPhone);
         }
+
+        // DATOS DEL PROYECTO (sección)
         if (data.projectName !== undefined) {
             fields.push("project_name = ?");
             params.push(data.projectName);
@@ -338,22 +386,13 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             fields.push("project_technologies = ?");
             params.push(data.projectTechnologies);
         }
-        if (data.academicTutorId !== undefined) {
-            fields.push("academic_tutor_id = ?");
-            params.push(data.academicTutorId);
+
+        // ESTATUS DE LA PROPUESTA
+        if (data.proposalStatus !== undefined) {
+            fields.push("proposal_status = ?");
+            params.push(data.proposalStatus);
         }
-        if (data.academicTutorName !== undefined) {
-            fields.push("academic_tutor_name = ?");
-            params.push(data.academicTutorName);
-        }
-        if (data.academicTutorEmail !== undefined) {
-            fields.push("academic_tutor_email = ?");
-            params.push(data.academicTutorEmail);
-        }
-        if (data.internshipType !== undefined) {
-            fields.push("internship_type = ?");
-            params.push(data.internshipType);
-        }
+
         if (data.userUpdate !== undefined) {
             fields.push("user_update = ?");
             params.push(data.userUpdate);
@@ -379,6 +418,27 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         } catch (error) {
             console.error("Error updating propuesta:", error);
             throw new Error(`Error al actualizar la propuesta: ${error}`);
+        }
+    }
+
+    async updateProposalStatus(uuid: string, status: ProposalStatus, userUpdate?: number): Promise<Propuesta | null> {
+        const sql = `
+            UPDATE project_proposals 
+            SET proposal_status = ?, user_update = ?, updated_at = CURRENT_TIMESTAMP 
+            WHERE uuid = ? AND active = true
+        `;
+
+        try {
+            const result: any = await query(sql, [status, userUpdate || null, uuid]);
+            
+            if (result.affectedRows === 0) {
+                return null;
+            }
+
+            return await this.getPropuesta(uuid);
+        } catch (error) {
+            console.error("Error updating proposal status:", error);
+            throw new Error(`Error al actualizar el estatus de la propuesta: ${error}`);
         }
     }
 
@@ -408,23 +468,23 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         `;
 
         try {
-        const result: any = await query(sql);
-        
-        if (result.length > 0) {
-            const row = result[0];
-            return {
-                id: row.id,
-                uuid: row.uuid,
-                nombre: row.nombre,
-                // Asegurar que sean arrays
-                pasantiasDisponibles: Array.isArray(row.pasantias_disponibles) 
-                    ? row.pasantias_disponibles 
-                    : JSON.parse(row.pasantias_disponibles || '[]'),
-                profesoresDisponibles: Array.isArray(row.profesores_disponibles)
-                    ? row.profesores_disponibles
-                    : JSON.parse(row.profesores_disponibles || '[]')
-            };
-        }
+            const result: any = await query(sql);
+            
+            if (result.length > 0) {
+                const row = result[0];
+                return {
+                    id: row.id,
+                    uuid: row.uuid,
+                    nombre: row.nombre,
+                    // Asegurar que sean arrays
+                    pasantiasDisponibles: Array.isArray(row.pasantias_disponibles) 
+                        ? row.pasantias_disponibles 
+                        : JSON.parse(row.pasantias_disponibles || '[]'),
+                    profesoresDisponibles: Array.isArray(row.profesores_disponibles)
+                        ? row.profesores_disponibles
+                        : JSON.parse(row.profesores_disponibles || '[]')
+                };
+            }
             return null;
         } catch (error) {
             console.error("Error getting active convocatoria:", error);
@@ -475,6 +535,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             row.project_main_activities,
             row.project_planned_deliverables,
             row.project_technologies,
+            row.proposal_status as ProposalStatus,
             row.active,
             row.created_at,
             row.updated_at,

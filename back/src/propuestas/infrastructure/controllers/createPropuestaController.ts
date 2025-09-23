@@ -13,12 +13,12 @@ export class CreatePropuestaController {
             academicTutorId,
             internshipType,
             
-            // Información de la empresa
-            companyShortName,
+            // Información de la empresa (sección)
+            companyShortName, // OPCIONAL
             companyLegalName,
             companyTaxId,
             
-            // Dirección de la empresa
+            // Dirección física y en la web de la empresa (sección)
             companyState,
             companyMunicipality,
             companySettlementType,
@@ -26,25 +26,25 @@ export class CreatePropuestaController {
             companyStreetType,
             companyStreetName,
             companyExteriorNumber,
-            companyInteriorNumber,
+            companyInteriorNumber, // OPCIONAL
             companyPostalCode,
-            companyWebsite,
-            companyLinkedin,
+            companyWebsite, // OPCIONAL
+            companyLinkedin, // OPCIONAL
             
-            // Información de contacto
+            // Información de contacto en la empresa (sección)
             contactName,
             contactPosition,
             contactEmail,
             contactPhone,
             contactArea,
             
-            // Supervisor del proyecto
+            // Supervisor del proyecto (sección)
             supervisorName,
             supervisorArea,
             supervisorEmail,
             supervisorPhone,
             
-            // Datos del proyecto
+            // Datos del proyecto (sección)
             projectName,
             projectStartDate,
             projectEndDate,
@@ -96,9 +96,9 @@ export class CreatePropuestaController {
             const studentId = userResult[0].id;
             console.log('✅ ID del estudiante encontrado:', studentId);
 
-            // Validar campos requeridos básicos
+            // Validar campos requeridos básicos (sin incluir los opcionales)
             console.log('🔍 Validando campos requeridos...');
-            if (!academicTutorId || !internshipType || !companyShortName || !companyLegalName || 
+            if (!academicTutorId || !internshipType || !companyLegalName || 
                 !companyTaxId || !companyState || !companyMunicipality || !projectName || 
                 !contactName || !supervisorName) {
                 console.log('❌ Faltan campos requeridos básicos');
@@ -139,12 +139,12 @@ export class CreatePropuestaController {
                 academicTutorId,
                 internshipType,
                 
-                // Información de la empresa
-                companyShortName,
+                // Información de la empresa (sección) - manejo de campos opcionales
+                companyShortName || null, // OPCIONAL
                 companyLegalName,
                 companyTaxId,
                 
-                // Dirección
+                // Dirección física y en la web de la empresa (sección)
                 companyState,
                 companyMunicipality,
                 companySettlementType,
@@ -152,25 +152,25 @@ export class CreatePropuestaController {
                 companyStreetType,
                 companyStreetName,
                 companyExteriorNumber,
-                companyInteriorNumber,
+                companyInteriorNumber || null, // OPCIONAL
                 companyPostalCode,
-                companyWebsite,
-                companyLinkedin,
+                companyWebsite || null, // OPCIONAL
+                companyLinkedin || null, // OPCIONAL
                 
-                // Contacto
+                // Información de contacto en la empresa (sección)
                 contactName,
                 contactPosition,
                 contactEmail,
                 contactPhone,
                 contactArea,
                 
-                // Supervisor
+                // Supervisor del proyecto (sección)
                 supervisorName,
                 supervisorArea,
                 supervisorEmail,
                 supervisorPhone,
                 
-                // Proyecto
+                // Datos del proyecto (sección)
                 projectName,
                 startDate,
                 endDate,
@@ -188,81 +188,8 @@ export class CreatePropuestaController {
             console.log('📋 Propuesta creada:', propuesta ? 'exitosamente' : 'falló');
 
             if (propuesta) {
-                // Formatear respuesta completa
-                const formattedPropuesta = {
-                    type: "propuesta",
-                    id: propuesta.getUuid(),
-                    attributes: {
-                        idConvocatoria: propuesta.getConvocatoriaId(),
-                        
-                        // Tutor Académico
-                        tutorAcademico: {
-                            id: propuesta.getAcademicTutorId(),
-                            nombre: propuesta.getAcademicTutorName(),
-                            email: propuesta.getAcademicTutorEmail()
-                        },
-                        
-                        // Tipo de pasantía
-                        tipoPasantia: propuesta.getInternshipType(),
-                        
-                        // Información completa de la empresa
-                        empresa: {
-                            nombreCorto: propuesta.getCompanyShortName(),
-                            razonSocial: propuesta.getCompanyLegalName(),
-                            rfc: propuesta.getCompanyTaxId(),
-                            direccion: {
-                                estado: propuesta.getCompanyState(),
-                                municipio: propuesta.getCompanyMunicipality(),
-                                tipoAsentamiento: propuesta.getCompanySettlementType(),
-                                nombreAsentamiento: propuesta.getCompanySettlementName(),
-                                tipoVialidad: propuesta.getCompanyStreetType(),
-                                nombreVia: propuesta.getCompanyStreetName(),
-                                numeroExterior: propuesta.getCompanyExteriorNumber(),
-                                numeroInterior: propuesta.getCompanyInteriorNumber(),
-                                codigoPostal: propuesta.getCompanyPostalCode()
-                            },
-                            paginaWeb: propuesta.getCompanyWebsite(),
-                            linkedin: propuesta.getCompanyLinkedin(),
-                            sector: propuesta.getContactArea()
-                        },
-                        
-                        // Información de contacto
-                        contacto: {
-                            nombre: propuesta.getContactName(),
-                            puesto: propuesta.getContactPosition(),
-                            email: propuesta.getContactEmail(),
-                            telefono: propuesta.getContactPhone(),
-                            area: propuesta.getContactArea()
-                        },
-                        
-                        // Supervisor del proyecto
-                        supervisor: {
-                            nombre: propuesta.getSupervisorName(),
-                            area: propuesta.getSupervisorArea(),
-                            email: propuesta.getSupervisorEmail(),
-                            telefono: propuesta.getSupervisorPhone()
-                        },
-                        
-                        // Proyecto completo
-                        proyecto: {
-                            nombre: propuesta.getProjectName(),
-                            fechaInicio: propuesta.getProjectStartDate(),
-                            fechaFin: propuesta.getProjectEndDate(),
-                            contextoProblema: propuesta.getProjectProblemContext(),
-                            descripcionProblema: propuesta.getProjectProblemDescription(),
-                            objetivoGeneral: propuesta.getProjectGeneralObjective(),
-                            objetivosEspecificos: propuesta.getProjectSpecificObjectives(),
-                            actividadesPrincipales: propuesta.getProjectMainActivities(),
-                            entregablesPlaneados: propuesta.getProjectPlannedDeliverables(),
-                            tecnologias: propuesta.getProjectTechnologies()
-                        },
-                        
-                        // Metadata
-                        active: propuesta.isActive(),
-                        createdAt: propuesta.getCreatedAt(),
-                        updatedAt: propuesta.getUpdatedAt()
-                    }
-                };
+                // Formatear respuesta con estructura de secciones y subsecciones
+                const formattedPropuesta = this.formatPropuestaResponse(propuesta);
 
                 console.log('✅ Enviando respuesta exitosa');
                 res.status(201).json({ data: formattedPropuesta });
@@ -315,5 +242,137 @@ export class CreatePropuestaController {
                 });
             }
         }
+    }
+
+    private formatPropuestaResponse(propuesta: any) {
+        return {
+            type: "propuesta",
+            id: propuesta.getUuid(),
+            attributes: {
+                // Estatus de la propuesta
+                estatus: propuesta.getProposalStatus(),
+                
+                // Información del alumno (sección)
+                informacionDelAlumno: {
+                    // Nombre del alumno se obtiene de la relación con users
+                    tutorAcademico: { // tutor académico (subsección)
+                        id: propuesta.getAcademicTutorId(),
+                        nombre: propuesta.getAcademicTutorName(),
+                        email: propuesta.getAcademicTutorEmail()
+                    },
+                    pasantiaARealizar: propuesta.getInternshipType() // Pasantía a realizar (subsección)
+                },
+                
+                // Información de la empresa (sección)
+                informacionDeLaEmpresa: {
+                    nombreCorto: propuesta.getCompanyShortName(), // OPCIONAL
+                    nombreLegal: propuesta.getCompanyLegalName(),
+                    rfc: propuesta.getCompanyTaxId()
+                },
+                
+                // Dirección física y en la web de la empresa (sección)
+                direccionFisicaYEnLaWebDeLaEmpresa: {
+                    entidadFederativa: propuesta.getCompanyState(),
+                    demarcacionTerritorial: propuesta.getCompanyMunicipality(),
+                    tipoDeAsentamientoHumano: propuesta.getCompanySettlementType(),
+                    nombreDelAsentamientoHumano: propuesta.getCompanySettlementName(),
+                    vialidad: propuesta.getCompanyStreetType(),
+                    nombreDeLaVia: propuesta.getCompanyStreetName(),
+                    numeroExterior: propuesta.getCompanyExteriorNumber(),
+                    numeroInterior: propuesta.getCompanyInteriorNumber(), // OPCIONAL
+                    codigoPostal: propuesta.getCompanyPostalCode(),
+                    paginaWeb: propuesta.getCompanyWebsite(), // OPCIONAL
+                    linkedin: propuesta.getCompanyLinkedin() // OPCIONAL
+                },
+                
+                // Información de contacto en la empresa (sección)
+                informacionDeContactoEnLaEmpresa: {
+                    nombreDeLaPersonaDeContacto: propuesta.getContactName(),
+                    puestoEnLaEmpresaDeLaPersonaDeContacto: propuesta.getContactPosition(),
+                    direccionElectronicaDeCorreo: propuesta.getContactEmail(),
+                    numeroTelefonico: propuesta.getContactPhone(),
+                    nombreDelAreaAsociada: propuesta.getContactArea()
+                },
+                
+                // Supervisor del proyecto de estancia o estadía (sección)
+                supervisorDelProyectoDeEstanciaOEstadia: {
+                    nombreDelSupervisor: propuesta.getSupervisorName(),
+                    areaDeLaEmpresaEnLaQueSeDesarrollaraElProyecto: propuesta.getSupervisorArea(),
+                    direccionElectronicaDeCorreo: propuesta.getSupervisorEmail(),
+                    numeroDeTelefono: propuesta.getSupervisorPhone()
+                },
+                
+                // Datos del proyecto (sección)
+                datosDelProyecto: {
+                    nombreDelProyecto: propuesta.getProjectName(),
+                    fechaDeInicioDelProyecto: propuesta.getProjectStartDate(),
+                    fechaDeCierreDelProyecto: propuesta.getProjectEndDate(),
+                    contextoDeLaProblematica: propuesta.getProjectProblemContext(),
+                    problematica: propuesta.getProjectProblemDescription(),
+                    objetivoGeneralDelProyectoADesarrollar: propuesta.getProjectGeneralObjective(),
+                    objetivosEspecificosDelProyecto: propuesta.getProjectSpecificObjectives(),
+                    principalesActividadesARealizarEnLaEstanciaOEstadia: propuesta.getProjectMainActivities(),
+                    entregablesPlaneadosDelProyecto: propuesta.getProjectPlannedDeliverables(),
+                    tecnologiasAAplicarEnElProyecto: propuesta.getProjectTechnologies()
+                },
+                
+                // Metadata
+                active: propuesta.isActive(),
+                createdAt: propuesta.getCreatedAt(),
+                updatedAt: propuesta.getUpdatedAt(),
+                
+                // Mantener formato anterior para compatibilidad
+                tutorAcademico: {
+                    id: propuesta.getAcademicTutorId(),
+                    nombre: propuesta.getAcademicTutorName(),
+                    email: propuesta.getAcademicTutorEmail()
+                },
+                tipoPasantia: propuesta.getInternshipType(),
+                empresa: {
+                    nombreCorto: propuesta.getCompanyShortName(),
+                    razonSocial: propuesta.getCompanyLegalName(),
+                    rfc: propuesta.getCompanyTaxId(),
+                    direccion: {
+                        estado: propuesta.getCompanyState(),
+                        municipio: propuesta.getCompanyMunicipality(),
+                        tipoAsentamiento: propuesta.getCompanySettlementType(),
+                        nombreAsentamiento: propuesta.getCompanySettlementName(),
+                        tipoVialidad: propuesta.getCompanyStreetType(),
+                        nombreVia: propuesta.getCompanyStreetName(),
+                        numeroExterior: propuesta.getCompanyExteriorNumber(),
+                        numeroInterior: propuesta.getCompanyInteriorNumber(),
+                        codigoPostal: propuesta.getCompanyPostalCode()
+                    },
+                    paginaWeb: propuesta.getCompanyWebsite(),
+                    linkedin: propuesta.getCompanyLinkedin(),
+                    sector: propuesta.getContactArea()
+                },
+                contacto: {
+                    nombre: propuesta.getContactName(),
+                    puesto: propuesta.getContactPosition(),
+                    email: propuesta.getContactEmail(),
+                    telefono: propuesta.getContactPhone(),
+                    area: propuesta.getContactArea()
+                },
+                supervisor: {
+                    nombre: propuesta.getSupervisorName(),
+                    area: propuesta.getSupervisorArea(),
+                    email: propuesta.getSupervisorEmail(),
+                    telefono: propuesta.getSupervisorPhone()
+                },
+                proyecto: {
+                    nombre: propuesta.getProjectName(),
+                    fechaInicio: propuesta.getProjectStartDate(),
+                    fechaFin: propuesta.getProjectEndDate(),
+                    contextoProblema: propuesta.getProjectProblemContext(),
+                    descripcionProblema: propuesta.getProjectProblemDescription(),
+                    objetivoGeneral: propuesta.getProjectGeneralObjective(),
+                    objetivosEspecificos: propuesta.getProjectSpecificObjectives(),
+                    actividadesPrincipales: propuesta.getProjectMainActivities(),
+                    entregablesPlaneados: propuesta.getProjectPlannedDeliverables(),
+                    tecnologias: propuesta.getProjectTechnologies()
+                }
+            }
+        };
     }
 }

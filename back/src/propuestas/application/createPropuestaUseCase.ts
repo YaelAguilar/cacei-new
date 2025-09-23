@@ -10,12 +10,12 @@ export class CreatePropuestaUseCase {
         academicTutorId: number,
         internshipType: string,
         
-        // Información de la empresa
-        companyShortName: string,
+        // Información de la empresa (sección)
+        companyShortName: string | null, // OPCIONAL
         companyLegalName: string,
         companyTaxId: string,
         
-        // Dirección de la empresa
+        // Dirección física y en la web de la empresa (sección)
         companyState: string,
         companyMunicipality: string,
         companySettlementType: string,
@@ -23,25 +23,25 @@ export class CreatePropuestaUseCase {
         companyStreetType: string,
         companyStreetName: string,
         companyExteriorNumber: string,
-        companyInteriorNumber: string | null,
+        companyInteriorNumber: string | null, // OPCIONAL
         companyPostalCode: string,
-        companyWebsite: string | null,
-        companyLinkedin: string | null,
+        companyWebsite: string | null, // OPCIONAL
+        companyLinkedin: string | null, // OPCIONAL
         
-        // Información de contacto
+        // Información de contacto en la empresa (sección)
         contactName: string,
         contactPosition: string,
         contactEmail: string,
         contactPhone: string,
         contactArea: string,
         
-        // Supervisor del proyecto
+        // Supervisor del proyecto (sección)
         supervisorName: string,
         supervisorArea: string,
         supervisorEmail: string,
         supervisorPhone: string,
         
-        // Datos del proyecto
+        // Datos del proyecto (sección)
         projectName: string,
         projectStartDate: Date,
         projectEndDate: Date,
@@ -71,9 +71,9 @@ export class CreatePropuestaUseCase {
                 throw new Error("Ya tienes una propuesta registrada en la convocatoria actual");
             }
 
-            // Validaciones de negocio
+            // Validaciones de negocio con campos opcionales
             this.validateBusinessRules(
-                companyShortName, companyLegalName, companyTaxId,
+                companyLegalName, companyTaxId,
                 companyState, companyMunicipality, companySettlementType, companySettlementName,
                 companyStreetType, companyStreetName, companyExteriorNumber, companyPostalCode,
                 contactName, contactPosition, contactEmail, contactPhone, contactArea,
@@ -108,12 +108,12 @@ export class CreatePropuestaUseCase {
                 academicTutorEmail: tutorDisponible.email,
                 internshipType,
                 
-                // Información de la empresa
-                companyShortName: companyShortName.trim(),
+                // Información de la empresa (sección) - manejo de campos opcionales
+                companyShortName: companyShortName ? companyShortName.trim() : null,
                 companyLegalName: companyLegalName.trim(),
                 companyTaxId: companyTaxId.trim(),
                 
-                // Dirección
+                // Dirección física y en la web de la empresa (sección)
                 companyState: companyState.trim(),
                 companyMunicipality: companyMunicipality.trim(),
                 companySettlementType: companySettlementType.trim(),
@@ -126,20 +126,20 @@ export class CreatePropuestaUseCase {
                 companyWebsite: companyWebsite ? companyWebsite.trim() : null,
                 companyLinkedin: companyLinkedin ? companyLinkedin.trim() : null,
                 
-                // Contacto
+                // Información de contacto en la empresa (sección)
                 contactName: contactName.trim(),
                 contactPosition: contactPosition.trim(),
                 contactEmail: contactEmail.trim(),
                 contactPhone: contactPhone.trim(),
                 contactArea: contactArea.trim(),
                 
-                // Supervisor
+                // Supervisor del proyecto (sección)
                 supervisorName: supervisorName.trim(),
                 supervisorArea: supervisorArea.trim(),
                 supervisorEmail: supervisorEmail.trim(),
                 supervisorPhone: supervisorPhone.trim(),
                 
-                // Proyecto
+                // Datos del proyecto (sección)
                 projectName: projectName.trim(),
                 projectStartDate,
                 projectEndDate,
@@ -162,7 +162,7 @@ export class CreatePropuestaUseCase {
     }
 
     private validateBusinessRules(
-        companyShortName: string, companyLegalName: string, companyTaxId: string,
+        companyLegalName: string, companyTaxId: string,
         companyState: string, companyMunicipality: string, companySettlementType: string,
         companySettlementName: string, companyStreetType: string, companyStreetName: string,
         companyExteriorNumber: string, companyPostalCode: string,
@@ -176,10 +176,7 @@ export class CreatePropuestaUseCase {
         projectMainActivities: string, projectPlannedDeliverables: string,
         projectTechnologies: string
     ): void {
-        // Validar campos obligatorios de empresa
-        if (!companyShortName || !companyShortName.trim()) {
-            throw new Error("El nombre corto de la empresa es obligatorio");
-        }
+        // Validar campos obligatorios de empresa (companyShortName es opcional)
         if (!companyLegalName || !companyLegalName.trim()) {
             throw new Error("El nombre legal de la empresa es obligatorio");
         }
@@ -187,7 +184,7 @@ export class CreatePropuestaUseCase {
             throw new Error("El RFC de la empresa es obligatorio");
         }
 
-        // Validar dirección
+        // Validar dirección (todos obligatorios, companyInteriorNumber es opcional)
         if (!companyState || !companyState.trim()) {
             throw new Error("La entidad federativa es obligatoria");
         }
@@ -213,7 +210,7 @@ export class CreatePropuestaUseCase {
             throw new Error("El código postal es obligatorio");
         }
 
-        // Validar contacto
+        // Validar información de contacto (todos obligatorios)
         if (!contactName || !contactName.trim()) {
             throw new Error("El nombre de la persona de contacto es obligatorio");
         }
@@ -230,7 +227,7 @@ export class CreatePropuestaUseCase {
             throw new Error("El área de contacto es obligatoria");
         }
 
-        // Validar supervisor
+        // Validar supervisor (todos obligatorios)
         if (!supervisorName || !supervisorName.trim()) {
             throw new Error("El nombre del supervisor es obligatorio");
         }
@@ -244,7 +241,7 @@ export class CreatePropuestaUseCase {
             throw new Error("El teléfono del supervisor es obligatorio");
         }
 
-        // Validar proyecto
+        // Validar proyecto (todos obligatorios)
         if (!projectName || !projectName.trim()) {
             throw new Error("El nombre del proyecto es obligatorio");
         }
