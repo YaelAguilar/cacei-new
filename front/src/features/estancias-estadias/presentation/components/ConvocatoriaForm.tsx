@@ -114,22 +114,20 @@ const ConvocatoriaForm: React.FC<ConvocatoriaFormProps> = observer(({ viewModel,
                 className="text-red-500 text-xs italic mt-1"
               />
             </div>
-
-            {/* Fecha límite */}
             <div>
               <label htmlFor="fechaLimite" className="block text-black text-sm font-bold mb-2">
                 Fecha Límite <span className="text-red-500">*</span>
                 <span className="text-gray-500 text-xs font-normal ml-2">
-                  (Debe ser al menos 24 horas en el futuro)
+                  (El cierre será a las 23:59:59 del día seleccionado)
                 </span>
               </label>
               <Field
-                type="datetime-local"
+                type="date"
                 id="fechaLimite"
                 name="fechaLimite"
                 disabled={isFormDisabled || isSubmitting}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline disabled:opacity-50 disabled:cursor-not-allowed"
-                min={viewModel.getMinDatetime()}
+                min={viewModel.getMinDate()}
               />
               <ErrorMessage
                 name="fechaLimite"

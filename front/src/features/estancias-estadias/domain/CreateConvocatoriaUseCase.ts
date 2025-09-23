@@ -13,10 +13,8 @@ export class CreateConvocatoriaUseCase {
   constructor(private repository: ConvocatoriaRepository) {}
 
   async execute(params: CreateConvocatoriaParams): Promise<Convocatoria> {
-    // Validaciones de negocio
     this.validateParams(params);
 
-    // Verificar que no hay convocatoria activa
     const hasActiveConvocatoria = await this.repository.checkActiveConvocatoria();
     if (hasActiveConvocatoria) {
       throw new Error("No se puede crear una nueva convocatoria mientras haya una convocatoria vigente");
@@ -28,11 +26,13 @@ export class CreateConvocatoriaUseCase {
       throw new Error("No hay profesores disponibles para la convocatoria");
     }
 
+    const fechaLimiteConTiempo = this.convertToEndOfDay(params.fechaLimite);
+
     // Crear la convocatoria
     const request: CreateConvocatoriaRequest = {
       nombre: params.nombre.trim(),
       descripcion: params.descripcion?.trim() || null,
-      fechaLimite: params.fechaLimite,
+      fechaLimite: fechaLimiteConTiempo,
       pasantiasSeleccionadas: params.pasantiasSeleccionadas
     };
 
@@ -43,6 +43,18 @@ export class CreateConvocatoriaUseCase {
     }
 
     return convocatoria;
+  }
+
+  private convertToEndOfDay(fechaString: string): string {
+    try {
+      const fecha = new Date(fechaString + 'T00:00:00.000Z');
+
+      fecha.setUTCHours(23, 59, 59, 999);
+
+      return fecha.toISOString();
+    } catch (error) {
+      throw new Error("Formato de fecha inválido. Use YYYY-MM-DD");
+    }
   }
 
   private validateParams(params: CreateConvocatoriaParams): void {
@@ -56,12 +68,21 @@ export class CreateConvocatoriaUseCase {
       throw new Error("La fecha límite es obligatoria");
     }
 
-    const fechaLimite = new Date(params.fechaLimite);
-    const now = new Date();
-    const minDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 horas
+    // Validar formato de fecha (YYYY-MM-DD)
+    const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!fechaRegex.test(params.fechaLimite)) {
+      throw new Error("La fecha debe tener el formato YYYY-MM-DD");
+    }
 
-    if (fechaLimite <= minDate) {
-      throw new Error("La fecha límite debe ser al menos 24 horas en el futuro");
+    // Validar que la fecha sea al menos mañana (24 horas en el futuro)
+    const fechaLimite = new Date(params.fechaLimite + 'T23:59:59.999Z');
+    const hoy = new Date();
+    const manana = new Date(hoy.getTime() + 24 * 60 * 60 * 1000);
+    const fechaLimiteSoloFecha = new Date(fechaLimite.getFullYear(), fechaLimite.getMonth(), fechaLimite.getDate());
+    const mananaISoloFecha = new Date(manana.getFullYear(), manana.getMonth(), manana.getDate());
+
+    if (fechaLimiteSoloFecha < mananaISoloFecha) {
+      throw new Error("La fecha límite debe ser al menos mañana");
     }
 
     // Validar pasantías
