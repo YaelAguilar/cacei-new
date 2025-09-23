@@ -2,10 +2,11 @@
 
 import * as Yup from 'yup';
 
-// Helper para obtener fecha mínima (24 horas en el futuro)
-const getMinDatetime = (): Date => {
-  const now = new Date();
-  return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+// 🚀 MODIFICADO: Helper para obtener fecha mínima (mañana)
+const getMinDate = (): Date => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1); // Mínimo mañana
+  return tomorrow;
 };
 
 // Opciones válidas de pasantías
@@ -21,15 +22,22 @@ export const ConvocatoriaValidationSchema = Yup.object().shape({
     .nullable()
     .notRequired(),
   
+  // 🚀 MODIFICADO: Validación para input type="date" (solo fecha)
   fechaLimite: Yup.string()
     .required('La fecha límite es obligatoria')
-    .test('future-date', 'La fecha límite debe ser al menos 24 horas en el futuro', function(value: string | undefined) {
+    .matches(/^\d{4}-\d{2}-\d{2}$/, 'La fecha debe tener el formato YYYY-MM-DD')
+    .test('future-date', 'La fecha límite debe ser al menos mañana', function(value: string | undefined) {
       if (!value) return false;
       
-      const selectedDate = new Date(value);
-      const minDate = getMinDatetime();
+      // Parsear la fecha seleccionada (solo fecha, sin hora)
+      const selectedDate = new Date(value + 'T00:00:00.000Z');
+      const minDate = getMinDate();
       
-      return selectedDate > minDate;
+      // Comparar solo las fechas (sin hora)
+      const selectedDateOnly = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+      const minDateOnly = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+      
+      return selectedDateOnly >= minDateOnly;
     }),
   
   pasantiasSeleccionadas: Yup.array()
@@ -46,7 +54,7 @@ export const ConvocatoriaValidationSchema = Yup.object().shape({
     .required('Debe seleccionar al menos una pasantía')
 });
 
-// Schema específico para validaciones en tiempo real
+// 🚀 MODIFICADO: Schema específico para validaciones en tiempo real
 export const ConvocatoriaRealTimeValidation = {
   validateNombre: (nombre: string): string | null => {
     if (!nombre || nombre.trim() === "") {
@@ -55,16 +63,31 @@ export const ConvocatoriaRealTimeValidation = {
     return null;
   },
 
+  // 🚀 MODIFICADO: Validar fecha en formato YYYY-MM-DD
   validateFechaLimite: (fechaLimite: string): string | null => {
     if (!fechaLimite) {
       return "La fecha límite es obligatoria";
     }
 
-    const selectedDate = new Date(fechaLimite);
-    const minDate = getMinDatetime();
+    // Validar formato
+    const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!fechaRegex.test(fechaLimite)) {
+      return "La fecha debe tener el formato YYYY-MM-DD";
+    }
 
-    if (selectedDate <= minDate) {
-      return "La fecha límite debe ser al menos 24 horas en el futuro";
+    // Validar que sea una fecha válida
+    const selectedDate = new Date(fechaLimite + 'T00:00:00.000Z');
+    if (isNaN(selectedDate.getTime())) {
+      return "Fecha inválida";
+    }
+
+    // Validar que sea al menos mañana
+    const minDate = getMinDate();
+    const selectedDateOnly = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    const minDateOnly = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+
+    if (selectedDateOnly < minDateOnly) {
+      return "La fecha límite debe ser al menos mañana";
     }
 
     return null;

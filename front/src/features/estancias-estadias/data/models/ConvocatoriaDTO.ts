@@ -1,7 +1,7 @@
 export interface CreateConvocatoriaRequest {
   nombre: string;
   descripcion?: string | null;
-  fechaLimite: string; // ISO 8601 format
+  fechaLimite: string; // 👈 CAMBIADO: Ahora es string con formato YYYY-MM-DD (será convertido en backend)
   pasantiasSeleccionadas: string[];
 }
 
@@ -21,7 +21,7 @@ export interface ProfesoresApiResponse {
 export interface ConvocatoriaResponseAttributes {
   nombre: string;
   descripcion: string | null;
-  fechaLimite: string;
+  fechaLimite: string; // Viene como ISO string desde el backend
   pasantiasDisponibles: string[];
   profesoresDisponibles: ProfesorDTO[];
   active: boolean;
@@ -76,7 +76,7 @@ export interface ErrorResponse {
 export interface UpdateConvocatoriaRequest {
   nombre?: string;
   descripcion?: string | null;
-  fechaLimite?: string; // ISO 8601 format
+  fechaLimite?: string; // 👈 CAMBIADO: Ahora es string con formato YYYY-MM-DD (será convertido en backend)
   pasantiasSeleccionadas?: string[];
   actualizarProfesores?: boolean;
 }

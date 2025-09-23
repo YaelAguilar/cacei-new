@@ -16,15 +16,17 @@ interface EditConvocatoriaFormProps {
 interface FormValues {
   nombre: string;
   descripcion: string;
-  fechaLimite: string;
+  fechaLimite: string; // 👈 CAMBIADO: Ahora es string con formato YYYY-MM-DD
   pasantiasSeleccionadas: string[];
   actualizarProfesores: boolean;
 }
 
-// Helper para formatear la fecha para el input datetime-local
-const formatDateTimeForInput = (date: Date): string => {
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return localDate.toISOString().slice(0, 16);
+// 🚀 NUEVO: Helper para formatear la fecha para el input date
+const formatDateForInput = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 const EditConvocatoriaForm: React.FC<EditConvocatoriaFormProps> = observer(({ 
@@ -36,7 +38,7 @@ const EditConvocatoriaForm: React.FC<EditConvocatoriaFormProps> = observer(({
   const initialValues: FormValues = {
     nombre: convocatoria.getNombre(),
     descripcion: convocatoria.getDescripcion() || "",
-    fechaLimite: formatDateTimeForInput(convocatoria.getFechaLimite()),
+    fechaLimite: formatDateForInput(convocatoria.getFechaLimite()), // 👈 CAMBIADO: Formatear solo fecha
     pasantiasSeleccionadas: convocatoria.getPasantiasDisponibles(),
     actualizarProfesores: false,
   };
@@ -54,6 +56,12 @@ const EditConvocatoriaForm: React.FC<EditConvocatoriaFormProps> = observer(({
   };
 
   const opcionesPasantias = ["Estancia I", "Estancia II", "Estadía", "Estadía 1", "Estadía 2"];
+
+  // 🚀 NUEVO: Obtener fecha mínima (hoy)
+  const getMinDate = (): string => {
+    const today = new Date();
+    return formatDateForInput(today);
+  };
 
   return (
     <div className="mt-4">
@@ -78,10 +86,20 @@ const EditConvocatoriaForm: React.FC<EditConvocatoriaFormProps> = observer(({
               <Field as="textarea" name="descripcion" rows={3} className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"/>
             </div>
 
-            {/* Fecha Límite */}
+            {/* 🚀 MODIFICADO: Fecha Límite - Ahora es input type="date" */}
             <div>
-              <label htmlFor="fechaLimite" className="block text-black text-sm font-bold mb-2">Fecha Límite</label>
-              <Field type="datetime-local" name="fechaLimite" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"/>
+              <label htmlFor="fechaLimite" className="block text-black text-sm font-bold mb-2">
+                Fecha Límite
+                <span className="text-gray-500 text-xs font-normal ml-2">
+                  (El cierre será a las 23:59:59 del día seleccionado)
+                </span>
+              </label>
+              <Field 
+                type="date" // 👈 CAMBIADO: De datetime-local a date
+                name="fechaLimite" 
+                min={getMinDate()} // 👈 NUEVO: Fecha mínima es hoy
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+              />
               <ErrorMessage name="fechaLimite" component="div" className="text-red-500 text-xs italic mt-1" />
             </div>
 

@@ -181,16 +181,16 @@ export class ConvocatoriaViewModel {
     return currentCount < 5;
   }
 
-  // Obtener fecha mínima para el input datetime-local
-  getMinDatetime(): string {
-    const now = new Date();
-    const minDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 horas
-    const year = minDate.getFullYear();
-    const month = (minDate.getMonth() + 1).toString().padStart(2, '0');
-    const day = minDate.getDate().toString().padStart(2, '0');
-    const hours = minDate.getHours().toString().padStart(2, '0');
-    const minutes = minDate.getMinutes().toString().padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  // 🚀 MODIFICADO: Obtener fecha mínima para el input date (mañana)
+  getMinDate(): string {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1); // Mínimo mañana
+    
+    const year = tomorrow.getFullYear();
+    const month = (tomorrow.getMonth() + 1).toString().padStart(2, '0');
+    const day = tomorrow.getDate().toString().padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
   }
 
   // Limpiar errores

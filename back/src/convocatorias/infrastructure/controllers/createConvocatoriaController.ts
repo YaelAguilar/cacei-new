@@ -1,122 +1,96 @@
-import { Request, Response } from 'express';
-import { CreateConvocatoriaUseCase } from '../../application/createConvocatoriaUseCase';
+import { ConvocatoriaRepository } from "../../domain/interfaces/convocatoriaRepository";
+import { Convocatoria } from "../../domain/models/convocatoria";
 
-export class CreateConvocatoriaController {
-    constructor(private readonly createConvocatoriaUseCase: CreateConvocatoriaUseCase) {}
+export class CreateConvocatoriaUseCase {
+    constructor(private readonly convocatoriaRepository: ConvocatoriaRepository) {}
 
-    async run(req: Request, res: Response): Promise<void> {
-        const { nombre, descripcion, fechaLimite, pasantiasSeleccionadas } = req.body;
-
+    async run(
+        nombre: string,
+        descripcion: string | null,
+        fechaLimite: string, // 👈 CAMBIADO: Ahora recibe formato YYYY-MM-DD
+        pasantiasDisponibles: string[],
+        profesoresDisponibles: { id: number; nombre: string; email: string }[]
+    ): Promise<Convocatoria | null> {
         try {
-            // Validar que los campos requeridos estén presentes
-            if (!nombre || !fechaLimite || !pasantiasSeleccionadas) {
-                res.status(400).json({
-                    errors: [{
-                        status: "400",
-                        title: "Bad Request",
-                        detail: "Los campos nombre, fechaLimite y pasantiasSeleccionadas son obligatorios"
-                    }]
-                });
-                return;
+            // Validaciones básicas
+            if (!nombre || !nombre.trim()) {
+                throw new Error("El nombre es obligatorio");
             }
 
-            // Validar que pasantiasSeleccionadas sea un array
-            if (!Array.isArray(pasantiasSeleccionadas)) {
-                res.status(400).json({
-                    errors: [{
-                        status: "400",
-                        title: "Bad Request",
-                        detail: "El campo pasantiasSeleccionadas debe ser un array"
-                    }]
-                });
-                return;
+            // 🚀 NUEVO: Validar formato YYYY-MM-DD
+            const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!fechaRegex.test(fechaLimite)) {
+                throw new Error("La fecha debe tener el formato YYYY-MM-DD");
             }
 
-            // Convertir la fecha límite a objeto Date
-            const fechaLimiteDate = new Date(fechaLimite);
-            if (isNaN(fechaLimiteDate.getTime())) {
-                res.status(400).json({
-                    errors: [{
-                        status: "400",
-                        title: "Bad Request",
-                        detail: "Formato de fecha inválido"
-                    }]
-                });
-                return;
+            // 🚀 NUEVO: Convertir fecha a último segundo del día
+            const fechaConvertida = this.convertToEndOfDay(fechaLimite);
+
+            // Validar que la fecha límite sea al menos mañana
+            const hoy = new Date();
+            const manana = new Date(hoy.getTime() + 24 * 60 * 60 * 1000);
+            const mananaFecha = new Date(manana.getFullYear(), manana.getMonth(), manana.getDate());
+
+            if (fechaConvertida < mananaFecha) {
+                throw new Error("La fecha límite debe ser al menos mañana");
             }
 
-            const convocatoria = await this.createConvocatoriaUseCase.run(
-                nombre,
-                descripcion || null,
-                fechaLimiteDate,
-                pasantiasSeleccionadas
+            if (!Array.isArray(pasantiasDisponibles) || pasantiasDisponibles.length === 0) {
+                throw new Error("Debe seleccionar al menos una pasantía");
+            }
+
+            if (pasantiasDisponibles.length > 5) {
+                throw new Error("No se pueden seleccionar más de 5 pasantías");
+            }
+
+            // Validar que las pasantías seleccionadas sean válidas
+            const pasantiasValidas = ["Estancia I", "Estancia II", "Estadía", "Estadía 1", "Estadía 2"];
+            const pasantiasInvalidas = pasantiasDisponibles.filter(p => !pasantiasValidas.includes(p));
+            if (pasantiasInvalidas.length > 0) {
+                throw new Error(`Pasantías no válidas: ${pasantiasInvalidas.join(", ")}`);
+            }
+
+            // Eliminar duplicados
+            const pasantiasUnicas = [...new Set(pasantiasDisponibles)];
+
+            // Obtener la lista actual de profesores disponibles
+            const profesores = await this.convocatoriaRepository.getProfesoresDisponibles();
+            if (!profesores || profesores.length === 0) {
+                throw new Error("No hay profesores disponibles para la convocatoria");
+            }
+
+            // Convertir profesores a formato para guardar
+            const profesoresDisponiblesFormato = profesores.map(profesor => ({
+                id: profesor.getId(),
+                nombre: profesor.getNombre(),
+                email: profesor.getEmail()
+            }));
+
+            return await this.convocatoriaRepository.createConvocatoria(
+                nombre.trim(),
+                descripcion ? descripcion.trim() : null,
+                fechaConvertida, // 👈 CAMBIADO: Usar fecha convertida
+                pasantiasUnicas,
+                profesoresDisponiblesFormato
             );
-
-            if (convocatoria) {
-                // Formato JSON:API
-                const formattedConvocatoria = {
-                    type: "convocatoria",
-                    id: convocatoria.getUuid(),
-                    attributes: {
-                        nombre: convocatoria.getNombre(),
-                        descripcion: convocatoria.getDescripcion(),
-                        fechaLimite: convocatoria.getFechaLimite(),
-                        pasantiasDisponibles: convocatoria.getPasantiasDisponibles(),
-                        profesoresDisponibles: convocatoria.getProfesoresDisponibles(),
-                        active: convocatoria.isActive(),
-                        createdAt: convocatoria.getCreatedAt(),
-                        updatedAt: convocatoria.getUpdatedAt()
-                    }
-                };
-
-                res.status(201).json({ data: formattedConvocatoria });
-            } else {
-                res.status(400).json({
-                    errors: [{
-                        status: "400",
-                        title: "Could not create convocatoria",
-                        detail: "No se pudo crear la convocatoria"
-                    }]
-                });
-            }
         } catch (error) {
-            console.error("Error in CreateConvocatoriaController:", error);
+            console.error("Error in CreateConvocatoriaUseCase:", error);
+            throw error;
+        }
+    }
+
+    // 🚀 NUEVO MÉTODO: Convierte fecha YYYY-MM-DD a Date con 23:59:59
+    private convertToEndOfDay(fechaString: string): Date {
+        try {
+            // Crear fecha desde el string (formato YYYY-MM-DD)
+            const fecha = new Date(fechaString + 'T00:00:00.000Z');
             
-            // Manejo específico de errores de validación de negocio
-            if (error instanceof Error) {
-                const errorMessage = error.message;
-                
-                // Errores de validación de negocio (400)
-                const businessErrors = [
-                    "No se puede crear una nueva convocatoria mientras haya una convocatoria vigente",
-                    "El nombre es obligatorio",
-                    "La fecha límite debe ser en el futuro",
-                    "Debe seleccionar al menos una pasantía",
-                    "No se pueden seleccionar más de 5 pasantías",
-                    "No hay profesores disponibles para la convocatoria"
-                ];
-                
-                if (businessErrors.some(msg => errorMessage.includes(msg)) || 
-                    errorMessage.includes("Pasantías no válidas:")) {
-                    res.status(400).json({
-                        errors: [{
-                            status: "400",
-                            title: "Business Logic Error",
-                            detail: errorMessage
-                        }]
-                    });
-                    return;
-                }
-            }
+            // Establecer al último segundo del día (23:59:59.999)
+            fecha.setUTCHours(23, 59, 59, 999);
             
-            // Error genérico del servidor (500)
-            res.status(500).json({
-                errors: [{
-                    status: "500",
-                    title: "Server error",
-                    detail: error instanceof Error ? error.message : String(error)
-                }]
-            });
+            return fecha;
+        } catch (error) {
+            throw new Error("Formato de fecha inválido. Use YYYY-MM-DD");
         }
     }
 }
