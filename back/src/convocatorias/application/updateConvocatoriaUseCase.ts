@@ -8,7 +8,7 @@ export class UpdateConvocatoriaUseCase {
         uuid: string,
         nombre?: string,
         descripcion?: string | null,
-        fechaLimite?: Date,
+        fechaLimite?: string, // Formato YYYY-MM-DD
         pasantiasDisponibles?: string[],
         actualizarProfesores?: boolean
     ): Promise<Convocatoria | null> {
@@ -33,19 +33,24 @@ export class UpdateConvocatoriaUseCase {
             }
 
             if (fechaLimite !== undefined) {
-                // Validar que la fecha límite sea al menos 1 hora en el futuro
-                const now = new Date();
-                const minDate = new Date(now.getTime() + 60 * 60 * 1000); // 1 hora
+                // Validar formato YYYY-MM-DD
+                const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
+                if (!fechaRegex.test(fechaLimite)) {
+                    throw new Error("La fecha debe tener el formato YYYY-MM-DD");
+                }
+
+                // Convertir fecha a último segundo del día
+                const fechaConvertida = this.convertToEndOfDay(fechaLimite);
                 
-                if (fechaLimite <= now) {
-                    throw new Error("La fecha límite debe ser en el futuro");
+                // Validar que la fecha sea al menos hoy (para actualizaciones)
+                const hoy = new Date();
+                const hoyFecha = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+
+                if (fechaConvertida < hoyFecha) {
+                    throw new Error("La fecha límite no puede ser anterior a hoy");
                 }
 
-                if (fechaLimite <= minDate) {
-                    throw new Error("La fecha límite debe ser al menos 1 hora en el futuro");
-                }
-
-                updatedData.fechaLimite = fechaLimite;
+                updatedData.fechaLimite = fechaConvertida;
             }
 
             if (pasantiasDisponibles !== undefined) {
@@ -91,6 +96,21 @@ export class UpdateConvocatoriaUseCase {
         } catch (error) {
             console.error("Error in UpdateConvocatoriaUseCase:", error);
             throw error;
+        }
+    }
+
+    // Convierte fecha YYYY-MM-DD a Date con 23:59:59
+    private convertToEndOfDay(fechaString: string): Date {
+        try {
+            // Crear fecha desde el string (formato YYYY-MM-DD)
+            const fecha = new Date(fechaString + 'T00:00:00.000Z');
+            
+            // Establecer al último segundo del día (23:59:59.999)
+            fecha.setUTCHours(23, 59, 59, 999);
+            
+            return fecha;
+        } catch (error) {
+            throw new Error("Formato de fecha inválido. Use YYYY-MM-DD");
         }
     }
 }

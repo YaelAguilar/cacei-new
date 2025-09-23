@@ -7,7 +7,7 @@ export class CreateConvocatoriaUseCase {
     async run(
         nombre: string,
         descripcion: string | null,
-        fechaLimite: Date,
+        fechaLimite: string, // Formato YYYY-MM-DD
         pasantiasDisponibles: string[]
     ): Promise<Convocatoria | null> {
         try {
@@ -22,16 +22,22 @@ export class CreateConvocatoriaUseCase {
                 throw new Error("El nombre es obligatorio");
             }
 
-            // Validar que la fecha límite sea al menos 1 día en el futuro
-            const now = new Date();
-            const minDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 horas
-            
-            if (fechaLimite <= now) {
-                throw new Error("La fecha límite debe ser en el futuro");
+            // Validar formato YYYY-MM-DD
+            const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!fechaRegex.test(fechaLimite)) {
+                throw new Error("La fecha debe tener el formato YYYY-MM-DD");
             }
 
-            if (fechaLimite <= minDate) {
-                throw new Error("La fecha límite debe ser al menos 24 horas en el futuro");
+            // Convertir fecha a último segundo del día
+            const fechaConvertida = this.convertToEndOfDay(fechaLimite);
+
+            // Validar que la fecha límite sea al menos mañana
+            const hoy = new Date();
+            const manana = new Date(hoy.getTime() + 24 * 60 * 60 * 1000);
+            const mananaFecha = new Date(manana.getFullYear(), manana.getMonth(), manana.getDate());
+
+            if (fechaConvertida < mananaFecha) {
+                throw new Error("La fecha límite debe ser al menos mañana");
             }
 
             if (!Array.isArray(pasantiasDisponibles) || pasantiasDisponibles.length === 0) {
@@ -68,13 +74,28 @@ export class CreateConvocatoriaUseCase {
             return await this.convocatoriaRepository.createConvocatoria(
                 nombre.trim(),
                 descripcion ? descripcion.trim() : null,
-                fechaLimite,
+                fechaConvertida,
                 pasantiasUnicas,
                 profesoresDisponibles
             );
         } catch (error) {
             console.error("Error in CreateConvocatoriaUseCase:", error);
             throw error;
+        }
+    }
+
+    // Convierte fecha YYYY-MM-DD a Date con 23:59:59
+    private convertToEndOfDay(fechaString: string): Date {
+        try {
+            // Crear fecha desde el string (formato YYYY-MM-DD)
+            const fecha = new Date(fechaString + 'T00:00:00.000Z');
+            
+            // Establecer al último segundo del día (23:59:59.999)
+            fecha.setUTCHours(23, 59, 59, 999);
+            
+            return fecha;
+        } catch (error) {
+            throw new Error("Formato de fecha inválido. Use YYYY-MM-DD");
         }
     }
 }
