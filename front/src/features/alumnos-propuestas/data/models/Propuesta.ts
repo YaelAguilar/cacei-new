@@ -122,6 +122,17 @@ export class TutorAcademico {
   getEmail(): string { return this.email; }
 }
 
+// NUEVA CLASE: Información del Estudiante
+export class InformacionEstudiante {
+  constructor(
+    private readonly nombreCompleto: string,
+    private readonly email: string
+  ) {}
+
+  getNombreCompleto(): string { return this.nombreCompleto; }
+  getEmail(): string { return this.email; }
+}
+
 // Tipos de estatus según el backend
 export type ProposalStatus = 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' | 'ACTUALIZAR';
 
@@ -130,13 +141,14 @@ export class PropuestaCompleta {
     private readonly id: string,
     private readonly numericId: number,
     private readonly idConvocatoria: number,
+    private readonly estudiante: InformacionEstudiante, // NUEVO: Información del estudiante
     private readonly tutorAcademico: TutorAcademico,
     private readonly tipoPasantia: string,
     private readonly empresa: EmpresaCompleta,
     private readonly contacto: Contacto,
     private readonly supervisor: Supervisor,
     private readonly proyecto: ProyectoCompleto,
-    private readonly estatus: ProposalStatus, // Nuevo campo de estatus
+    private readonly estatus: ProposalStatus,
     private readonly active: boolean,
     private readonly createdAt: Date,
     private readonly updatedAt: Date
@@ -146,13 +158,14 @@ export class PropuestaCompleta {
   getId(): string { return this.id; }
   getNumericId(): number { return this.numericId; }
   getIdConvocatoria(): number { return this.idConvocatoria; }
+  getEstudiante(): InformacionEstudiante { return this.estudiante; } // NUEVO getter
   getTutorAcademico(): TutorAcademico { return this.tutorAcademico; }
   getTipoPasantia(): string { return this.tipoPasantia; }
   getEmpresa(): EmpresaCompleta { return this.empresa; }
   getContacto(): Contacto { return this.contacto; }
   getSupervisor(): Supervisor { return this.supervisor; }
   getProyecto(): ProyectoCompleto { return this.proyecto; }
-  getEstatus(): ProposalStatus { return this.estatus; } // Nuevo getter
+  getEstatus(): ProposalStatus { return this.estatus; }
   isActive(): boolean { return this.active; }
   getCreatedAt(): Date { return this.createdAt; }
   getUpdatedAt(): Date { return this.updatedAt; }
