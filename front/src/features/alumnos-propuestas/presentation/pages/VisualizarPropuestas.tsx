@@ -1,15 +1,27 @@
 // src/features/alumnos-propuestas/presentation/pages/VisualizarPropuestas.tsx
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import MainContainer from "../../../shared/layout/MainContainer";
 import { VisualizarPropuestasViewModel } from "../viewModels/VisualizarPropuestasViewModel";
 import PropuestaCard from "../components/PropuestaCard";
 import PropuestaDetailModal from "../../../shared/components/PropuestaDetailModal";
-import { FiRefreshCw, FiAlertCircle, FiFileText, FiPlus } from "react-icons/fi";
+import { FiRefreshCw, FiAlertCircle, FiFileText, FiPlus, FiFilter } from "react-icons/fi";
+import { ProposalStatus } from "../../data/models/Propuesta";
+import { useAuth } from "../../../../core/utils/AuthContext";
 
 const VisualizarPropuestas: React.FC = observer(() => {
   // Crear instancia del ViewModel usando useMemo para evitar recreaciones
   const visualizarViewModel = useMemo(() => new VisualizarPropuestasViewModel(), []);
+  const authViewModel = useAuth();
+  
+  // Estado local para filtros
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<ProposalStatus | 'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Verificar si el usuario puede gestionar estatus (es tutor/admin)
+  const canManageStatus = authViewModel.userRoles.some(role => 
+    ['PTC', 'PA', 'Director', 'Admin'].includes(role.name)
+  );
 
   // Inicializar datos al montar el componente
   useEffect(() => {
@@ -31,8 +43,61 @@ const VisualizarPropuestas: React.FC = observer(() => {
 
   // Manejar actualización manual
   const handleRefresh = async () => {
-    await visualizarViewModel.loadPropuestas();
+    if (selectedStatusFilter && selectedStatusFilter !== 'ALL' && selectedStatusFilter !== 'ACTIVE' && selectedStatusFilter !== 'INACTIVE') {
+      await visualizarViewModel.loadPropuestasByStatus(selectedStatusFilter as ProposalStatus);
+    } else {
+      await visualizarViewModel.loadPropuestas();
+    }
   };
+
+  // Manejar cambio de filtro
+  const handleFilterChange = async (filter: ProposalStatus | 'ALL' | 'ACTIVE' | 'INACTIVE') => {
+    setSelectedStatusFilter(filter);
+    
+    if (filter === 'ALL') {
+      await visualizarViewModel.loadPropuestas();
+    } else if (filter === 'ACTIVE' || filter === 'INACTIVE') {
+      await visualizarViewModel.loadPropuestas(); // Cargar todas y filtrar en UI
+    } else {
+      await visualizarViewModel.loadPropuestasByStatus(filter as ProposalStatus);
+    }
+  };
+
+  // Filtrar propuestas según el filtro seleccionado
+  const getFilteredPropuestas = () => {
+    switch (selectedStatusFilter) {
+      case 'ACTIVE':
+        return visualizarViewModel.propuestasActivas;
+      case 'INACTIVE':
+        return visualizarViewModel.propuestasInactivas;
+      case 'PENDIENTE':
+        return visualizarViewModel.propuestasPendientes;
+      case 'APROBADO':
+        return visualizarViewModel.propuestasAprobadas;
+      case 'RECHAZADO':
+        return visualizarViewModel.propuestasRechazadas;
+      case 'ACTUALIZAR':
+        return visualizarViewModel.propuestasParaActualizar;
+      case 'ALL':
+      default:
+        return visualizarViewModel.propuestas;
+    }
+  };
+
+  const filteredPropuestas = getFilteredPropuestas();
+
+  // Opciones de filtro
+  const filterOptions = [
+    { value: 'ALL', label: 'Todas', count: visualizarViewModel.statistics.total },
+    { value: 'ACTIVE', label: 'Activas', count: visualizarViewModel.statistics.activas },
+    { value: 'INACTIVE', label: 'Inactivas', count: visualizarViewModel.statistics.inactivas },
+    ...(canManageStatus ? [
+      { value: 'PENDIENTE', label: 'Pendientes', count: visualizarViewModel.statistics.pendientes },
+      { value: 'APROBADO', label: 'Aprobadas', count: visualizarViewModel.statistics.aprobadas },
+      { value: 'RECHAZADO', label: 'Rechazadas', count: visualizarViewModel.statistics.rechazadas },
+      { value: 'ACTUALIZAR', label: 'Para Actualizar', count: visualizarViewModel.statistics.paraActualizar }
+    ] : [])
+  ];
 
   // Mostrar loading mientras se inicializa
   if (!visualizarViewModel.isInitialized) {
@@ -54,15 +119,26 @@ const VisualizarPropuestas: React.FC = observer(() => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
             <div>
               <h1 className="text-[23px] md:text-[36px] font-semibold text-black">
-                Mis Propuestas
+                {canManageStatus ? 'Gestión de Propuestas' : 'Mis Propuestas'}
               </h1>
               <p className="text-[14px] md:text-[24px] font-light text-black">
-                Visualiza todas tus propuestas de proyectos registradas.
+                {canManageStatus 
+                  ? 'Visualiza y gestiona todas las propuestas de proyectos.'
+                  : 'Visualiza todas tus propuestas de proyectos registradas.'
+                }
               </p>
             </div>
             
             {/* Botones de acción */}
             <div className="mt-4 md:mt-0 flex gap-3">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <FiFilter className="w-4 h-4" />
+                Filtros
+              </button>
+              
               <button
                 onClick={handleRefresh}
                 disabled={visualizarViewModel.loading}
@@ -72,19 +148,43 @@ const VisualizarPropuestas: React.FC = observer(() => {
                 {visualizarViewModel.loading ? 'Actualizando...' : 'Actualizar'}
               </button>
               
-              <button
-                onClick={() => window.location.href = '/mis-propuestas/nueva-propuesta'}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <FiPlus className="w-4 h-4" />
-                Nueva Propuesta
-              </button>
+              {!canManageStatus && (
+                <button
+                  onClick={() => window.location.href = '/mis-propuestas/nueva-propuesta'}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <FiPlus className="w-4 h-4" />
+                  Nueva Propuesta
+                </button>
+              )}
             </div>
           </div>
 
+          {/* Panel de filtros */}
+          {showFilters && (
+            <div className="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Filtrar propuestas</h3>
+              <div className="flex flex-wrap gap-2">
+                {filterOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleFilterChange(option.value as any)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                      selectedStatusFilter === option.value
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {option.label} ({option.count})
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Estadísticas rápidas */}
           {visualizarViewModel.hasPropuestas && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
               <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -93,7 +193,7 @@ const VisualizarPropuestas: React.FC = observer(() => {
                   <div>
                     <p className="text-sm text-gray-500">Total</p>
                     <p className="text-xl font-semibold text-gray-900">
-                      {visualizarViewModel.propuestas.length}
+                      {visualizarViewModel.statistics.total}
                     </p>
                   </div>
                 </div>
@@ -107,25 +207,71 @@ const VisualizarPropuestas: React.FC = observer(() => {
                   <div>
                     <p className="text-sm text-gray-500">Activas</p>
                     <p className="text-xl font-semibold text-gray-900">
-                      {visualizarViewModel.propuestasActivas.length}
+                      {visualizarViewModel.statistics.activas}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <FiFileText className="w-5 h-5 text-gray-600" />
+              {canManageStatus && (
+                <>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <FiFileText className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Pendientes</p>
+                        <p className="text-xl font-semibold text-gray-900">
+                          {visualizarViewModel.statistics.pendientes}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Inactivas</p>
-                    <p className="text-xl font-semibold text-gray-900">
-                      {visualizarViewModel.propuestasInactivas.length}
-                    </p>
+
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <FiFileText className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Aprobadas</p>
+                        <p className="text-xl font-semibold text-gray-900">
+                          {visualizarViewModel.statistics.aprobadas}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                        <FiFileText className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Rechazadas</p>
+                        <p className="text-xl font-semibold text-gray-900">
+                          {visualizarViewModel.statistics.rechazadas}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <FiFileText className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">P/Actualizar</p>
+                        <p className="text-xl font-semibold text-gray-900">
+                          {visualizarViewModel.statistics.paraActualizar}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -151,6 +297,16 @@ const VisualizarPropuestas: React.FC = observer(() => {
             </div>
           )}
 
+          {/* Información del filtro actual */}
+          {selectedStatusFilter !== 'ALL' && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Filtro activo:</strong> {filterOptions.find(f => f.value === selectedStatusFilter)?.label} 
+                ({filteredPropuestas.length} propuesta{filteredPropuestas.length !== 1 ? 's' : ''})
+              </p>
+            </div>
+          )}
+
           {/* Loading state */}
           {visualizarViewModel.loading && (
             <div className="flex justify-center py-8">
@@ -161,45 +317,16 @@ const VisualizarPropuestas: React.FC = observer(() => {
           {/* Lista de propuestas */}
           {!visualizarViewModel.loading && (
             <>
-              {visualizarViewModel.hasPropuestas ? (
-                <div className="space-y-8">
-                  {/* Propuestas activas */}
-                  {visualizarViewModel.propuestasActivas.length > 0 && (
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        Propuestas Activas ({visualizarViewModel.propuestasActivas.length})
-                      </h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {visualizarViewModel.propuestasActivas.map((propuesta) => (
-                          <PropuestaCard
-                            key={propuesta.getId()}
-                            propuesta={propuesta}
-                            viewModel={visualizarViewModel}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Propuestas inactivas */}
-                  {visualizarViewModel.propuestasInactivas.length > 0 && (
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                        Propuestas Inactivas ({visualizarViewModel.propuestasInactivas.length})
-                      </h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {visualizarViewModel.propuestasInactivas.map((propuesta) => (
-                          <PropuestaCard
-                            key={propuesta.getId()}
-                            propuesta={propuesta}
-                            viewModel={visualizarViewModel}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
+              {filteredPropuestas.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredPropuestas.map((propuesta) => (
+                    <PropuestaCard
+                      key={propuesta.getId()}
+                      propuesta={propuesta}
+                      viewModel={visualizarViewModel}
+                      showStatusActions={canManageStatus}
+                    />
+                  ))}
                 </div>
               ) : (
                 /* Estado vacío */
@@ -208,25 +335,41 @@ const VisualizarPropuestas: React.FC = observer(() => {
                     <FiFileText className="w-12 h-12 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No tienes propuestas registradas
+                    {selectedStatusFilter === 'ALL' 
+                      ? 'No tienes propuestas registradas'
+                      : `No hay propuestas ${filterOptions.find(f => f.value === selectedStatusFilter)?.label?.toLowerCase()}`
+                    }
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    Aún no has registrado ninguna propuesta de proyecto. Cuando haya una convocatoria activa, podrás registrar tu primera propuesta.
+                    {selectedStatusFilter === 'ALL' 
+                      ? 'Aún no has registrado ninguna propuesta de proyecto. Cuando haya una convocatoria activa, podrás registrar tu primera propuesta.'
+                      : `No se encontraron propuestas con el filtro seleccionado.`
+                    }
                   </p>
                   
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    {selectedStatusFilter !== 'ALL' && (
+                      <button
+                        onClick={() => handleFilterChange('ALL')}
+                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                      >
+                        Ver todas las propuestas
+                      </button>
+                    )}
                     <button
                       onClick={handleRefresh}
-                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Actualizar lista
                     </button>
-                    <button
-                      onClick={() => window.location.href = '/mis-propuestas/nueva-propuesta'}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Verificar convocatorias
-                    </button>
+                    {!canManageStatus && selectedStatusFilter === 'ALL' && (
+                      <button
+                        onClick={() => window.location.href = '/mis-propuestas/nueva-propuesta'}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        Verificar convocatorias
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

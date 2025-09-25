@@ -2,7 +2,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { PropuestaRepository } from "../../data/repository/PropuestaRepository";
 import { GetPropuestasByAlumnoUseCase } from "../../domain/GetPropuestasByAlumnoUseCase";
-import { PropuestaCompleta } from "../../data/models/Propuesta";
+import { PropuestaCompleta, ProposalStatus } from "../../data/models/Propuesta";
 import { PropuestaDetailViewModelInterface } from "../../../shared/components/PropuestaDetailModal";
 
 export class VisualizarPropuestasViewModel implements PropuestaDetailViewModelInterface {
@@ -85,6 +85,55 @@ export class VisualizarPropuestasViewModel implements PropuestaDetailViewModelIn
     }
   }
 
+  // Cargar propuestas por estatus
+  async loadPropuestasByStatus(status: ProposalStatus): Promise<void> {
+    this.setLoading(true);
+    this.setError(null);
+
+    try {
+      const propuestas = await this.repository.getPropuestasByStatus(status);
+      runInAction(() => {
+        this.setPropuestas(propuestas);
+      });
+    } catch (error: any) {
+      runInAction(() => {
+        this.setError(error.message || "Error al cargar las propuestas por estatus");
+        this.setPropuestas([]);
+      });
+    } finally {
+      this.setLoading(false);
+    }
+  }
+
+  // Actualizar estatus de propuesta
+  async updateProposalStatus(uuid: string, status: ProposalStatus): Promise<boolean> {
+    try {
+      const updatedPropuesta = await this.repository.updateProposalStatus(uuid, status);
+      
+      if (updatedPropuesta) {
+        runInAction(() => {
+          // Actualizar la propuesta en la lista
+          const index = this.propuestas.findIndex(p => p.getId() === uuid);
+          if (index !== -1) {
+            this.propuestas[index] = updatedPropuesta;
+          }
+          
+          // Actualizar la propuesta seleccionada si es la misma
+          if (this.selectedPropuesta && this.selectedPropuesta.getId() === uuid) {
+            this.selectedPropuesta = updatedPropuesta;
+          }
+        });
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      runInAction(() => {
+        this.setError(error.message || "Error al actualizar el estatus de la propuesta");
+      });
+      return false;
+    }
+  }
+
   // Abrir modal de detalles
   openDetailModal(propuesta: PropuestaCompleta) {
     this.setSelectedPropuesta(propuesta);
@@ -110,25 +159,73 @@ export class VisualizarPropuestasViewModel implements PropuestaDetailViewModelIn
     return this.propuestas.filter(propuesta => !propuesta.isActive());
   }
 
+  // Nuevos getters para propuestas por estatus
+  get propuestasPendientes(): PropuestaCompleta[] {
+    return this.propuestas.filter(propuesta => propuesta.getEstatus() === 'PENDIENTE');
+  }
+
+  get propuestasAprobadas(): PropuestaCompleta[] {
+    return this.propuestas.filter(propuesta => propuesta.getEstatus() === 'APROBADO');
+  }
+
+  get propuestasRechazadas(): PropuestaCompleta[] {
+    return this.propuestas.filter(propuesta => propuesta.getEstatus() === 'RECHAZADO');
+  }
+
+  get propuestasParaActualizar(): PropuestaCompleta[] {
+    return this.propuestas.filter(propuesta => propuesta.getEstatus() === 'ACTUALIZAR');
+  }
+
+  // Estadísticas de propuestas
+  get statistics() {
+    return {
+      total: this.propuestas.length,
+      pendientes: this.propuestasPendientes.length,
+      aprobadas: this.propuestasAprobadas.length,
+      rechazadas: this.propuestasRechazadas.length,
+      paraActualizar: this.propuestasParaActualizar.length,
+      activas: this.propuestasActivas.length,
+      inactivas: this.propuestasInactivas.length
+    };
+  }
+
   // Obtener el estado de una propuesta
   getPropuestaStatus(propuesta: PropuestaCompleta): {
     status: 'active' | 'inactive';
     label: string;
     color: string;
   } {
-    if (propuesta.isActive()) {
-      return {
-        status: 'active',
-        label: 'Activa',
-        color: 'text-green-600 bg-green-100 border-green-300'
-      };
-    } else {
+    // Primero verificar el estatus de la propuesta
+    const statusInfo = propuesta.getStatusInfo();
+    
+    if (!propuesta.isActive()) {
       return {
         status: 'inactive',
         label: 'Inactiva',
         color: 'text-gray-600 bg-gray-100 border-gray-300'
       };
     }
+
+    // Si está activa, mostrar el estatus actual
+    return {
+      status: 'active',
+      label: statusInfo.label,
+      color: `${statusInfo.color} ${statusInfo.bgColor}`
+    };
+  }
+
+  // Obtener información detallada del estatus
+  getPropuestaDetailedStatus(propuesta: PropuestaCompleta) {
+    const statusInfo = propuesta.getStatusInfo();
+    const activeInfo = propuesta.isActive();
+    
+    return {
+      estatus: statusInfo,
+      activa: activeInfo,
+      mostrarEstatus: activeInfo, // Solo mostrar estatus si está activa
+      colorPrincipal: activeInfo ? statusInfo.color : 'text-gray-600',
+      fondoPrincipal: activeInfo ? statusInfo.bgColor : 'bg-gray-100 border-gray-300'
+    };
   }
 
   // Formatear fecha para mostrar

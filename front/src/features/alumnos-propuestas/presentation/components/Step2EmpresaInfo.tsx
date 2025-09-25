@@ -40,7 +40,7 @@ const Step2EmpresaInfo: React.FC<Step2EmpresaInfoProps> = observer(({
 
   const handleSubmit = (values: any) => {
     viewModel.updateFormData({
-      companyShortName: values.companyShortName,
+      companyShortName: values.companyShortName || null, // Convertir string vacío a null
       companyLegalName: values.companyLegalName,
       companyTaxId: values.companyTaxId,
       companyState: values.companyState,
@@ -50,10 +50,10 @@ const Step2EmpresaInfo: React.FC<Step2EmpresaInfoProps> = observer(({
       companyStreetType: values.companyStreetType,
       companyStreetName: values.companyStreetName,
       companyExteriorNumber: values.companyExteriorNumber,
-      companyInteriorNumber: values.companyInteriorNumber,
+      companyInteriorNumber: values.companyInteriorNumber || null, // Convertir string vacío a null
       companyPostalCode: values.companyPostalCode,
-      companyWebsite: values.companyWebsite,
-      companyLinkedin: values.companyLinkedin,
+      companyWebsite: values.companyWebsite || null, // Convertir string vacío a null
+      companyLinkedin: values.companyLinkedin || null, // Convertir string vacío a null
       contactName: values.contactName,
       contactPosition: values.contactPosition,
       contactEmail: values.contactEmail,
@@ -85,16 +85,19 @@ const Step2EmpresaInfo: React.FC<Step2EmpresaInfoProps> = observer(({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="companyShortName" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre Comercial <span className="text-red-500">*</span>
+                    Nombre Comercial <span className="text-gray-400">(Opcional)</span>
                   </label>
                   <Field
                     type="text"
                     id="companyShortName"
                     name="companyShortName"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ej: TechSolutions"
+                    placeholder="Ej: TechSolutions (opcional)"
                   />
                   <ErrorMessage name="companyShortName" component="div" className="text-red-500 text-xs mt-1" />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Si no tiene nombre comercial, déjalo vacío
+                  </p>
                 </div>
 
                 <div>
@@ -111,7 +114,7 @@ const Step2EmpresaInfo: React.FC<Step2EmpresaInfoProps> = observer(({
                   <ErrorMessage name="companyLegalName" component="div" className="text-red-500 text-xs mt-1" />
                 </div>
 
-                <div>
+                <div className="md:col-span-1">
                   <label htmlFor="companyTaxId" className="block text-sm font-medium text-gray-700 mb-2">
                     RFC <span className="text-red-500">*</span>
                   </label>
@@ -121,8 +124,12 @@ const Step2EmpresaInfo: React.FC<Step2EmpresaInfoProps> = observer(({
                     name="companyTaxId"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Ej: TSO123456ABC"
+                    style={{ textTransform: 'uppercase' }}
                   />
                   <ErrorMessage name="companyTaxId" component="div" className="text-red-500 text-xs mt-1" />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Formato: 3-4 letras + 6 dígitos (YYMMDD) + 3 caracteres
+                  </p>
                 </div>
               </div>
             </div>
@@ -244,14 +251,14 @@ const Step2EmpresaInfo: React.FC<Step2EmpresaInfoProps> = observer(({
 
                 <div>
                   <label htmlFor="companyInteriorNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                    Número Interior (Opcional)
+                    Número Interior <span className="text-gray-400">(Opcional)</span>
                   </label>
                   <Field
                     type="text"
                     id="companyInteriorNumber"
                     name="companyInteriorNumber"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ej: A, 2, 101"
+                    placeholder="Ej: A, 2, 101 (opcional)"
                   />
                   <ErrorMessage name="companyInteriorNumber" component="div" className="text-red-500 text-xs mt-1" />
                 </div>
@@ -266,6 +273,7 @@ const Step2EmpresaInfo: React.FC<Step2EmpresaInfoProps> = observer(({
                     name="companyPostalCode"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Ej: 29000"
+                    maxLength={5}
                   />
                   <ErrorMessage name="companyPostalCode" component="div" className="text-red-500 text-xs mt-1" />
                 </div>
@@ -279,7 +287,7 @@ const Step2EmpresaInfo: React.FC<Step2EmpresaInfoProps> = observer(({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="companyWebsite" className="block text-sm font-medium text-gray-700 mb-2">
-                    Página Web
+                    Página Web <span className="text-gray-400">(Opcional)</span>
                   </label>
                   <Field
                     type="url"
@@ -293,7 +301,7 @@ const Step2EmpresaInfo: React.FC<Step2EmpresaInfoProps> = observer(({
 
                 <div>
                   <label htmlFor="companyLinkedin" className="block text-sm font-medium text-gray-700 mb-2">
-                    LinkedIn
+                    LinkedIn <span className="text-gray-400">(Opcional)</span>
                   </label>
                   <Field
                     type="url"
@@ -368,7 +376,7 @@ const Step2EmpresaInfo: React.FC<Step2EmpresaInfoProps> = observer(({
                   <ErrorMessage name="contactPhone" component="div" className="text-red-500 text-xs mt-1" />
                 </div>
 
-                <div>
+                <div className="md:col-span-2">
                   <label htmlFor="contactArea" className="block text-sm font-medium text-gray-700 mb-2">
                     Área/Departamento <span className="text-red-500">*</span>
                   </label>

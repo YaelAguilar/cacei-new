@@ -3,6 +3,7 @@ import ApiClient from "../../../../core/API/ApiClient";
 import { 
   CreatePropuestaRequest,
   UpdatePropuestaRequest,
+  UpdateProposalStatusRequest,
   JsonApiPropuestaCompletaResponse,
   JsonApiPropuestasCompletasListResponse,
   JsonApiConvocatoriaActivaResponse
@@ -15,7 +16,8 @@ import {
   Contacto,
   Supervisor,
   ProyectoCompleto,
-  ConvocatoriaActiva
+  ConvocatoriaActiva,
+  ProposalStatus
 } from "../models/Propuesta";
 
 export class PropuestaRepository {
@@ -106,85 +108,244 @@ export class PropuestaRepository {
     }
   }
 
+  // Nuevo método para actualizar estatus de propuesta
+  async updateProposalStatus(uuid: string, status: ProposalStatus): Promise<PropuestaCompleta | null> {
+    try {
+      const request: UpdateProposalStatusRequest = { status };
+      const response = await ApiClient.patch<JsonApiPropuestaCompletaResponse>(`/propuestas/${uuid}/estatus`, request);
+      
+      if (response.status === 200 && response.data.data) {
+        return this.mapResponseToPropuesta(response.data.data);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error en updateProposalStatus:", error);
+      throw error;
+    }
+  }
+
+  // Nuevo método para obtener propuestas por estatus
+  async getPropuestasByStatus(status: ProposalStatus): Promise<PropuestaCompleta[]> {
+    try {
+      const response = await ApiClient.get<JsonApiPropuestasCompletasListResponse>(`/propuestas/estatus/${status}`);
+      
+      if (response.status === 200 && response.data.data) {
+        return response.data.data.map(item => this.mapResponseToPropuesta(item));
+      }
+      
+      return [];
+    } catch (error) {
+      console.error("Error en getPropuestasByStatus:", error);
+      throw error;
+    }
+  }
+
   private mapResponseToPropuesta(data: any): PropuestaCompleta {
     const attrs = data.attributes;
     
-    // Mapear Tutor Académico
-    const tutorAcademico = new TutorAcademico(
-      attrs.tutorAcademico.id,
-      attrs.tutorAcademico.nombre,
-      attrs.tutorAcademico.email
-    );
+    // Manejar ambas estructuras de respuesta (nueva estructura por secciones y estructura de compatibilidad)
+    let tutorAcademico: TutorAcademico;
+    let tipoPasantia: string;
+    let nombreCortoEmpresa: string | null;
+    let razonSocial: string;
+    let rfc: string;
+    let direccionData: any;
+    let paginaWeb: string | null;
+    let linkedin: string | null;
+    let contactoData: any;
+    let supervisorData: any;
+    let proyectoData: any;
+    let estatus: ProposalStatus;
+    
+    // Determinar estructura de respuesta y mapear campos
+    if (attrs.informacionDelAlumno) {
+      // Nueva estructura por secciones
+      tutorAcademico = new TutorAcademico(
+        attrs.informacionDelAlumno.tutorAcademico.id,
+        attrs.informacionDelAlumno.tutorAcademico.nombre,
+        attrs.informacionDelAlumno.tutorAcademico.email
+      );
+      tipoPasantia = attrs.informacionDelAlumno.pasantiaARealizar;
+      
+      nombreCortoEmpresa = attrs.informacionDeLaEmpresa?.nombreCorto || null;
+      razonSocial = attrs.informacionDeLaEmpresa?.nombreLegal || '';
+      rfc = attrs.informacionDeLaEmpresa?.rfc || '';
+      
+      const direccionInfo = attrs.direccionFisicaYEnLaWebDeLaEmpresa;
+      direccionData = {
+        estado: direccionInfo?.entidadFederativa || '',
+        municipio: direccionInfo?.demarcacionTerritorial || '',
+        tipoAsentamiento: direccionInfo?.tipoDeAsentamientoHumano || '',
+        nombreAsentamiento: direccionInfo?.nombreDelAsentamientoHumano || '',
+        tipoVialidad: direccionInfo?.vialidad || '',
+        nombreVia: direccionInfo?.nombreDeLaVia || '',
+        numeroExterior: direccionInfo?.numeroExterior || '',
+        numeroInterior: direccionInfo?.numeroInterior || null,
+        codigoPostal: direccionInfo?.codigoPostal || ''
+      };
+      
+      paginaWeb = direccionInfo?.paginaWeb || null;
+      linkedin = direccionInfo?.linkedin || null;
+      
+      const contactoInfo = attrs.informacionDeContactoEnLaEmpresa;
+      contactoData = {
+        nombre: contactoInfo?.nombreDeLaPersonaDeContacto || '',
+        puesto: contactoInfo?.puestoEnLaEmpresaDeLaPersonaDeContacto || '',
+        email: contactoInfo?.direccionElectronicaDeCorreo || '',
+        telefono: contactoInfo?.numeroTelefonico || '',
+        area: contactoInfo?.nombreDelAreaAsociada || ''
+      };
+      
+      const supervisorInfo = attrs.supervisorDelProyectoDeEstanciaOEstadia;
+      supervisorData = {
+        nombre: supervisorInfo?.nombreDelSupervisor || '',
+        area: supervisorInfo?.areaDeLaEmpresaEnLaQueSeDesarrollaraElProyecto || '',
+        email: supervisorInfo?.direccionElectronicaDeCorreo || '',
+        telefono: supervisorInfo?.numeroDeTelefono || ''
+      };
+      
+      const proyectoInfo = attrs.datosDelProyecto;
+      proyectoData = {
+        nombre: proyectoInfo?.nombreDelProyecto || '',
+        fechaInicio: proyectoInfo?.fechaDeInicioDelProyecto || '',
+        fechaFin: proyectoInfo?.fechaDeCierreDelProyecto || '',
+        contextoProblema: proyectoInfo?.contextoDeLaProblematica || '',
+        descripcionProblema: proyectoInfo?.problematica || '',
+        objetivoGeneral: proyectoInfo?.objetivoGeneralDelProyectoADesarrollar || '',
+        objetivosEspecificos: proyectoInfo?.objetivosEspecificosDelProyecto || '',
+        actividadesPrincipales: proyectoInfo?.principalesActividadesARealizarEnLaEstanciaOEstadia || '',
+        entregablesPlaneados: proyectoInfo?.entregablesPlaneadosDelProyecto || '',
+        tecnologias: proyectoInfo?.tecnologiasAAplicarEnElProyecto || ''
+      };
+      
+      estatus = attrs.estatus || 'PENDIENTE';
+      
+    } else {
+      // Estructura de compatibilidad (formato anterior)
+      tutorAcademico = new TutorAcademico(
+        attrs.tutorAcademico?.id || 0,
+        attrs.tutorAcademico?.nombre || '',
+        attrs.tutorAcademico?.email || ''
+      );
+      tipoPasantia = attrs.tipoPasantia || '';
+      
+      nombreCortoEmpresa = attrs.empresa?.nombreCorto || null;
+      razonSocial = attrs.empresa?.razonSocial || '';
+      rfc = attrs.empresa?.rfc || '';
+      
+      direccionData = {
+        estado: attrs.empresa?.direccion?.estado || '',
+        municipio: attrs.empresa?.direccion?.municipio || '',
+        tipoAsentamiento: attrs.empresa?.direccion?.tipoAsentamiento || '',
+        nombreAsentamiento: attrs.empresa?.direccion?.nombreAsentamiento || '',
+        tipoVialidad: attrs.empresa?.direccion?.tipoVialidad || '',
+        nombreVia: attrs.empresa?.direccion?.nombreVia || '',
+        numeroExterior: attrs.empresa?.direccion?.numeroExterior || '',
+        numeroInterior: attrs.empresa?.direccion?.numeroInterior || null,
+        codigoPostal: attrs.empresa?.direccion?.codigoPostal || ''
+      };
+      
+      paginaWeb = attrs.empresa?.paginaWeb || null;
+      linkedin = attrs.empresa?.linkedin || null;
+      
+      contactoData = {
+        nombre: attrs.contacto?.nombre || '',
+        puesto: attrs.contacto?.puesto || '',
+        email: attrs.contacto?.email || '',
+        telefono: attrs.contacto?.telefono || '',
+        area: attrs.contacto?.area || ''
+      };
+      
+      supervisorData = {
+        nombre: attrs.supervisor?.nombre || '',
+        area: attrs.supervisor?.area || '',
+        email: attrs.supervisor?.email || '',
+        telefono: attrs.supervisor?.telefono || ''
+      };
+      
+      proyectoData = {
+        nombre: attrs.proyecto?.nombre || '',
+        fechaInicio: attrs.proyecto?.fechaInicio || '',
+        fechaFin: attrs.proyecto?.fechaFin || '',
+        contextoProblema: attrs.proyecto?.contextoProblema || '',
+        descripcionProblema: attrs.proyecto?.descripcionProblema || '',
+        objetivoGeneral: attrs.proyecto?.objetivoGeneral || '',
+        objetivosEspecificos: attrs.proyecto?.objetivosEspecificos || '',
+        actividadesPrincipales: attrs.proyecto?.actividadesPrincipales || '',
+        entregablesPlaneados: attrs.proyecto?.entregablesPlaneados || '',
+        tecnologias: attrs.proyecto?.tecnologias || ''
+      };
+      
+      estatus = attrs.estatus || 'PENDIENTE';
+    }
 
-    // Mapear Dirección de Empresa
+    // Crear objetos del dominio
     const direccion = new DireccionEmpresa(
-      attrs.empresa.direccion.estado,
-      attrs.empresa.direccion.municipio,
-      attrs.empresa.direccion.tipoAsentamiento,
-      attrs.empresa.direccion.nombreAsentamiento,
-      attrs.empresa.direccion.tipoVialidad,
-      attrs.empresa.direccion.nombreVia,
-      attrs.empresa.direccion.numeroExterior,
-      attrs.empresa.direccion.numeroInterior,
-      attrs.empresa.direccion.codigoPostal
+      direccionData.estado,
+      direccionData.municipio,
+      direccionData.tipoAsentamiento,
+      direccionData.nombreAsentamiento,
+      direccionData.tipoVialidad,
+      direccionData.nombreVia,
+      direccionData.numeroExterior,
+      direccionData.numeroInterior,
+      direccionData.codigoPostal
     );
 
-    // Mapear Empresa Completa
     const empresa = new EmpresaCompleta(
-      attrs.empresa.nombreCorto,
-      attrs.empresa.razonSocial,
-      attrs.empresa.rfc,
+      nombreCortoEmpresa,
+      razonSocial,
+      rfc,
       direccion,
-      attrs.empresa.paginaWeb,
-      attrs.empresa.linkedin,
-      attrs.empresa.sector
+      paginaWeb,
+      linkedin,
+      contactoData.area // El sector se toma del área de contacto
     );
 
-    // Mapear Contacto
     const contacto = new Contacto(
-      attrs.contacto.nombre,
-      attrs.contacto.puesto,
-      attrs.contacto.email,
-      attrs.contacto.telefono,
-      attrs.contacto.area
+      contactoData.nombre,
+      contactoData.puesto,
+      contactoData.email,
+      contactoData.telefono,
+      contactoData.area
     );
 
-    // Mapear Supervisor
     const supervisor = new Supervisor(
-      attrs.supervisor.nombre,
-      attrs.supervisor.area,
-      attrs.supervisor.email,
-      attrs.supervisor.telefono
+      supervisorData.nombre,
+      supervisorData.area,
+      supervisorData.email,
+      supervisorData.telefono
     );
 
-    // Mapear Proyecto Completo
     const proyecto = new ProyectoCompleto(
-      attrs.proyecto.nombre,
-      new Date(attrs.proyecto.fechaInicio),
-      new Date(attrs.proyecto.fechaFin),
-      attrs.proyecto.contextoProblema,
-      attrs.proyecto.descripcionProblema,
-      attrs.proyecto.objetivoGeneral,
-      attrs.proyecto.objetivosEspecificos,
-      attrs.proyecto.actividadesPrincipales,
-      attrs.proyecto.entregablesPlaneados,
-      attrs.proyecto.tecnologias
+      proyectoData.nombre,
+      new Date(proyectoData.fechaInicio),
+      new Date(proyectoData.fechaFin),
+      proyectoData.contextoProblema,
+      proyectoData.descripcionProblema,
+      proyectoData.objetivoGeneral,
+      proyectoData.objetivosEspecificos,
+      proyectoData.actividadesPrincipales,
+      proyectoData.entregablesPlaneados,
+      proyectoData.tecnologias
     );
 
     // Crear Propuesta Completa
     return new PropuestaCompleta(
       data.id,
-      data.id,
-      attrs.idConvocatoria,
+      parseInt(data.id), // numericId
+      attrs.idConvocatoria || 0,
       tutorAcademico,
-      attrs.tipoPasantia,
+      tipoPasantia,
       empresa,
       contacto,
       supervisor,
       proyecto,
-      attrs.active,
-      new Date(attrs.createdAt),
-      new Date(attrs.updatedAt)
+      estatus,
+      attrs.active !== false,
+      new Date(attrs.createdAt || new Date()),
+      new Date(attrs.updatedAt || new Date())
     );
   }
 }

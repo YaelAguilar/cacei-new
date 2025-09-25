@@ -23,10 +23,11 @@ export const Step1ValidationSchema = Yup.object().shape({
 export const Step2ValidationSchema = Yup.object().shape({
   // Información básica de la empresa
   companyShortName: Yup.string()
-    .required('El nombre comercial de la empresa es obligatorio')
     .trim()
     .min(2, 'El nombre debe tener al menos 2 caracteres')
-    .max(255, 'El nombre no puede exceder 255 caracteres'),
+    .max(100, 'El nombre no puede exceder 100 caracteres')
+    .nullable()
+    .transform((value) => value === '' ? null : value),
   
   companyLegalName: Yup.string()
     .required('La razón social es obligatoria')
@@ -38,18 +39,21 @@ export const Step2ValidationSchema = Yup.object().shape({
     .required('El RFC es obligatorio')
     .trim()
     .min(12, 'El RFC debe tener al menos 12 caracteres')
-    .max(13, 'El RFC no puede exceder 13 caracteres'),
+    .max(13, 'El RFC no puede exceder 13 caracteres')
+    .matches(/^[A-ZÑ&]{3,4}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[A-Z0-9]{2}[0-9A]$/, 'Formato de RFC inválido'),
 
   // Dirección
   companyState: Yup.string()
     .required('La entidad federativa es obligatoria')
     .trim()
-    .min(2, 'Debe tener al menos 2 caracteres'),
+    .min(2, 'Debe tener al menos 2 caracteres')
+    .max(100, 'No puede exceder 100 caracteres'),
   
   companyMunicipality: Yup.string()
     .required('La demarcación territorial es obligatoria')
     .trim()
-    .min(2, 'Debe tener al menos 2 caracteres'),
+    .min(2, 'Debe tener al menos 2 caracteres')
+    .max(100, 'No puede exceder 100 caracteres'),
   
   companySettlementType: Yup.string()
     .required('El tipo de asentamiento es obligatorio')
@@ -58,7 +62,8 @@ export const Step2ValidationSchema = Yup.object().shape({
   companySettlementName: Yup.string()
     .required('El nombre del asentamiento es obligatorio')
     .trim()
-    .min(2, 'Debe tener al menos 2 caracteres'),
+    .min(2, 'Debe tener al menos 2 caracteres')
+    .max(100, 'No puede exceder 100 caracteres'),
   
   companyStreetType: Yup.string()
     .required('El tipo de vialidad es obligatorio')
@@ -67,15 +72,18 @@ export const Step2ValidationSchema = Yup.object().shape({
   companyStreetName: Yup.string()
     .required('El nombre de la vía es obligatorio')
     .trim()
-    .min(2, 'Debe tener al menos 2 caracteres'),
+    .min(2, 'Debe tener al menos 2 caracteres')
+    .max(100, 'No puede exceder 100 caracteres'),
   
   companyExteriorNumber: Yup.string()
     .required('El número exterior es obligatorio')
     .trim()
-    .min(1, 'Debe especificar el número exterior'),
+    .min(1, 'Debe especificar el número exterior')
+    .max(10, 'No puede exceder 10 caracteres'),
   
   companyInteriorNumber: Yup.string()
     .nullable()
+    .max(10, 'No puede exceder 10 caracteres')
     .transform((value) => value === '' ? null : value),
   
   companyPostalCode: Yup.string()
@@ -86,11 +94,13 @@ export const Step2ValidationSchema = Yup.object().shape({
   companyWebsite: Yup.string()
     .nullable()
     .url('Debe ser una URL válida (incluir http:// o https://)')
+    .max(255, 'La URL no puede exceder 255 caracteres')
     .transform((value) => value === '' ? null : value),
   
   companyLinkedin: Yup.string()
     .nullable()
     .url('Debe ser una URL válida (incluir http:// o https://)')
+    .max(255, 'La URL no puede exceder 255 caracteres')
     .transform((value) => value === '' ? null : value),
 
   // Información de contacto
@@ -104,7 +114,7 @@ export const Step2ValidationSchema = Yup.object().shape({
     .required('El puesto es obligatorio')
     .trim()
     .min(2, 'El puesto debe tener al menos 2 caracteres')
-    .max(255, 'El puesto no puede exceder 255 caracteres'),
+    .max(100, 'El puesto no puede exceder 100 caracteres'),
   
   contactEmail: Yup.string()
     .required('El email es obligatorio')
@@ -114,13 +124,15 @@ export const Step2ValidationSchema = Yup.object().shape({
   contactPhone: Yup.string()
     .required('El teléfono es obligatorio')
     .trim()
-    .min(10, 'El teléfono debe tener al menos 10 dígitos'),
+    .min(10, 'El teléfono debe tener al menos 10 dígitos')
+    .max(15, 'El teléfono no puede exceder 15 caracteres')
+    .matches(/^[\d\-\s\(\)\+]+$/, 'Formato de teléfono inválido'),
   
   contactArea: Yup.string()
     .required('El área/departamento es obligatorio')
     .trim()
     .min(2, 'El área debe tener al menos 2 caracteres')
-    .max(255, 'El área no puede exceder 255 caracteres')
+    .max(100, 'El área no puede exceder 100 caracteres')
 });
 
 // Validación para Step 3: Supervisor del Proyecto
@@ -135,7 +147,7 @@ export const Step3ValidationSchema = Yup.object().shape({
     .required('El área del supervisor es obligatoria')
     .trim()
     .min(2, 'El área debe tener al menos 2 caracteres')
-    .max(255, 'El área no puede exceder 255 caracteres'),
+    .max(100, 'El área no puede exceder 100 caracteres'),
   
   supervisorEmail: Yup.string()
     .required('El email del supervisor es obligatorio')
@@ -146,6 +158,8 @@ export const Step3ValidationSchema = Yup.object().shape({
     .required('El teléfono del supervisor es obligatorio')
     .trim()
     .min(10, 'El teléfono debe tener al menos 10 dígitos')
+    .max(15, 'El teléfono no puede exceder 15 caracteres')
+    .matches(/^[\d\-\s\(\)\+]+$/, 'Formato de teléfono inválido')
 });
 
 // Validación para Step 4: Información del Proyecto
@@ -162,7 +176,15 @@ export const Step4ValidationSchema = Yup.object().shape({
   
   projectEndDate: Yup.date()
     .required('La fecha de fin es obligatoria')
-    .min(Yup.ref('projectStartDate'), 'La fecha de fin debe ser posterior a la fecha de inicio'),
+    .min(Yup.ref('projectStartDate'), 'La fecha de fin debe ser posterior a la fecha de inicio')
+    .test('duration', 'El proyecto debe tener una duración mínima de 30 días', function(value) {
+      const { projectStartDate } = this.parent;
+      if (!value || !projectStartDate) return true;
+      
+      const diffTime = Math.abs(value.getTime() - projectStartDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays >= 30;
+    }),
   
   projectProblemContext: Yup.string()
     .required('El contexto de la problemática es obligatorio')
@@ -262,3 +284,10 @@ export const PropuestaRealTimeValidation = {
     }
   }
 };
+
+// Validación para actualización de estatus
+export const UpdateStatusValidationSchema = Yup.object().shape({
+  status: Yup.string()
+    .required('El estatus es obligatorio')
+    .oneOf(['PENDIENTE', 'APROBADO', 'RECHAZADO', 'ACTUALIZAR'], 'Estatus inválido')
+});

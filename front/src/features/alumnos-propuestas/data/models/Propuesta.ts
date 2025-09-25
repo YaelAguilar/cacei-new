@@ -31,7 +31,7 @@ export class DireccionEmpresa {
 
 export class EmpresaCompleta {
   constructor(
-    private readonly nombreCorto: string,
+    private readonly nombreCorto: string | null,
     private readonly razonSocial: string,
     private readonly rfc: string,
     private readonly direccion: DireccionEmpresa,
@@ -40,7 +40,7 @@ export class EmpresaCompleta {
     private readonly sector: string
   ) {}
 
-  getNombreCorto(): string { return this.nombreCorto; }
+  getNombreCorto(): string | null { return this.nombreCorto; }
   getRazonSocial(): string { return this.razonSocial; }
   getRFC(): string { return this.rfc; }
   getDireccion(): DireccionEmpresa { return this.direccion; }
@@ -122,6 +122,9 @@ export class TutorAcademico {
   getEmail(): string { return this.email; }
 }
 
+// Tipos de estatus según el backend
+export type ProposalStatus = 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' | 'ACTUALIZAR';
+
 export class PropuestaCompleta {
   constructor(
     private readonly id: string,
@@ -133,6 +136,7 @@ export class PropuestaCompleta {
     private readonly contacto: Contacto,
     private readonly supervisor: Supervisor,
     private readonly proyecto: ProyectoCompleto,
+    private readonly estatus: ProposalStatus, // Nuevo campo de estatus
     private readonly active: boolean,
     private readonly createdAt: Date,
     private readonly updatedAt: Date
@@ -148,6 +152,7 @@ export class PropuestaCompleta {
   getContacto(): Contacto { return this.contacto; }
   getSupervisor(): Supervisor { return this.supervisor; }
   getProyecto(): ProyectoCompleto { return this.proyecto; }
+  getEstatus(): ProposalStatus { return this.estatus; } // Nuevo getter
   isActive(): boolean { return this.active; }
   getCreatedAt(): Date { return this.createdAt; }
   getUpdatedAt(): Date { return this.updatedAt; }
@@ -168,11 +173,51 @@ export class PropuestaCompleta {
 
   getEmpresaInfo() {
     return {
-      getNombre: () => this.empresa.getNombreCorto(),
+      getNombre: () => this.empresa.getNombreCorto() || this.empresa.getRazonSocial(),
       getSector: () => this.empresa.getSector(),
       getPersonaContacto: () => this.contacto.getNombre(),
       getPaginaWeb: () => this.empresa.getPaginaWeb()
     };
+  }
+
+  // Método para obtener información de estatus formateada
+  getStatusInfo(): {
+    status: 'pendiente' | 'aprobado' | 'rechazado' | 'actualizar';
+    label: string;
+    color: string;
+    bgColor: string;
+  } {
+    switch (this.estatus) {
+      case 'APROBADO':
+        return {
+          status: 'aprobado',
+          label: 'Aprobado',
+          color: 'text-green-700',
+          bgColor: 'bg-green-100 border-green-300'
+        };
+      case 'RECHAZADO':
+        return {
+          status: 'rechazado',
+          label: 'Rechazado',
+          color: 'text-red-700',
+          bgColor: 'bg-red-100 border-red-300'
+        };
+      case 'ACTUALIZAR':
+        return {
+          status: 'actualizar',
+          label: 'Requiere Actualización',
+          color: 'text-yellow-700',
+          bgColor: 'bg-yellow-100 border-yellow-300'
+        };
+      case 'PENDIENTE':
+      default:
+        return {
+          status: 'pendiente',
+          label: 'Pendiente',
+          color: 'text-blue-700',
+          bgColor: 'bg-blue-100 border-blue-300'
+        };
+    }
   }
 }
 

@@ -5,7 +5,7 @@ export interface CreatePropuestaRequest {
   internshipType: string;
   
   // Información de la empresa
-  companyShortName: string;
+  companyShortName?: string | null;
   companyLegalName: string;
   companyTaxId: string;
   
@@ -67,7 +67,7 @@ export interface DireccionEmpresaDTO {
 }
 
 export interface EmpresaCompletaDTO {
-  nombreCorto: string;
+  nombreCorto?: string | null;
   razonSocial: string;
   rfc: string;
   direccion: DireccionEmpresaDTO;
@@ -104,17 +104,81 @@ export interface ProyectoCompletoDTO {
   tecnologias: string;
 }
 
+// Nuevo DTO que refleja la estructura del backend actualizado
 export interface PropuestaCompletaResponseAttributes {
-  idConvocatoria: number;
-  tutorAcademico: TutorAcademicoDTO;
-  tipoPasantia: string;
-  empresa: EmpresaCompletaDTO;
-  contacto: ContactoDTO;
-  supervisor: SupervisorDTO;
-  proyecto: ProyectoCompletoDTO;
-  active: boolean;
-  createdAt: string;
-  updatedAt: string;
+  // Estatus de la propuesta (nuevo campo del backend)
+  estatus?: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' | 'ACTUALIZAR';
+  
+  // Información del alumno (sección)
+  informacionDelAlumno?: {
+    tutorAcademico: TutorAcademicoDTO;
+    pasantiaARealizar: string;
+  };
+  
+  // Información de la empresa (sección)
+  informacionDeLaEmpresa?: {
+    nombreCorto?: string | null;
+    nombreLegal: string;
+    rfc: string;
+  };
+  
+  // Dirección física y en la web de la empresa (sección)
+  direccionFisicaYEnLaWebDeLaEmpresa?: {
+    entidadFederativa: string;
+    demarcacionTerritorial: string;
+    tipoDeAsentamientoHumano: string;
+    nombreDelAsentamientoHumano: string;
+    vialidad: string;
+    nombreDeLaVia: string;
+    numeroExterior: string;
+    numeroInterior?: string | null;
+    codigoPostal: string;
+    paginaWeb?: string | null;
+    linkedin?: string | null;
+  };
+  
+  // Información de contacto en la empresa (sección)
+  informacionDeContactoEnLaEmpresa?: {
+    nombreDeLaPersonaDeContacto: string;
+    puestoEnLaEmpresaDeLaPersonaDeContacto: string;
+    direccionElectronicaDeCorreo: string;
+    numeroTelefonico: string;
+    nombreDelAreaAsociada: string;
+  };
+  
+  // Supervisor del proyecto de estancia o estadía (sección)
+  supervisorDelProyectoDeEstanciaOEstadia?: {
+    nombreDelSupervisor: string;
+    areaDeLaEmpresaEnLaQueSeDesarrollaraElProyecto: string;
+    direccionElectronicaDeCorreo: string;
+    numeroDeTelefono: string;
+  };
+  
+  // Datos del proyecto (sección)
+  datosDelProyecto?: {
+    nombreDelProyecto: string;
+    fechaDeInicioDelProyecto: string;
+    fechaDeCierreDelProyecto: string;
+    contextoDeLaProblematica: string;
+    problematica: string;
+    objetivoGeneralDelProyectoADesarrollar: string;
+    objetivosEspecificosDelProyecto: string;
+    principalesActividadesARealizarEnLaEstanciaOEstadia: string;
+    entregablesPlaneadosDelProyecto: string;
+    tecnologiasAAplicarEnElProyecto: string;
+  };
+  
+  // Campos de compatibilidad con la estructura anterior
+  idConvocatoria?: number;
+  tutorAcademico?: TutorAcademicoDTO;
+  tipoPasantia?: string;
+  empresa?: EmpresaCompletaDTO;
+  contacto?: ContactoDTO;
+  supervisor?: SupervisorDTO;
+  proyecto?: ProyectoCompletoDTO;
+  active?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PropuestaCompletaResponseDTO {
@@ -162,7 +226,7 @@ export interface UpdatePropuestaRequest {
   internshipType?: string;
   
   // Información de la empresa
-  companyShortName?: string;
+  companyShortName?: string | null;
   companyLegalName?: string;
   companyTaxId?: string;
   
@@ -203,4 +267,9 @@ export interface UpdatePropuestaRequest {
   projectMainActivities?: string;
   projectPlannedDeliverables?: string;
   projectTechnologies?: string;
+}
+
+// Nuevo DTO para actualizar estatus de propuesta
+export interface UpdateProposalStatusRequest {
+  status: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' | 'ACTUALIZAR';
 }
