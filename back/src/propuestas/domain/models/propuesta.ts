@@ -10,8 +10,9 @@ export class Propuesta {
         private readonly convocatoriaId: number,
         private readonly studentId: number,
         
-        // INFORMACIÓN DEL ALUMNO (sección)
-        // Nombre del alumno se obtiene de users mediante student_id
+        // INFORMACIÓN DEL ALUMNO (sección) - ACTUALIZADA
+        private readonly studentName: string, // NUEVO: Nombre completo del estudiante
+        private readonly studentEmail: string, // NUEVO: Email del estudiante
         private readonly academicTutorId: number, // tutor académico (subsección)
         private readonly academicTutorName: string,
         private readonly academicTutorEmail: string,
@@ -79,7 +80,9 @@ export class Propuesta {
     getConvocatoriaId(): number { return this.convocatoriaId; }
     getStudentId(): number { return this.studentId; }
     
-    // INFORMACIÓN DEL ALUMNO (sección) - Getters
+    // INFORMACIÓN DEL ALUMNO (sección) - Getters ACTUALIZADOS
+    getStudentName(): string { return this.studentName; } // NUEVO
+    getStudentEmail(): string { return this.studentEmail; } // NUEVO
     getAcademicTutorId(): number { return this.academicTutorId; } // tutor académico (subsección)
     getAcademicTutorName(): string { return this.academicTutorName; }
     getAcademicTutorEmail(): string { return this.academicTutorEmail; }

@@ -6,7 +6,9 @@ export interface PropuestaCreateData {
     convocatoriaId: number;
     studentId: number;
     
-    // INFORMACIÓN DEL ALUMNO (sección)
+    // INFORMACIÓN DEL ALUMNO (sección) - ACTUALIZADA
+    studentName: string; // NUEVO: Nombre completo del estudiante
+    studentEmail: string; // NUEVO: Email del estudiante
     academicTutorId: number; // tutor académico (subsección)
     academicTutorName: string;
     academicTutorEmail: string;
@@ -60,7 +62,7 @@ export interface PropuestaCreateData {
 }
 
 export interface PropuestaUpdateData {
-    // INFORMACIÓN DEL ALUMNO (sección)
+    // INFORMACIÓN DEL ALUMNO (sección) - No se actualiza nombre y email del estudiante
     academicTutorId?: number; // tutor académico (subsección)
     academicTutorName?: string;
     academicTutorEmail?: string;

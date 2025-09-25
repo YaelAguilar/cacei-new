@@ -7,6 +7,8 @@ export class CreatePropuestaUseCase {
 
     async run(
         studentId: number,
+        studentName: string, // NUEVO: Nombre completo del estudiante
+        studentEmail: string, // NUEVO: Email del estudiante
         academicTutorId: number,
         internshipType: string,
         
@@ -73,6 +75,7 @@ export class CreatePropuestaUseCase {
 
             // Validaciones de negocio con campos opcionales
             this.validateBusinessRules(
+                studentName, studentEmail, // NUEVAS VALIDACIONES
                 companyLegalName, companyTaxId,
                 companyState, companyMunicipality, companySettlementType, companySettlementName,
                 companyStreetType, companyStreetName, companyExteriorNumber, companyPostalCode,
@@ -103,6 +106,8 @@ export class CreatePropuestaUseCase {
             const propuestaData: PropuestaCreateData = {
                 convocatoriaId: convocatoriaActiva.id,
                 studentId,
+                studentName: studentName.trim(), // NUEVO
+                studentEmail: studentEmail.trim(), // NUEVO
                 academicTutorId,
                 academicTutorName: tutorDisponible.nombre,
                 academicTutorEmail: tutorDisponible.email,
@@ -162,6 +167,7 @@ export class CreatePropuestaUseCase {
     }
 
     private validateBusinessRules(
+        studentName: string, studentEmail: string, // NUEVOS PARÁMETROS
         companyLegalName: string, companyTaxId: string,
         companyState: string, companyMunicipality: string, companySettlementType: string,
         companySettlementName: string, companyStreetType: string, companyStreetName: string,
@@ -176,6 +182,20 @@ export class CreatePropuestaUseCase {
         projectMainActivities: string, projectPlannedDeliverables: string,
         projectTechnologies: string
     ): void {
+        // NUEVAS VALIDACIONES PARA INFORMACIÓN DEL ESTUDIANTE
+        if (!studentName || !studentName.trim()) {
+            throw new Error("El nombre del estudiante es obligatorio");
+        }
+        if (!studentEmail || !studentEmail.trim()) {
+            throw new Error("El email del estudiante es obligatorio");
+        }
+        
+        // Validar formato de email del estudiante
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(studentEmail.trim())) {
+            throw new Error("El formato del email del estudiante es inválido");
+        }
+
         // Validar campos obligatorios de empresa (companyShortName es opcional)
         if (!companyLegalName || !companyLegalName.trim()) {
             throw new Error("El nombre legal de la empresa es obligatorio");

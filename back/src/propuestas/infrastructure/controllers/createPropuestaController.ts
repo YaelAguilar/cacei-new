@@ -76,10 +76,13 @@ export class CreatePropuestaController {
 
             console.log('✅ Token válido, UUID:', userFromToken.uuid);
 
-            // Obtener el ID del estudiante desde la base de datos usando el UUID del token
+            // Obtener el ID y datos completos del estudiante desde la base de datos usando el UUID del token
             console.log('🔍 Consultando usuario en BD...');
             const { query } = require('../../../database/mysql');
-            const userResult = await query('SELECT id FROM users WHERE uuid = ? AND active = true', [userFromToken.uuid]);
+            const userResult = await query(
+                'SELECT id, name, lastName, secondLastName, email FROM users WHERE uuid = ? AND active = true', 
+                [userFromToken.uuid]
+            );
             
             if (userResult.length === 0) {
                 console.log('❌ Usuario no encontrado en BD');
@@ -93,8 +96,12 @@ export class CreatePropuestaController {
                 return;
             }
 
-            const studentId = userResult[0].id;
-            console.log('✅ ID del estudiante encontrado:', studentId);
+            const student = userResult[0];
+            const studentId = student.id;
+            const studentName = `${student.name} ${student.lastName} ${student.secondLastName}`.trim();
+            const studentEmail = student.email;
+            
+            console.log('✅ Datos del estudiante encontrados:', { studentId, studentName, studentEmail });
 
             // Validar campos requeridos básicos (sin incluir los opcionales)
             console.log('🔍 Validando campos requeridos...');
@@ -136,6 +143,8 @@ export class CreatePropuestaController {
             console.log('🔍 Ejecutando createPropuestaUseCase...');
             const propuesta = await this.createPropuestaUseCase.run(
                 studentId,
+                studentName, // NUEVO: Nombre completo del estudiante
+                studentEmail, // NUEVO: Email del estudiante
                 academicTutorId,
                 internshipType,
                 
@@ -252,10 +261,13 @@ export class CreatePropuestaController {
                 // Estatus de la propuesta
                 estatus: propuesta.getProposalStatus(),
                 
-                // Información del alumno (sección)
+                // Información del alumno (sección) - ACTUALIZADA
                 informacionDelAlumno: {
-                    // Nombre del alumno se obtiene de la relación con users
-                    tutorAcademico: { // tutor académico (subsección)
+                    // NUEVOS CAMPOS: Información del estudiante
+                    nombreCompleto: propuesta.getStudentName(),
+                    email: propuesta.getStudentEmail(),
+                    // Tutor académico (subsección)
+                    tutorAcademico: {
                         id: propuesta.getAcademicTutorId(),
                         nombre: propuesta.getAcademicTutorName(),
                         email: propuesta.getAcademicTutorEmail()
@@ -263,14 +275,13 @@ export class CreatePropuestaController {
                     pasantiaARealizar: propuesta.getInternshipType() // Pasantía a realizar (subsección)
                 },
                 
-                // Información de la empresa (sección)
+                // ... resto de las secciones sin cambios
                 informacionDeLaEmpresa: {
-                    nombreCorto: propuesta.getCompanyShortName(), // OPCIONAL
+                    nombreCorto: propuesta.getCompanyShortName(),
                     nombreLegal: propuesta.getCompanyLegalName(),
                     rfc: propuesta.getCompanyTaxId()
                 },
                 
-                // Dirección física y en la web de la empresa (sección)
                 direccionFisicaYEnLaWebDeLaEmpresa: {
                     entidadFederativa: propuesta.getCompanyState(),
                     demarcacionTerritorial: propuesta.getCompanyMunicipality(),
@@ -279,13 +290,12 @@ export class CreatePropuestaController {
                     vialidad: propuesta.getCompanyStreetType(),
                     nombreDeLaVia: propuesta.getCompanyStreetName(),
                     numeroExterior: propuesta.getCompanyExteriorNumber(),
-                    numeroInterior: propuesta.getCompanyInteriorNumber(), // OPCIONAL
+                    numeroInterior: propuesta.getCompanyInteriorNumber(),
                     codigoPostal: propuesta.getCompanyPostalCode(),
-                    paginaWeb: propuesta.getCompanyWebsite(), // OPCIONAL
-                    linkedin: propuesta.getCompanyLinkedin() // OPCIONAL
+                    paginaWeb: propuesta.getCompanyWebsite(),
+                    linkedin: propuesta.getCompanyLinkedin()
                 },
                 
-                // Información de contacto en la empresa (sección)
                 informacionDeContactoEnLaEmpresa: {
                     nombreDeLaPersonaDeContacto: propuesta.getContactName(),
                     puestoEnLaEmpresaDeLaPersonaDeContacto: propuesta.getContactPosition(),
@@ -294,7 +304,6 @@ export class CreatePropuestaController {
                     nombreDelAreaAsociada: propuesta.getContactArea()
                 },
                 
-                // Supervisor del proyecto de estancia o estadía (sección)
                 supervisorDelProyectoDeEstanciaOEstadia: {
                     nombreDelSupervisor: propuesta.getSupervisorName(),
                     areaDeLaEmpresaEnLaQueSeDesarrollaraElProyecto: propuesta.getSupervisorArea(),
@@ -302,7 +311,6 @@ export class CreatePropuestaController {
                     numeroDeTelefono: propuesta.getSupervisorPhone()
                 },
                 
-                // Datos del proyecto (sección)
                 datosDelProyecto: {
                     nombreDelProyecto: propuesta.getProjectName(),
                     fechaDeInicioDelProyecto: propuesta.getProjectStartDate(),

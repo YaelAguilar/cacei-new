@@ -8,7 +8,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
     async createPropuesta(data: PropuestaCreateData): Promise<Propuesta | null> {
         const sql = `
             INSERT INTO project_proposals (
-                uuid, convocatoria_id, student_id, 
+                uuid, convocatoria_id, student_id, student_name, student_email,
                 academic_tutor_id, academic_tutor_name, academic_tutor_email, internship_type,
                 company_short_name, company_legal_name, company_tax_id,
                 company_state, company_municipality, company_settlement_type, company_settlement_name,
@@ -20,7 +20,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
                 project_problem_description, project_general_objective, project_specific_objectives,
                 project_main_activities, project_planned_deliverables, project_technologies,
                 proposal_status, user_creation
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const uuid = uuidv4();
@@ -28,6 +28,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             uuid,
             data.convocatoriaId,
             data.studentId,
+            data.studentName, // NUEVO
+            data.studentEmail, // NUEVO
             data.academicTutorId,
             data.academicTutorName,
             data.academicTutorEmail,
@@ -77,6 +79,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
                 uuid,
                 data.convocatoriaId,
                 data.studentId,
+                data.studentName, // NUEVO
+                data.studentEmail, // NUEVO
                 data.academicTutorId,
                 data.academicTutorName,
                 data.academicTutorEmail,
@@ -143,66 +147,6 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             return [];
         } catch (error) {
             console.error("Error getting propuestas:", error);
-            throw new Error(`Error al obtener las propuestas: ${error}`);
-        }
-    }
-
-    async getPropuestasByConvocatoria(convocatoriaId: number): Promise<Propuesta[] | null> {
-        const sql = `
-            SELECT * FROM project_proposals 
-            WHERE convocatoria_id = ? AND active = true 
-            ORDER BY created_at DESC
-        `;
-
-        try {
-            const result: any = await query(sql, [convocatoriaId]);
-            
-            if (result.length > 0) {
-                return result.map((row: any) => this.mapRowToPropuesta(row));
-            }
-            return [];
-        } catch (error) {
-            console.error("Error getting propuestas by convocatoria:", error);
-            throw new Error(`Error al obtener las propuestas por convocatoria: ${error}`);
-        }
-    }
-
-    async getPropuestasByStudent(studentId: number): Promise<Propuesta[] | null> {
-        const sql = `
-            SELECT * FROM project_proposals 
-            WHERE student_id = ? AND active = true 
-            ORDER BY created_at DESC
-        `;
-
-        try {
-            const result: any = await query(sql, [studentId]);
-            
-            if (result.length > 0) {
-                return result.map((row: any) => this.mapRowToPropuesta(row));
-            }
-            return [];
-        } catch (error) {
-            console.error("Error getting propuestas by student:", error);
-            throw new Error(`Error al obtener las propuestas del estudiante: ${error}`);
-        }
-    }
-
-    async getPropuestasByStatus(status: ProposalStatus): Promise<Propuesta[] | null> {
-        const sql = `
-            SELECT * FROM project_proposals 
-            WHERE proposal_status = ? AND active = true 
-            ORDER BY created_at DESC
-        `;
-
-        try {
-            const result: any = await query(sql, [status]);
-            
-            if (result.length > 0) {
-                return result.map((row: any) => this.mapRowToPropuesta(row));
-            }
-            return [];
-        } catch (error) {
-            console.error("Error getting propuestas by status:", error);
             throw new Error(`Error al obtener las propuestas por estatus: ${error}`);
         }
     }
@@ -227,7 +171,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         const fields: string[] = [];
         const params: any[] = [];
 
-        // INFORMACIÓN DEL ALUMNO (sección)
+        // INFORMACIÓN DEL ALUMNO (sección) - No se actualiza nombre y email del estudiante
         if (data.academicTutorId !== undefined) {
             fields.push("academic_tutor_id = ?");
             params.push(data.academicTutorId);
@@ -498,6 +442,8 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             row.uuid,
             row.convocatoria_id,
             row.student_id,
+            row.student_name, // NUEVO
+            row.student_email, // NUEVO
             row.academic_tutor_id,
             row.academic_tutor_name,
             row.academic_tutor_email,
@@ -543,4 +489,64 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             row.user_update
         );
     }
-}
+} las propuestas: ${error}`);
+        }
+    }
+
+    async getPropuestasByConvocatoria(convocatoriaId: number): Promise<Propuesta[] | null> {
+        const sql = `
+            SELECT * FROM project_proposals 
+            WHERE convocatoria_id = ? AND active = true 
+            ORDER BY created_at DESC
+        `;
+
+        try {
+            const result: any = await query(sql, [convocatoriaId]);
+            
+            if (result.length > 0) {
+                return result.map((row: any) => this.mapRowToPropuesta(row));
+            }
+            return [];
+        } catch (error) {
+            console.error("Error getting propuestas by convocatoria:", error);
+            throw new Error(`Error al obtener las propuestas por convocatoria: ${error}`);
+        }
+    }
+
+    async getPropuestasByStudent(studentId: number): Promise<Propuesta[] | null> {
+        const sql = `
+            SELECT * FROM project_proposals 
+            WHERE student_id = ? AND active = true 
+            ORDER BY created_at DESC
+        `;
+
+        try {
+            const result: any = await query(sql, [studentId]);
+            
+            if (result.length > 0) {
+                return result.map((row: any) => this.mapRowToPropuesta(row));
+            }
+            return [];
+        } catch (error) {
+            console.error("Error getting propuestas by student:", error);
+            throw new Error(`Error al obtener las propuestas del estudiante: ${error}`);
+        }
+    }
+
+    async getPropuestasByStatus(status: ProposalStatus): Promise<Propuesta[] | null> {
+        const sql = `
+            SELECT * FROM project_proposals 
+            WHERE proposal_status = ? AND active = true 
+            ORDER BY created_at DESC
+        `;
+
+        try {
+            const result: any = await query(sql, [status]);
+            
+            if (result.length > 0) {
+                return result.map((row: any) => this.mapRowToPropuesta(row));
+            }
+            return [];
+        } catch (error) {
+            console.error("Error getting propuestas by status:", error);
+            throw new Error(`Error al obtener
