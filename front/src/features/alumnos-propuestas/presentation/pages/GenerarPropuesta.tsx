@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../../core/utils/AuthContext';
 import MainContainer from '../../../shared/layout/MainContainer';
 import { Toasters } from '../../../shared/components/Toasters';
 import { PropuestaViewModel } from '../viewModels/PropuestaViewModel';
@@ -21,9 +22,13 @@ type ViewState = 'loading' | 'no-convocatoria' | 'propuesta-existente' | 'form' 
 
 const GenerarPropuesta: React.FC = observer(() => {
   const navigate = useNavigate();
+  const authViewModel = useAuth();
   
-  // Crear instancia del ViewModel
-  const propuestaViewModel = useMemo(() => new PropuestaViewModel(), []);
+  // Crear instancia del ViewModel con AuthViewModel
+  const propuestaViewModel = useMemo(() => {
+    const vm = new PropuestaViewModel(authViewModel);
+    return vm;
+  }, [authViewModel]);
   
   // Estado local para controlar qué vista mostrar
   const [viewState, setViewState] = useState<ViewState>('loading');
@@ -275,15 +280,30 @@ const GenerarPropuesta: React.FC = observer(() => {
         <div className="poppins">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-[23px] md:text-[36px] font-semibold text-black">
-              Registrar Nueva Propuesta
-            </h1>
-            <p className="text-[14px] md:text-[24px] font-light text-black">
-              {viewState === 'form' 
-                ? 'Completa los 4 pasos para registrar tu propuesta de proyecto de pasantía.'
-                : 'Gestión de propuestas de proyectos de pasantías.'
-              }
-            </p>
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h1 className="text-[23px] md:text-[36px] font-semibold text-black">
+                  Registrar Nueva Propuesta
+                </h1>
+                <p className="text-[14px] md:text-[24px] font-light text-black">
+                  {viewState === 'form' 
+                    ? 'Completa los 4 pasos para registrar tu propuesta de proyecto de pasantía.'
+                    : 'Gestión de propuestas de proyectos de pasantías.'
+                  }
+                </p>
+              </div>
+              
+              {/* Información del usuario logueado */}
+              <div className="hidden md:block bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-600 mb-1">Registrando como:</p>
+                <p className="text-sm font-semibold text-blue-900">
+                  {authViewModel.currentUser?.getFullName() || 'Usuario'}
+                </p>
+                <p className="text-xs text-blue-700">
+                  {authViewModel.currentUser?.getEmail() || ''}
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Contenido principal */}

@@ -6,6 +6,7 @@ import { CreatePropuestaUseCase, CreatePropuestaParams } from "../../domain/Crea
 import { GetPropuestasByAlumnoUseCase } from "../../domain/GetPropuestasByAlumnoUseCase";
 import { ConvocatoriaActiva, Propuesta, TutorAcademico } from "../../data/models/Propuesta";
 import { PropuestaRealTimeValidation } from "../validations/PropuestaSchema";
+import { AuthViewModel } from "../../../auth/presentation/viewModels/AuthViewModel";
 
 export interface PropuestaFormData {
   // Step 1: Información del alumno
@@ -73,6 +74,9 @@ export class PropuestaViewModel {
   loadingConvocatoria: boolean = false;
   loadingPropuestas: boolean = false;
 
+  // NUEVO: Referencia al AuthViewModel para obtener información del usuario
+  private authViewModel: AuthViewModel | null = null;
+
   // Datos del formulario
   formData: PropuestaFormData = {
     academicTutorId: null,
@@ -123,8 +127,11 @@ export class PropuestaViewModel {
   private createPropuestaUseCase: CreatePropuestaUseCase;
   private getPropuestasByAlumnoUseCase: GetPropuestasByAlumnoUseCase;
 
-  constructor() {
+  constructor(authViewModel?: AuthViewModel) {
     makeAutoObservable(this);
+
+    // NUEVO: Inyectar el AuthViewModel para obtener información del usuario
+    this.authViewModel = authViewModel || null;
 
     this.repository = new PropuestaRepository();
     this.getConvocatoriaActivaUseCase = new GetConvocatoriaActivaUseCase(this.repository);
@@ -159,6 +166,36 @@ export class PropuestaViewModel {
 
   setCurrentStep(step: number) {
     this.currentStep = step;
+  }
+
+  // NUEVOS GETTERS para información del usuario actual
+  get currentUserName(): string {
+    if (!this.authViewModel?.currentUser) {
+      return 'Usuario no disponible';
+    }
+    
+    return this.authViewModel.currentUser.getFullName();
+  }
+
+  get currentUserEmail(): string {
+    if (!this.authViewModel?.currentUser) {
+      return 'Email no disponible';
+    }
+    
+    return this.authViewModel.currentUser.getEmail();
+  }
+
+  get currentUserUuid(): string | null {
+    if (!this.authViewModel?.currentUser) {
+      return null;
+    }
+    
+    return this.authViewModel.currentUser.getUuid() || null;
+  }
+
+  // MÉTODO para establecer el AuthViewModel después de la construcción
+  setAuthViewModel(authViewModel: AuthViewModel) {
+    this.authViewModel = authViewModel;
   }
 
   // Método de inicialización
@@ -235,6 +272,126 @@ export class PropuestaViewModel {
         companyMunicipality: this.formData.companyMunicipality,
         companySettlementType: this.formData.companySettlementType,
         companySettlementName: this.formData.companySettlementName,
+      companyStreetType: this.formData.companyStreetType,
+      companyStreetName: this.formData.companyStreetName,
+      companyExteriorNumber: this.formData.companyExteriorNumber,
+      companyInteriorNumber: this.formData.companyInteriorNumber,
+      companyPostalCode: this.formData.companyPostalCode,
+      companyWebsite: this.formData.companyWebsite,
+      companyLinkedin: this.formData.companyLinkedin,
+      contactName: this.formData.contactName,
+      contactPosition: this.formData.contactPosition,
+      contactEmail: this.formData.contactEmail,
+      contactPhone: this.formData.contactPhone,
+      contactArea: this.formData.contactArea
+    };
+    return PropuestaRealTimeValidation.validateStep2(step2Data);
+  }
+
+  get isStep3Valid(): boolean {
+    const step3Data = {
+      supervisorName: this.formData.supervisorName,
+      supervisorArea: this.formData.supervisorArea,
+      supervisorEmail: this.formData.supervisorEmail,
+      supervisorPhone: this.formData.supervisorPhone
+    };
+    return PropuestaRealTimeValidation.validateStep3(step3Data);
+  }
+
+  get isStep4Valid(): boolean {
+    const step4Data = {
+      projectName: this.formData.projectName,
+      projectStartDate: this.formData.projectStartDate,
+      projectEndDate: this.formData.projectEndDate,
+      projectProblemContext: this.formData.projectProblemContext,
+      projectProblemDescription: this.formData.projectProblemDescription,
+      projectGeneralObjective: this.formData.projectGeneralObjective,
+      projectSpecificObjectives: this.formData.projectSpecificObjectives,
+      projectMainActivities: this.formData.projectMainActivities,
+      projectPlannedDeliverables: this.formData.projectPlannedDeliverables,
+      projectTechnologies: this.formData.projectTechnologies
+    };
+    return PropuestaRealTimeValidation.validateStep4(step4Data);
+  }
+
+  get isFormValid(): boolean {
+    return this.isStep1Valid && this.isStep2Valid && this.isStep3Valid && this.isStep4Valid;
+  }
+
+  // Utilidades para fechas
+  formatDateForInput(date: Date | null): string {
+    if (!date) return '';
+    return date.toISOString().split('T')[0];
+  }
+
+  parseDateFromInput(dateString: string): Date | null {
+    if (!dateString) return null;
+    return new Date(dateString);
+  }
+
+  // Limpiar errores
+  clearError() {
+    this.setError(null);
+  }
+
+  // Resetear formulario
+  resetForm() {
+    this.formData = {
+      academicTutorId: null,
+      internshipType: '',
+      companyShortName: '',
+      companyLegalName: '',
+      companyTaxId: '',
+      companyState: '',
+      companyMunicipality: '',
+      companySettlementType: '',
+      companySettlementName: '',
+      companyStreetType: '',
+      companyStreetName: '',
+      companyExteriorNumber: '',
+      companyInteriorNumber: '',
+      companyPostalCode: '',
+      companyWebsite: '',
+      companyLinkedin: '',
+      contactName: '',
+      contactPosition: '',
+      contactEmail: '',
+      contactPhone: '',
+      contactArea: '',
+      supervisorName: '',
+      supervisorArea: '',
+      supervisorEmail: '',
+      supervisorPhone: '',
+      projectName: '',
+      projectStartDate: null,
+      projectEndDate: null,
+      projectProblemContext: '',
+      projectProblemDescription: '',
+      projectGeneralObjective: '',
+      projectSpecificObjectives: '',
+      projectMainActivities: '',
+      projectPlannedDeliverables: '',
+      projectTechnologies: ''
+    };
+    this.setCurrentStep(1);
+    this.setLastCreatedPropuesta(null);
+  }
+
+  // Reset completo
+  reset() {
+    this.loading = false;
+    this.submitting = false;
+    this.error = null;
+    this.isInitialized = false;
+    this.currentStep = 1;
+    this.convocatoriaActiva = null;
+    this.misPropuestas = [];
+    this.lastCreatedPropuesta = null;
+    this.loadingConvocatoria = false;
+    this.loadingPropuestas = false;
+    this.resetForm();
+  }
+}
         companyStreetType: this.formData.companyStreetType,
         companyStreetName: this.formData.companyStreetName,
         companyExteriorNumber: this.formData.companyExteriorNumber,
@@ -364,123 +521,3 @@ export class PropuestaViewModel {
       companyMunicipality: this.formData.companyMunicipality,
       companySettlementType: this.formData.companySettlementType,
       companySettlementName: this.formData.companySettlementName,
-      companyStreetType: this.formData.companyStreetType,
-      companyStreetName: this.formData.companyStreetName,
-      companyExteriorNumber: this.formData.companyExteriorNumber,
-      companyInteriorNumber: this.formData.companyInteriorNumber,
-      companyPostalCode: this.formData.companyPostalCode,
-      companyWebsite: this.formData.companyWebsite,
-      companyLinkedin: this.formData.companyLinkedin,
-      contactName: this.formData.contactName,
-      contactPosition: this.formData.contactPosition,
-      contactEmail: this.formData.contactEmail,
-      contactPhone: this.formData.contactPhone,
-      contactArea: this.formData.contactArea
-    };
-    return PropuestaRealTimeValidation.validateStep2(step2Data);
-  }
-
-  get isStep3Valid(): boolean {
-    const step3Data = {
-      supervisorName: this.formData.supervisorName,
-      supervisorArea: this.formData.supervisorArea,
-      supervisorEmail: this.formData.supervisorEmail,
-      supervisorPhone: this.formData.supervisorPhone
-    };
-    return PropuestaRealTimeValidation.validateStep3(step3Data);
-  }
-
-  get isStep4Valid(): boolean {
-    const step4Data = {
-      projectName: this.formData.projectName,
-      projectStartDate: this.formData.projectStartDate,
-      projectEndDate: this.formData.projectEndDate,
-      projectProblemContext: this.formData.projectProblemContext,
-      projectProblemDescription: this.formData.projectProblemDescription,
-      projectGeneralObjective: this.formData.projectGeneralObjective,
-      projectSpecificObjectives: this.formData.projectSpecificObjectives,
-      projectMainActivities: this.formData.projectMainActivities,
-      projectPlannedDeliverables: this.formData.projectPlannedDeliverables,
-      projectTechnologies: this.formData.projectTechnologies
-    };
-    return PropuestaRealTimeValidation.validateStep4(step4Data);
-  }
-
-  get isFormValid(): boolean {
-    return this.isStep1Valid && this.isStep2Valid && this.isStep3Valid && this.isStep4Valid;
-  }
-
-  // Utilidades para fechas
-  formatDateForInput(date: Date | null): string {
-    if (!date) return '';
-    return date.toISOString().split('T')[0];
-  }
-
-  parseDateFromInput(dateString: string): Date | null {
-    if (!dateString) return null;
-    return new Date(dateString);
-  }
-
-  // Limpiar errores
-  clearError() {
-    this.setError(null);
-  }
-
-  // Resetear formulario
-  resetForm() {
-    this.formData = {
-      academicTutorId: null,
-      internshipType: '',
-      companyShortName: '',
-      companyLegalName: '',
-      companyTaxId: '',
-      companyState: '',
-      companyMunicipality: '',
-      companySettlementType: '',
-      companySettlementName: '',
-      companyStreetType: '',
-      companyStreetName: '',
-      companyExteriorNumber: '',
-      companyInteriorNumber: '',
-      companyPostalCode: '',
-      companyWebsite: '',
-      companyLinkedin: '',
-      contactName: '',
-      contactPosition: '',
-      contactEmail: '',
-      contactPhone: '',
-      contactArea: '',
-      supervisorName: '',
-      supervisorArea: '',
-      supervisorEmail: '',
-      supervisorPhone: '',
-      projectName: '',
-      projectStartDate: null,
-      projectEndDate: null,
-      projectProblemContext: '',
-      projectProblemDescription: '',
-      projectGeneralObjective: '',
-      projectSpecificObjectives: '',
-      projectMainActivities: '',
-      projectPlannedDeliverables: '',
-      projectTechnologies: ''
-    };
-    this.setCurrentStep(1);
-    this.setLastCreatedPropuesta(null);
-  }
-
-  // Reset completo
-  reset() {
-    this.loading = false;
-    this.submitting = false;
-    this.error = null;
-    this.isInitialized = false;
-    this.currentStep = 1;
-    this.convocatoriaActiva = null;
-    this.misPropuestas = [];
-    this.lastCreatedPropuesta = null;
-    this.loadingConvocatoria = false;
-    this.loadingPropuestas = false;
-    this.resetForm();
-  }
-}
