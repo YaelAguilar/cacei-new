@@ -1,19 +1,14 @@
-// src/features/shared/components/PropuestaDetailModal.tsx
-import React, { useEffect, useMemo, useState } from "react";
+// src/features/alumnos-propuestas/presentation/components/PropuestaDetailModal.tsx
+import React from "react";
 import { observer } from "mobx-react-lite";
 import { motion } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
 import { PropuestaCompleta } from "../../alumnos-propuestas/data/models/Propuesta";
-import Status from "./Status";
+import Status from "../components/Status";
 import { 
   FiCalendar, FiUser, FiBriefcase, FiFileText, FiTarget, FiTool, 
-  FiActivity, FiClock, FiMail, FiGlobe, FiPhone, FiMapPin, FiBook,
-  FiMessageCircle, FiChevronDown, FiChevronUp, FiCheckCircle, FiAlertTriangle
+  FiActivity, FiClock, FiMail, FiGlobe, FiPhone, FiMapPin, FiBook
 } from "react-icons/fi";
-import { CommentsViewModel } from "../../propuestas-comentarios/presentation/viewModels/CommentsViewModel";
-import InlineComments from "../../propuestas-comentarios/presentation/components/InlineComments";
-import { ProposalComment } from "../../propuestas-comentarios/data/models/ProposalComment";
-import { useAuth } from "../../../core/utils/AuthContext";
 
 // Interface genérica para el ViewModel
 export interface PropuestaDetailViewModelInterface {
@@ -38,82 +33,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
   onClose 
 }) => {
   const statusInfo = viewModel.getPropuestaStatus(propuesta);
-  const authViewModel = useAuth();
-  const [showComments, setShowComments] = useState(false);
-  const [showApprovalConfirmation, setShowApprovalConfirmation] = useState(false);
-  
-  // Crear instancia del ViewModel de comentarios
-  const commentsViewModel = useMemo(() => new CommentsViewModel(), []);
-  
-  // Verificar si el usuario puede comentar (es tutor)
-  const canComment = authViewModel.userRoles.some(role => 
-    ['PTC', 'PA', 'Director'].includes(role.name)
-  );
-  
-  const currentUserEmail = authViewModel.currentUser?.getEmail();
-
-  // Inicializar comentarios cuando se abre el modal
-  useEffect(() => {
-    const initializeComments = async () => {
-      try {
-        // Usar el UUID de la propuesta (getId() devuelve el UUID)
-        const proposalUuid = propuesta.getId();
-        
-        console.log('🔍 Inicializando comentarios...');
-        console.log('📦 UUID de propuesta:', proposalUuid);
-        
-        await commentsViewModel.initialize(propuesta.getId());
-      } catch (error) {
-        console.error("Error al cargar comentarios:", error);
-      }
-    };
-
-    initializeComments();
-
-    return () => {
-      commentsViewModel.reset();
-    };
-}, [propuesta, commentsViewModel]);
-
-  // Función para obtener todos los comentarios agrupados por sección
-  const getCommentsBySection = () => {
-    const allComments = commentsViewModel.comments || [];
-    const commentsBySection: Record<string, ProposalComment[]> = {};
-    
-    allComments.forEach((comment: ProposalComment) => {
-      const sectionKey = `${comment.getSectionName()} - ${comment.getSubsectionName()}`;
-      if (!commentsBySection[sectionKey]) {
-        commentsBySection[sectionKey] = [];
-      }
-      commentsBySection[sectionKey].push(comment);
-    });
-    
-    return commentsBySection;
-  };
-
-  // ✅ NUEVO: Lógica para aprobar toda la propuesta
-  const isFullyApproved = commentsViewModel.isProposalFullyApproved;
-  const hasAnyComments = commentsViewModel.hasComments;
-  const hasTutorCommentedInProposal = currentUserEmail ? 
-    commentsViewModel.comments.some(comment => comment.getTutorEmail() === currentUserEmail) : false;
-
-  const handleApproveProposal = async () => {
-    if (hasAnyComments) {
-      // Mostrar confirmación si ya hay comentarios
-      setShowApprovalConfirmation(true);
-    } else {
-      // Proceder directamente si no hay comentarios
-      await executeApproval();
-    }
-  };
-
-  const executeApproval = async () => {
-    const success = await commentsViewModel.approveProposal(propuesta.getId());
-    if (success) {
-      console.log('✅ Propuesta aprobada completamente');
-      setShowApprovalConfirmation(false);
-    }
-  };
 
   return (
     <motion.div
@@ -147,18 +66,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
               className={statusInfo.color}
             />
             
-            {/* ✅ ÚNICO BOTÓN DE APROBAR TODO - Posicionado en el header */}
-            {canComment && !isFullyApproved && !hasTutorCommentedInProposal && (
-              <button
-                onClick={handleApproveProposal}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                title="Aprobar toda la propuesta sin comentarios específicos"
-              >
-                <FiCheckCircle className="w-4 h-4" />
-                Aprobar Propuesta Completa
-              </button>
-            )}
-
             <button 
               onClick={onClose} 
               className="text-blue-500 hover:bg-blue-100 rounded-full p-3 cursor-pointer"
@@ -167,168 +74,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
             </button>
           </div>
         </div>
-
-        {/* ✅ CONFIRMACIÓN DE APROBACIÓN GLOBAL */}
-        {showApprovalConfirmation && (
-          <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <FiAlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h4 className="font-medium text-yellow-800 mb-2">
-                  ⚠️ Confirmar Aprobación Total de la Propuesta
-                </h4>
-                <p className="text-sm text-yellow-700 mb-3">
-                  Ya existen comentarios específicos en esta propuesta. Para aprobar toda la propuesta, 
-                  se eliminarán todos los comentarios existentes y se marcará como completamente aprobada.
-                </p>
-                <p className="text-sm font-medium text-yellow-800 mb-3">
-                  ¿Está seguro de que desea continuar?
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={executeApproval}
-                    className="px-3 py-1.5 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors"
-                  >
-                    Sí, Aprobar Propuesta Completa
-                  </button>
-                  <button
-                    onClick={() => setShowApprovalConfirmation(false)}
-                    className="px-3 py-1.5 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ✅ MENSAJE INFORMATIVO PARA USUARIOS QUE YA COMENTARON */}
-        {canComment && hasTutorCommentedInProposal && !isFullyApproved && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Información:</strong> Ya has realizado comentarios en esta propuesta. 
-              Solo los tutores que no han comentado pueden aprobar la propuesta completa.
-            </p>
-          </div>
-        )}
-
-        {/* ✅ MENSAJE DE PROPUESTA APROBADA */}
-        {isFullyApproved && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center gap-2">
-              <FiCheckCircle className="w-5 h-5 text-green-600" />
-              <p className="text-sm text-green-800 font-medium">
-                ✅ Esta propuesta ha sido aprobada en su totalidad.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Error de aprobación */}
-        {commentsViewModel.error && commentsViewModel.error.includes("comentarios específicos") && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800">
-            <strong>❌ Error:</strong> {commentsViewModel.error}
-          </div>
-        )}
-
-        {/* Resumen de Comentarios y botón para ver todos los comentarios */}
-        {canComment && (
-          <div className="flex items-center justify-between mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-600">
-                <span className="font-medium text-gray-800">Resumen de Revisión:</span>
-                <span className="ml-2">
-                  {commentsViewModel.statistics.total > 0 ? (
-                    <>
-                      <span className="text-green-600 font-medium">{commentsViewModel.statistics.approved} ✓</span>
-                      <span className="mx-1">·</span>
-                      <span className="text-red-600 font-medium">{commentsViewModel.statistics.rejected} ✗</span>
-                      <span className="mx-1">·</span>
-                      <span className="text-yellow-600 font-medium">{commentsViewModel.statistics.needsUpdate} ↻</span>
-                    </>
-                  ) : (
-                    <span className="text-gray-500">Sin comentarios</span>
-                  )}
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowComments(!showComments)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md transition-colors duration-200 text-sm"
-            >
-              <FiMessageCircle className="w-4 h-4" />
-              <span className="font-medium">
-                {showComments ? 'Ocultar' : 'Ver todos'}
-              </span>
-              {showComments ? (
-                <FiChevronUp className="w-3 h-3" />
-              ) : (
-                <FiChevronDown className="w-3 h-3" />
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* Sección de comentarios desplegable */}
-        {canComment && showComments && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mb-6 overflow-hidden"
-          >
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-80 overflow-y-auto">
-              <div className="flex items-center gap-2 mb-4">
-                <FiMessageCircle className="w-5 h-5 text-gray-600" />
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Todos los comentarios del proyecto
-                </h3>
-              </div>
-              
-              {Object.keys(getCommentsBySection()).length === 0 ? (
-                <div className="text-center py-8">
-                  <FiMessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500">No hay comentarios en esta propuesta aún.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {Object.entries(getCommentsBySection()).map(([sectionKey, comments]) => (
-                    <div key={sectionKey} className="bg-white rounded-lg p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        {sectionKey}
-                      </h4>
-                      <div className="space-y-3">
-                        {comments.map((comment: ProposalComment, index: number) => (
-                          <div key={index} className="bg-gray-50 rounded-md p-3 border-l-4 border-blue-400">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-gray-700">
-                                {comment.getTutorEmail()}
-                              </span>
-                              <div className="flex items-center gap-2">
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full border ${comment.getVoteStatusColor()}`}>
-                                  {comment.getVoteStatusIcon()} {comment.getVoteStatus()}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {commentsViewModel.formatDate(comment.getCreatedAt())}
-                                </span>
-                              </div>
-                            </div>
-                            <p className="text-gray-800 text-sm leading-relaxed">
-                              {comment.getCommentText()}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
 
         {/* Contenido con scroll */}
         <div className="flex-1 overflow-y-auto">
@@ -365,15 +110,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-red-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getContextoProblema()}
                     </p>
-                    
-                    <InlineComments
-                      viewModel={commentsViewModel}
-                      proposalId={propuesta.getId()}
-                      sectionName="Contexto y Problemática"
-                      subsectionName="Contexto del Problema"
-                      currentUserEmail={currentUserEmail}
-                      canComment={canComment}
-                    />
                   </div>
 
                   <div className="bg-orange-50 p-4 rounded-lg">
@@ -381,15 +117,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-orange-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getDescripcionProblema()}
                     </p>
-                    
-                    <InlineComments
-                      viewModel={commentsViewModel}
-                      proposalId={propuesta.getId()}
-                      sectionName="Contexto y Problemática"
-                      subsectionName="Descripción del Problema"
-                      currentUserEmail={currentUserEmail}
-                      canComment={canComment}
-                    />
                   </div>
                 </div>
               </div>
@@ -407,15 +134,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-green-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getObjetivoGeneral()}
                     </p>
-                    
-                    <InlineComments
-                      viewModel={commentsViewModel}
-                      proposalId={propuesta.getId()}
-                      sectionName="Objetivos del Proyecto"
-                      subsectionName="Objetivo General"
-                      currentUserEmail={currentUserEmail}
-                      canComment={canComment}
-                    />
                   </div>
 
                   <div className="bg-emerald-50 p-4 rounded-lg">
@@ -423,15 +141,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-emerald-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getObjetivosEspecificos()}
                     </p>
-                    
-                    <InlineComments
-                      viewModel={commentsViewModel}
-                      proposalId={propuesta.getId()}
-                      sectionName="Objetivos del Proyecto"
-                      subsectionName="Objetivos Específicos"
-                      currentUserEmail={currentUserEmail}
-                      canComment={canComment}
-                    />
                   </div>
                 </div>
               </div>
@@ -452,15 +161,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-purple-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getActividadesPrincipales()}
                     </p>
-                    
-                    <InlineComments
-                      viewModel={commentsViewModel}
-                      proposalId={propuesta.getId()}
-                      sectionName="Plan de Trabajo"
-                      subsectionName="Actividades Principales"
-                      currentUserEmail={currentUserEmail}
-                      canComment={canComment}
-                    />
                   </div>
 
                   <div className="bg-violet-50 p-4 rounded-lg">
@@ -471,15 +171,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <p className="text-violet-800 leading-relaxed whitespace-pre-wrap">
                       {propuesta.getProyecto().getEntregablesPlaneados()}
                     </p>
-                    
-                    <InlineComments
-                      viewModel={commentsViewModel}
-                      proposalId={propuesta.getId()}
-                      sectionName="Plan de Trabajo"
-                      subsectionName="Entregables Planeados"
-                      currentUserEmail={currentUserEmail}
-                      canComment={canComment}
-                    />
                   </div>
                 </div>
               </div>
@@ -495,15 +186,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                   <p className="text-cyan-800 leading-relaxed whitespace-pre-wrap">
                     {propuesta.getProyecto().getTecnologias()}
                   </p>
-                  
-                  <InlineComments
-                    viewModel={commentsViewModel}
-                    proposalId={propuesta.getId()}
-                    sectionName="Plan de Trabajo"
-                    subsectionName="Tecnologías"
-                    currentUserEmail={currentUserEmail}
-                    canComment={canComment}
-                  />
                 </div>
               </div>
 
@@ -527,15 +209,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </p>
                   </div>
                 </div>
-                
-                <InlineComments
-                  viewModel={commentsViewModel}
-                  proposalId={propuesta.getId()}
-                  sectionName="Calendario"
-                  subsectionName="Fechas del Proyecto"
-                  currentUserEmail={currentUserEmail}
-                  canComment={canComment}
-                />
               </div>
             </div>
 
@@ -607,15 +280,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </div>
                   )}
                 </div>
-                
-                <InlineComments
-                  viewModel={commentsViewModel}
-                  proposalId={propuesta.getId()}
-                  sectionName="Información de la Empresa"
-                  subsectionName="Datos Generales"
-                  currentUserEmail={currentUserEmail}
-                  canComment={canComment}
-                />
               </div>
 
               {/* Dirección de la Empresa */}
@@ -630,15 +294,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     {propuesta.getEmpresa().getDireccion().getDireccionCompleta()}
                   </p>
                 </div>
-                
-                <InlineComments
-                  viewModel={commentsViewModel}
-                  proposalId={propuesta.getId()}
-                  sectionName="Información de la Empresa"
-                  subsectionName="Dirección"
-                  currentUserEmail={currentUserEmail}
-                  canComment={canComment}
-                />
               </div>
 
               {/* Persona de Contacto */}
@@ -691,15 +346,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </a>
                   </div>
                 </div>
-                
-                <InlineComments
-                  viewModel={commentsViewModel}
-                  proposalId={propuesta.getId()}
-                  sectionName="Información de la Empresa"
-                  subsectionName="Información de Contacto"
-                  currentUserEmail={currentUserEmail}
-                  canComment={canComment}
-                />
               </div>
 
               {/* Supervisor del Proyecto */}
@@ -745,15 +391,6 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </a>
                   </div>
                 </div>
-                
-                <InlineComments
-                  viewModel={commentsViewModel}
-                  proposalId={propuesta.getId()}
-                  sectionName="Supervisor del Proyecto"
-                  subsectionName="Información del Supervisor"
-                  currentUserEmail={currentUserEmail}
-                  canComment={canComment}
-                />
               </div>
 
               {/* Tutor Académico */}
