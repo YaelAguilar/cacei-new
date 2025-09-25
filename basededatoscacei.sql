@@ -49,7 +49,7 @@ CREATE TABLE `convocatorias` (
 
 LOCK TABLES `convocatorias` WRITE;
 /*!40000 ALTER TABLE `convocatorias` DISABLE KEYS */;
-INSERT INTO `convocatorias` VALUES (2,'f9fc93aa-be2e-4ec5-a12b-8d2d951a9429','Periodo test enero-abril 2026',NULL,'2025-10-12 10:00:00','[\"Estancia II\", \"Estadía\", \"Estadía 1\"]','[{\"id\": 13, \"email\": \"ana.perez@upchiapas.edu.mx\", \"nombre\": \"Ana Pérez Morales\"}, {\"id\": 10, \"email\": \"carlos.mendoza@upchiapas.edu.mx\", \"nombre\": \"Carlos Mendoza García\"}, {\"id\": 6, \"email\": \"director-test@upchiapas.edu.mx\", \"nombre\": \"Director directorApellido1 directorApellido2\"}, {\"id\": 12, \"email\": \"jose.hernandez@upchiapas.edu.mx\", \"nombre\": \"José Hernández Ruiz\"}, {\"id\": 11, \"email\": \"maria.gonzalez@upchiapas.edu.mx\", \"nombre\": \"María González López\"}, {\"id\": 8, \"email\": \"ptc@upchiapas.edu.mx\", \"nombre\": \"Profesor Tiempo Completo\"}, {\"id\": 14, \"email\": \"roberto.jimenez@upchiapas.edu.mx\", \"nombre\": \"Roberto Jiménez Torres\"}]',1,'2025-09-22 15:14:06','2025-09-22 15:49:39',NULL,NULL);
+INSERT INTO `convocatorias` VALUES (2,'f9fc93aa-be2e-4ec5-a12b-8d2d951a9429','Periodo test enero-abril 2026',NULL,'2025-09-25 18:00:00','[\"Estancia II\", \"Estadía\", \"Estadía 1\"]','[{\"id\": 13, \"email\": \"ana.perez@upchiapas.edu.mx\", \"nombre\": \"Ana Pérez Morales\"}, {\"id\": 10, \"email\": \"carlos.mendoza@upchiapas.edu.mx\", \"nombre\": \"Carlos Mendoza García\"}, {\"id\": 6, \"email\": \"director-test@upchiapas.edu.mx\", \"nombre\": \"Director directorApellido1 directorApellido2\"}, {\"id\": 12, \"email\": \"jose.hernandez@upchiapas.edu.mx\", \"nombre\": \"José Hernández Ruiz\"}, {\"id\": 11, \"email\": \"maria.gonzalez@upchiapas.edu.mx\", \"nombre\": \"María González López\"}, {\"id\": 8, \"email\": \"ptc@upchiapas.edu.mx\", \"nombre\": \"Profesor Tiempo Completo\"}, {\"id\": 14, \"email\": \"roberto.jimenez@upchiapas.edu.mx\", \"nombre\": \"Roberto Jiménez Torres\"}]',1,'2025-09-22 15:14:06','2025-09-23 11:27:05',NULL,NULL);
 /*!40000 ALTER TABLE `convocatorias` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -141,43 +141,46 @@ CREATE TABLE `project_proposals` (
   `uuid` varchar(36) NOT NULL,
   `convocatoria_id` int NOT NULL COMMENT 'FK to convocatorias table',
   `student_id` int NOT NULL COMMENT 'FK to users table - student who creates the proposal',
-  `academic_tutor_id` int NOT NULL COMMENT 'FK to users table - selected academic tutor',
+  `student_name` varchar(255) NOT NULL COMMENT 'Nombre completo del estudiante',
+  `student_email` varchar(255) NOT NULL COMMENT 'Email del estudiante',
+  `academic_tutor_id` int NOT NULL COMMENT 'FK to users table - tutor académico (subsección)',
   `academic_tutor_name` varchar(255) NOT NULL COMMENT 'Academic tutor name at registration time',
   `academic_tutor_email` varchar(255) NOT NULL COMMENT 'Academic tutor email at registration time',
-  `internship_type` varchar(50) NOT NULL COMMENT 'Type of internship',
-  `company_short_name` varchar(100) NOT NULL COMMENT 'Company short name',
-  `company_legal_name` varchar(255) NOT NULL COMMENT 'Company full legal name',
-  `company_tax_id` varchar(13) NOT NULL COMMENT 'Company RFC (tax ID)',
-  `company_state` varchar(100) NOT NULL COMMENT 'State/Province',
-  `company_municipality` varchar(100) NOT NULL COMMENT 'Municipality/City',
-  `company_settlement_type` varchar(50) NOT NULL COMMENT 'Type of settlement (Colonia, Fraccionamiento, etc.)',
-  `company_settlement_name` varchar(100) NOT NULL COMMENT 'Settlement name',
-  `company_street_type` varchar(50) NOT NULL COMMENT 'Street type (Calle, Avenida, etc.)',
-  `company_street_name` varchar(100) NOT NULL COMMENT 'Street name',
-  `company_exterior_number` varchar(10) NOT NULL COMMENT 'Exterior number',
-  `company_interior_number` varchar(10) DEFAULT NULL COMMENT 'Interior number (optional)',
-  `company_postal_code` varchar(5) NOT NULL COMMENT 'Postal code',
-  `company_website` varchar(255) DEFAULT NULL COMMENT 'Company website (optional)',
-  `company_linkedin` varchar(255) DEFAULT NULL COMMENT 'Company LinkedIn (optional)',
-  `contact_name` varchar(255) NOT NULL COMMENT 'Contact person name',
-  `contact_position` varchar(100) NOT NULL COMMENT 'Contact person position',
-  `contact_email` varchar(255) NOT NULL COMMENT 'Contact person email',
-  `contact_phone` varchar(15) NOT NULL COMMENT 'Contact person phone',
-  `contact_area` varchar(100) NOT NULL COMMENT 'Contact person department/area',
-  `supervisor_name` varchar(255) NOT NULL COMMENT 'Project supervisor name',
-  `supervisor_area` varchar(100) NOT NULL COMMENT 'Supervisor work area/department',
-  `supervisor_email` varchar(255) NOT NULL COMMENT 'Supervisor email',
-  `supervisor_phone` varchar(15) NOT NULL COMMENT 'Supervisor phone',
-  `project_name` varchar(255) NOT NULL COMMENT 'Project name',
-  `project_start_date` date NOT NULL COMMENT 'Project start date',
-  `project_end_date` date NOT NULL COMMENT 'Project end date',
-  `project_problem_context` text NOT NULL COMMENT 'Problem context description',
-  `project_problem_description` text NOT NULL COMMENT 'Problem description',
-  `project_general_objective` text NOT NULL COMMENT 'General objective',
-  `project_specific_objectives` text NOT NULL COMMENT 'Specific objectives',
-  `project_main_activities` text NOT NULL COMMENT 'Main activities to perform',
-  `project_planned_deliverables` text NOT NULL COMMENT 'Planned deliverables',
-  `project_technologies` text NOT NULL COMMENT 'Technologies to be used',
+  `internship_type` varchar(50) NOT NULL COMMENT 'Pasantía a realizar (subsección)',
+  `company_short_name` varchar(100) DEFAULT NULL COMMENT 'Nombre corto (subsección) - OPCIONAL',
+  `company_legal_name` varchar(255) NOT NULL COMMENT 'Nombre legal (subsección)',
+  `company_tax_id` varchar(13) NOT NULL COMMENT 'RFC - Registro Federal de Contribuyentes (subsección)',
+  `company_state` varchar(100) NOT NULL COMMENT 'Entidad federativa (subsección)',
+  `company_municipality` varchar(100) NOT NULL COMMENT 'Demarcación territorial (subsección)',
+  `company_settlement_type` varchar(50) NOT NULL COMMENT 'Tipo de asentamiento humano (subsección)',
+  `company_settlement_name` varchar(100) NOT NULL COMMENT 'Nombre del asentamiento humano (subsección)',
+  `company_street_type` varchar(50) NOT NULL COMMENT 'Vialidad (subsección)',
+  `company_street_name` varchar(100) NOT NULL COMMENT 'Nombre de la vía (subsección)',
+  `company_exterior_number` varchar(10) NOT NULL COMMENT 'Número exterior (subsección)',
+  `company_interior_number` varchar(10) DEFAULT NULL COMMENT 'Número interior (subsección) - OPCIONAL',
+  `company_postal_code` varchar(5) NOT NULL COMMENT 'Código postal (subsección)',
+  `company_website` varchar(255) DEFAULT NULL COMMENT 'Página Web (subsección) - OPCIONAL',
+  `company_linkedin` varchar(255) DEFAULT NULL COMMENT 'LinkedIn (subsección) - OPCIONAL',
+  `contact_name` varchar(255) NOT NULL COMMENT 'Nombre de la persona de contacto (subsección)',
+  `contact_position` varchar(100) NOT NULL COMMENT 'Puesto en la empresa de la persona de contacto (subsección)',
+  `contact_email` varchar(255) NOT NULL COMMENT 'Dirección electrónica de correo (subsección)',
+  `contact_phone` varchar(15) NOT NULL COMMENT 'Número telefónico (subsección)',
+  `contact_area` varchar(100) NOT NULL COMMENT 'Nombre del área asociada (subsección)',
+  `supervisor_name` varchar(255) NOT NULL COMMENT 'Nombre del Supervisor (subsección)',
+  `supervisor_area` varchar(100) NOT NULL COMMENT 'Área de la empresa en la que se desarrollará el proyecto (subsección)',
+  `supervisor_email` varchar(255) NOT NULL COMMENT 'Dirección electrónica de correo (subsección)',
+  `supervisor_phone` varchar(15) NOT NULL COMMENT 'Número de teléfono (subsección)',
+  `project_name` varchar(255) NOT NULL COMMENT 'Nombre del proyecto (subsección)',
+  `project_start_date` date NOT NULL COMMENT 'Fecha de inicio del proyecto (subsección)',
+  `project_end_date` date NOT NULL COMMENT 'Fecha de cierre del proyecto (subsección)',
+  `project_problem_context` text NOT NULL COMMENT 'Contexto de la problemática (subsección)',
+  `project_problem_description` text NOT NULL COMMENT 'Problemática (subsección)',
+  `project_general_objective` text NOT NULL COMMENT 'Objetivo general del proyecto a desarrollar (subsección)',
+  `project_specific_objectives` text NOT NULL COMMENT 'Objetivos específicos del proyecto (subsección)',
+  `project_main_activities` text NOT NULL COMMENT 'Principales actividades a realizar en la estancia o estadía (subsección)',
+  `project_planned_deliverables` text NOT NULL COMMENT 'Entregables planeados del proyecto (subsección)',
+  `project_technologies` text NOT NULL COMMENT 'Tecnologías a aplicar en el proyecto (subsección)',
+  `proposal_status` enum('PENDIENTE','APROBADO','RECHAZADO','ACTUALIZAR') NOT NULL DEFAULT 'PENDIENTE' COMMENT 'Estatus de la propuesta',
   `active` tinyint(1) DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -190,6 +193,7 @@ CREATE TABLE `project_proposals` (
   KEY `idx_proposals_student` (`student_id`),
   KEY `idx_proposals_tutor` (`academic_tutor_id`),
   KEY `idx_proposals_active` (`active`),
+  KEY `idx_proposals_status` (`proposal_status`),
   KEY `idx_proposals_created_at` (`created_at`),
   KEY `idx_proposals_company` (`company_short_name`),
   KEY `idx_proposals_project_dates` (`project_start_date`,`project_end_date`),
@@ -203,7 +207,7 @@ CREATE TABLE `project_proposals` (
   CONSTRAINT `chk_project_dates` CHECK ((`project_end_date` >= `project_start_date`)),
   CONSTRAINT `chk_tax_id_length` CHECK (((char_length(`company_tax_id`) >= 12) and (char_length(`company_tax_id`) <= 13))),
   CONSTRAINT `chk_website_format` CHECK (((`company_website` is null) or (`company_website` like _utf8mb4'http%')))
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Project proposals with all fields in single table - optimized for fixed form structure';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Project proposals with section/subsection structure and status field';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -212,7 +216,7 @@ CREATE TABLE `project_proposals` (
 
 LOCK TABLES `project_proposals` WRITE;
 /*!40000 ALTER TABLE `project_proposals` DISABLE KEYS */;
-INSERT INTO `project_proposals` VALUES (1,'9b5ab044-dde5-4cbe-a027-24a6c152e260',2,5,12,'José Hernández Ruiz','jose.hernandez@upchiapas.edu.mx','Estancia I','google','privada','BIM011108DJ5','Chiapas','Tuxtla Gutierrez','Centro','Centro','Avenida','Central','200',NULL,'29100','https://www.googl.com','https://www.googl.com','juan carlos medina ocampo','RH','juan@gmail.com','1234567890','RH','José Luis Martínez','TI','jmartinez@upgto.edu.mx','1234567890','Sistema de gestión para inventarios','2025-09-22','2025-11-30','Este es el contexto de la problemática del proyecto.','Esta es la descripción de la problemática del proyecto.','Completar la aplicación dentro del tiempo establecido.','1. Entregar a tiempo.\n2. cumplir con el propósito.\n3. Hacer frente a la problemática.','1. Desarrollo del backend.\n2. Maquedato del frontend.\n3. Desarrollo del frontend.\n4. Despliegue de la aplicación.','1. Repositorio de github.\n2. Documentación.\n3. Aplicación desplegada.','1. Docker.\n2. AWS (EC2).\n3. Ruby on rails.\n4. React js',1,'2025-09-22 15:22:18','2025-09-22 15:22:18',5,NULL);
+INSERT INTO `project_proposals` VALUES (1,'71eae849-9928-4849-a67f-9837c51dff77',2,5,'','',10,'Carlos Mendoza García','carlos.mendoza@upchiapas.edu.mx','Estancia II','google','privada','BIM011108DJ5','Chiapas','Tuxtla Gutierrez','Barrio','Centro','Avenida','Central','200','c21312','29100','https://www.googl.com','https://www.googl.com','José Calzada Razo','director','crjosue@upgto.edu.mx','12-3456-7890','RH','supervisor juan','TI','yo@gmail.com','12-3456-7890','aqui va el nombre del proyecto completo','2025-09-27','2025-11-07','aqui describiremos el contexto de la problemática completa del proyecto.','aqui describiremos la problemática completa del proyecto.','terminar la aplicacion en el tiempo establecido','desarrollar backend, desarrollar frontend, etc etc ect','Desarrollar todo el backend, desarrollar todo el frontend y completar todo a tiempo','github y aplicacion desplegada y automatizada github y aplicacion desplegada y automatizada github y aplicacion desplegada y automatizada github y aplicacion desplegada y automatizada','react, node, docker, ia python','PENDIENTE',1,'2025-09-25 03:21:46','2025-09-25 03:21:46',5,NULL);
 /*!40000 ALTER TABLE `project_proposals` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -526,4 +530,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-23  4:03:07
+-- Dump completed on 2025-09-25  2:07:55

@@ -111,6 +111,8 @@ export interface PropuestaCompletaResponseAttributes {
   
   // Información del alumno (sección)
   informacionDelAlumno?: {
+    nombreCompleto: string; // NUEVO: Nombre completo del estudiante
+    email: string; // NUEVO: Email del estudiante
     tutorAcademico: TutorAcademicoDTO;
     pasantiaARealizar: string;
   };
@@ -219,54 +221,6 @@ export interface ApiErrorDetail {
 
 export interface ErrorResponse {
   errors: ApiErrorDetail[];
-}
-
-export interface UpdatePropuestaRequest {
-  academicTutorId?: number;
-  internshipType?: string;
-  
-  // Información de la empresa
-  companyShortName?: string | null;
-  companyLegalName?: string;
-  companyTaxId?: string;
-  
-  // Dirección de la empresa
-  companyState?: string;
-  companyMunicipality?: string;
-  companySettlementType?: string;
-  companySettlementName?: string;
-  companyStreetType?: string;
-  companyStreetName?: string;
-  companyExteriorNumber?: string;
-  companyInteriorNumber?: string | null;
-  companyPostalCode?: string;
-  companyWebsite?: string | null;
-  companyLinkedin?: string | null;
-  
-  // Información de contacto
-  contactName?: string;
-  contactPosition?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  contactArea?: string;
-  
-  // Supervisor del proyecto
-  supervisorName?: string;
-  supervisorArea?: string;
-  supervisorEmail?: string;
-  supervisorPhone?: string;
-  
-  // Datos del proyecto
-  projectName?: string;
-  projectStartDate?: string;
-  projectEndDate?: string;
-  projectProblemContext?: string;
-  projectProblemDescription?: string;
-  projectGeneralObjective?: string;
-  projectSpecificObjectives?: string;
-  projectMainActivities?: string;
-  projectPlannedDeliverables?: string;
-  projectTechnologies?: string;
 }
 
 // Nuevo DTO para actualizar estatus de propuesta

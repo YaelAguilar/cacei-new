@@ -229,6 +229,18 @@ export class CreatePropuestaController {
                     "debe tener una duración mínima"
                 ];
                 
+                // Manejo específico para propuesta existente
+                if (errorMessage.includes("Ya tienes una propuesta registrada")) {
+                    res.status(400).json({
+                        errors: [{
+                            status: "400",
+                            title: "Propuesta ya registrada",
+                            detail: "Ya tienes una propuesta registrada en la convocatoria actual. Solo se permite una propuesta por convocatoria."
+                        }]
+                    });
+                    return;
+                }
+                
                 if (businessErrors.some(msg => errorMessage.includes(msg))) {
                     res.status(400).json({
                         errors: [{

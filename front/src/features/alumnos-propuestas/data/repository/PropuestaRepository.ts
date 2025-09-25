@@ -58,8 +58,15 @@ export class PropuestaRepository {
       }
       
       return null;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error en createPropuesta:", error);
+      
+      // Extraer mensaje de error específico del API
+      if (error.response?.data?.errors?.[0]?.detail) {
+        const apiError = new Error(error.response.data.errors[0].detail);
+        throw apiError;
+      }
+      
       throw error;
     }
   }
@@ -155,7 +162,7 @@ export class PropuestaRepository {
 
     // NUEVO: Mapear información del estudiante desde la nueva estructura
     if (attrs.informacionDelAlumno) {
-      // Estructura por secciones (nueva)
+      // Estructura por secciones (nueva) - ACTUALIZADA
       estudiante = new InformacionEstudiante(
         attrs.informacionDelAlumno.nombreCompleto || 'Nombre no disponible',
         attrs.informacionDelAlumno.email || 'Email no disponible'

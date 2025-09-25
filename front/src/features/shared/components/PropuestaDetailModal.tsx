@@ -393,6 +393,32 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                 </div>
               </div>
 
+              {/* Información del Estudiante */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <FiUser className="w-6 h-6 text-blue-600" />
+                  <h3 className="text-xl font-bold text-gray-900">Información del Estudiante</h3>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
+                  <div>
+                    <p className="text-sm font-semibold text-blue-700 mb-1">Nombre Completo</p>
+                    <p className="text-blue-900 font-bold text-lg">
+                      {propuesta.getEstudiante().getNombreCompleto()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-700 mb-1">Correo Electrónico</p>
+                    <a 
+                      href={`mailto:${propuesta.getEstudiante().getEmail()}`}
+                      className="text-blue-900 hover:text-blue-700 font-medium break-all flex items-center gap-2"
+                    >
+                      <FiMail className="w-4 h-4 flex-shrink-0" />
+                      {propuesta.getEstudiante().getEmail()}
+                    </a>
+                  </div>
+                </div>
+              </div>
+
               {/* Tutor Académico */}
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-4">

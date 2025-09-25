@@ -314,7 +314,12 @@ export class PropuestaViewModel {
       return true;
     } catch (error: any) {
       runInAction(() => {
-        this.setError(error.message || "Error al crear la propuesta");
+        // Manejo específico para el error de propuesta existente
+        if (error.message && error.message.includes("Ya tienes una propuesta registrada")) {
+          this.setError("Ya tienes una propuesta registrada en la convocatoria actual. Puedes revisar tu propuesta existente en la sección 'Mis Propuestas'.");
+        } else {
+          this.setError(error.message || "Error al crear la propuesta");
+        }
       });
       return false;
     } finally {

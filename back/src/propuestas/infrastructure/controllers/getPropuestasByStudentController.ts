@@ -55,16 +55,30 @@ export class GetPropuestasByStudentController {
                 type: "propuesta",
                 id: propuesta.getUuid(),
                 attributes: {
-                    idConvocatoria: propuesta.getConvocatoriaId(),
+                    // Estatus de la propuesta
+                    estatus: propuesta.getProposalStatus(),
                     
-                    // Tutor Académico
+                    // Información del alumno (sección) - ACTUALIZADA
+                    informacionDelAlumno: {
+                        // NUEVOS CAMPOS: Información del estudiante
+                        nombreCompleto: propuesta.getStudentName(),
+                        email: propuesta.getStudentEmail(),
+                        // Tutor académico (subsección)
+                        tutorAcademico: {
+                            id: propuesta.getAcademicTutorId(),
+                            nombre: propuesta.getAcademicTutorName(),
+                            email: propuesta.getAcademicTutorEmail()
+                        },
+                        pasantiaARealizar: propuesta.getInternshipType()
+                    },
+                    
+                    // Campos de compatibilidad con estructura anterior
+                    idConvocatoria: propuesta.getConvocatoriaId(),
                     tutorAcademico: {
                         id: propuesta.getAcademicTutorId(),
                         nombre: propuesta.getAcademicTutorName(),
                         email: propuesta.getAcademicTutorEmail()
                     },
-                    
-                    // Tipo de pasantía
                     tipoPasantia: propuesta.getInternshipType(),
                     
                     // Información completa de la empresa

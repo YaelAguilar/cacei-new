@@ -83,8 +83,12 @@ export class GetPropuestasByStatusController {
                 // Estatus de la propuesta
                 estatus: propuesta.getProposalStatus(),
                 
-                // Información del alumno (sección)
+                // Información del alumno (sección) - ACTUALIZADA
                 informacionDelAlumno: {
+                    // NUEVOS CAMPOS: Información del estudiante
+                    nombreCompleto: propuesta.getStudentName(),
+                    email: propuesta.getStudentEmail(),
+                    // Tutor académico (subsección)
                     tutorAcademico: {
                         id: propuesta.getAcademicTutorId(),
                         nombre: propuesta.getAcademicTutorName(),

@@ -489,9 +489,6 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             row.user_update
         );
     }
-} las propuestas: ${error}`);
-        }
-    }
 
     async getPropuestasByConvocatoria(convocatoriaId: number): Promise<Propuesta[] | null> {
         const sql = `
@@ -549,4 +546,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
             return [];
         } catch (error) {
             console.error("Error getting propuestas by status:", error);
-            throw new Error(`Error al obtener
+            throw new Error(`Error al obtener las propuestas por estatus: ${error}`);
+        }
+    }
+}
