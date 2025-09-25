@@ -6,10 +6,10 @@ let pool: Pool;
 
 export async function connect() {
     pool = createPool({
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_DATABASE,
+        host: process.env.DB_HOST || 'localhost',
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || '',
+        database: process.env.DB_DATABASE || 'basededatoscacei',
         port: parseInt(process.env.DB_PORT || '3306', 10),
         waitForConnections: true,
         connectionLimit: 10,

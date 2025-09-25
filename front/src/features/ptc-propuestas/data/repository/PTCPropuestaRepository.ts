@@ -6,6 +6,7 @@ import {
 import { 
   PropuestaCompleta,
   TutorAcademico,
+  InformacionEstudiante,
   DireccionEmpresa,
   EmpresaCompleta,
   Contacto,
@@ -92,28 +93,37 @@ export class PTCPropuestaRepository {
     );
 
     const proyecto = new ProyectoCompleto(
-      attrs.proyecto.nombre,
-      new Date(attrs.proyecto.fechaInicio),
-      new Date(attrs.proyecto.fechaFin),
-      attrs.proyecto.contextoProblema,
-      attrs.proyecto.descripcionProblema,
-      attrs.proyecto.objetivoGeneral,
-      attrs.proyecto.objetivosEspecificos,
-      attrs.proyecto.actividadesPrincipales,
-      attrs.proyecto.entregablesPlaneados,
-      attrs.proyecto.tecnologias
+      attrs.proyecto?.nombre || 'Proyecto sin nombre',
+      attrs.proyecto?.fechaInicio ? new Date(attrs.proyecto.fechaInicio) : new Date(),
+      attrs.proyecto?.fechaFin ? new Date(attrs.proyecto.fechaFin) : new Date(),
+      attrs.proyecto?.contextoProblema || '',
+      attrs.proyecto?.descripcionProblema || '',
+      attrs.proyecto?.objetivoGeneral || '',
+      attrs.proyecto?.objetivosEspecificos || '',
+      attrs.proyecto?.actividadesPrincipales || '',
+      attrs.proyecto?.entregablesPlaneados || '',
+      attrs.proyecto?.tecnologias || ''
+    );
+
+    // Crear información del estudiante (necesario para el constructor)
+    const estudiante = new InformacionEstudiante(
+      attrs.estudiante?.nombre || 'Estudiante',
+      attrs.estudiante?.email || 'estudiante@email.com',
+      attrs.estudiante?.telefono || ''
     );
 
     return new PropuestaCompleta(
       data.id,
-      data.id,
+      parseInt(data.id), // numericId
       attrs.idConvocatoria,
+      estudiante,
       tutorAcademico,
-      attrs.tipoPasantia,
+      typeof attrs.tipoPasantia === 'string' ? attrs.tipoPasantia : String(attrs.tipoPasantia),
       empresa,
       contacto,
       supervisor,
       proyecto,
+      attrs.estatus || 'PENDIENTE',
       attrs.active,
       new Date(attrs.createdAt),
       new Date(attrs.updatedAt)

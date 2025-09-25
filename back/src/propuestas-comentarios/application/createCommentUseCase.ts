@@ -1,9 +1,13 @@
 // src/propuestas-comentarios/application/createCommentUseCase.ts
 import { CommentRepository, CommentCreateData } from "../domain/interfaces/commentRepository";
 import { ProposalComment } from "../domain/models/proposalComment";
+import { UpdateProposalStatusAfterCommentUseCase } from "./updateProposalStatusAfterCommentUseCase";
 
 export class CreateCommentUseCase {
-    constructor(private readonly commentRepository: CommentRepository) {}
+    constructor(
+        private readonly commentRepository: CommentRepository,
+        private readonly updateProposalStatusUseCase: UpdateProposalStatusAfterCommentUseCase
+    ) {}
 
     async run(
         proposalId: string | number,
@@ -54,7 +58,19 @@ export class CreateCommentUseCase {
                 voteStatus
             };
 
-            return await this.commentRepository.createComment(commentData);
+            const createdComment = await this.commentRepository.createComment(commentData);
+            
+            // ✅ NUEVO: Actualizar automáticamente el estado de la propuesta
+            if (createdComment) {
+                try {
+                    await this.updateProposalStatusUseCase.run(createdComment.getProposalId());
+                } catch (statusError) {
+                    console.error("Error updating proposal status after comment creation:", statusError);
+                    // No lanzamos el error para no afectar la creación del comentario
+                }
+            }
+
+            return createdComment;
         } catch (error) {
             console.error("Error in CreateCommentUseCase:", error);
             throw error;

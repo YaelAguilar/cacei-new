@@ -118,6 +118,13 @@ export interface PropuestaUpdateData {
     userUpdate?: number | null;
 }
 
+export interface ProposalFilters {
+    status?: string;
+    internshipType?: string;
+    tutorId?: number;
+    convocatoriaId?: number;
+}
+
 export interface PropuestaRepository {
     createPropuesta(data: PropuestaCreateData): Promise<Propuesta | null>;
     
@@ -125,7 +132,7 @@ export interface PropuestaRepository {
     
     getPropuestasByConvocatoria(convocatoriaId: number): Promise<Propuesta[] | null>;
     
-    getPropuestasByStudent(studentId: number): Promise<Propuesta[] | null>;
+    getPropuestasByStudent(studentId: number, filters?: ProposalFilters): Promise<Propuesta[] | null>;
     
     getPropuestasByStatus(status: ProposalStatus): Promise<Propuesta[] | null>;
     
@@ -144,4 +151,12 @@ export interface PropuestaRepository {
         pasantiasDisponibles: string[]; 
         profesoresDisponibles: any[] 
     } | null>;
+
+    // ✅ NUEVOS MÉTODOS PARA FILTROS AVANZADOS
+    getPropuestasWithFilters(filters: ProposalFilters): Promise<Propuesta[]>;
+    
+    getPropuestasByTutor(tutorId: number, filters?: ProposalFilters): Promise<Propuesta[]>;
+
+    // ✅ MÉTODO PARA HISTORIAL DE DIRECTORES
+    getAllProposalsFromAllPeriods(filters?: ProposalFilters): Promise<Propuesta[]>;
 }

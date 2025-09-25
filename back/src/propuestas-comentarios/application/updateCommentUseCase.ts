@@ -1,16 +1,23 @@
 // src/propuestas-comentarios/application/updateCommentUseCase.ts
 import { CommentRepository, CommentUpdateData } from "../domain/interfaces/commentRepository";
 import { ProposalComment } from "../domain/models/proposalComment";
+import { ValidateCommentEditUseCase } from "./validateCommentEditUseCase";
+import { UpdateProposalStatusAfterCommentUseCase } from "./updateProposalStatusAfterCommentUseCase";
 
 export class UpdateCommentUseCase {
-    constructor(private readonly commentRepository: CommentRepository) {}
+    constructor(
+        private readonly commentRepository: CommentRepository,
+        private readonly validateCommentEditUseCase: ValidateCommentEditUseCase,
+        private readonly updateProposalStatusUseCase: UpdateProposalStatusAfterCommentUseCase
+    ) {}
 
     async run(
         uuid: string,
         updateData: {
             commentText?: string;
             voteStatus?: 'ACEPTADO' | 'RECHAZADO' | 'ACTUALIZA';
-        }
+        },
+        tutorId: number
     ): Promise<ProposalComment | null> {
         try {
             // Validar que el comentario existe
@@ -18,6 +25,9 @@ export class UpdateCommentUseCase {
             if (!existingComment) {
                 throw new Error("Comentario no encontrado");
             }
+
+            // ✅ NUEVO: Validar permisos de edición
+            await this.validateCommentEditUseCase.run(uuid, tutorId);
 
             // Validaciones de negocio
             this.validateUpdateData(updateData);
@@ -38,7 +48,19 @@ export class UpdateCommentUseCase {
                 throw new Error("No hay campos para actualizar");
             }
 
-            return await this.commentRepository.updateComment(uuid, commentUpdateData);
+            const updatedComment = await this.commentRepository.updateComment(uuid, commentUpdateData);
+            
+            // ✅ NUEVO: Actualizar automáticamente el estado de la propuesta
+            if (updatedComment) {
+                try {
+                    await this.updateProposalStatusUseCase.run(updatedComment.getProposalId());
+                } catch (statusError) {
+                    console.error("Error updating proposal status after comment update:", statusError);
+                    // No lanzamos el error para no afectar la actualización del comentario
+                }
+            }
+
+            return updatedComment;
         } catch (error) {
             console.error("Error in UpdateCommentUseCase:", error);
             throw error;

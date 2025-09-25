@@ -375,6 +375,75 @@ export class CommentsViewModel {
     }
 
     // Resetear el ViewModel
+    // ✅ NUEVO: Aprobar toda la propuesta
+    async approveProposal(proposalId: string): Promise<boolean> {
+        try {
+            this.loading = true;
+            this.error = null;
+            
+            const success = await this.repository.approveProposal(proposalId);
+            
+            if (success) {
+                // Recargar comentarios para mostrar el nuevo estado
+                await this.loadComments(proposalId);
+            }
+            
+            return success;
+        } catch (error) {
+            console.error("Error approving proposal:", error);
+            this.error = error instanceof Error ? error.message : "Error al aprobar la propuesta";
+            return false;
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    // ✅ NUEVO: Rechazar toda la propuesta
+    async rejectProposal(proposalId: string): Promise<boolean> {
+        try {
+            this.loading = true;
+            this.error = null;
+            
+            const success = await this.repository.rejectProposal(proposalId);
+            
+            if (success) {
+                // Recargar comentarios para mostrar el nuevo estado
+                await this.loadComments(proposalId);
+            }
+            
+            return success;
+        } catch (error) {
+            console.error("Error rejecting proposal:", error);
+            this.error = error instanceof Error ? error.message : "Error al rechazar la propuesta";
+            return false;
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    // ✅ NUEVO: Actualizar toda la propuesta
+    async updateProposal(proposalId: string): Promise<boolean> {
+        try {
+            this.loading = true;
+            this.error = null;
+            
+            const success = await this.repository.updateProposal(proposalId);
+            
+            if (success) {
+                // Recargar comentarios para mostrar el nuevo estado
+                await this.loadComments(proposalId);
+            }
+            
+            return success;
+        } catch (error) {
+            console.error("Error updating proposal:", error);
+            this.error = error instanceof Error ? error.message : "Error al solicitar actualización de la propuesta";
+            return false;
+        } finally {
+            this.loading = false;
+        }
+    }
+
     reset() {
         this.loading = false;
         this.error = null;

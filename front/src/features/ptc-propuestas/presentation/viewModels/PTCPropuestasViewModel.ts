@@ -157,7 +157,7 @@ export class PTCPropuestasViewModel implements PropuestaDetailViewModelInterface
     if (this.searchTerm.trim()) {
       const searchLower = this.searchTerm.toLowerCase();
       filtered = filtered.filter(propuesta => 
-        propuesta.getProyecto().getNombre().toLowerCase().includes(searchLower) ||
+        (propuesta.getProyecto()?.getNombre() || '').toLowerCase().includes(searchLower) ||
         propuesta.getEmpresa().getNombreCorto().toLowerCase().includes(searchLower) ||
         propuesta.getTutorAcademico().getNombre().toLowerCase().includes(searchLower) ||
         propuesta.getTipoPasantia().toLowerCase().includes(searchLower)
@@ -186,8 +186,8 @@ export class PTCPropuestasViewModel implements PropuestaDetailViewModelInterface
 
       switch (this.sortColumn) {
         case "proyecto":
-          valueA = a.getProyecto().getNombre();
-          valueB = b.getProyecto().getNombre();
+          valueA = a.getProyecto()?.getNombre() || '';
+          valueB = b.getProyecto()?.getNombre() || '';
           break;
         case "empresa":
           valueA = a.getEmpresa().getNombreCorto();

@@ -9,7 +9,7 @@ export class CreateConvocatoriaController {
             nombre, 
             descripcion, 
             fechaLimite, 
-            pasantiasDisponibles 
+            pasantiasSeleccionadas 
         } = req.body;
 
         try {
@@ -17,7 +17,7 @@ export class CreateConvocatoriaController {
                 nombre,
                 descripcion,
                 fechaLimite,
-                pasantiasDisponibles
+                pasantiasSeleccionadas
             );
 
             if (convocatoria) {

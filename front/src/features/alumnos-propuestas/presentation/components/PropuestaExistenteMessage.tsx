@@ -48,7 +48,7 @@ const PropuestaExistenteMessage: React.FC<PropuestaExistenteMessageProps> = obse
                 <div>
                   <p className="text-sm text-gray-500">Proyecto:</p>
                   <p className="font-medium text-gray-900">
-                    {propuestaActual.getProyecto().getNombre()}
+                    {propuestaActual.getProyecto()?.getNombre() || 'Proyecto sin nombre'}
                   </p>
                 </div>
                 <div>
@@ -60,7 +60,7 @@ const PropuestaExistenteMessage: React.FC<PropuestaExistenteMessageProps> = obse
                 <div>
                   <p className="text-sm text-gray-500">Empresa:</p>
                   <p className="font-medium text-gray-900">
-                    {propuestaActual.getEmpresa().getNombreCorto()}
+                    {propuestaActual.getEmpresa().getNombreCorto() || propuestaActual.getEmpresa().getRazonSocial()}
                   </p>
                 </div>
                 <div>

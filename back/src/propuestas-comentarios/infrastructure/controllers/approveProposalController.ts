@@ -10,6 +10,8 @@ export class ApproveProposalController {
         console.log('📝 Body recibido:', req.body);
         
         const { proposalId } = req.body;
+        console.log('📝 proposalId extraído:', proposalId);
+        console.log('📝 Tipo de proposalId:', typeof proposalId);
 
         try {
             // Obtener el tutor del token JWT

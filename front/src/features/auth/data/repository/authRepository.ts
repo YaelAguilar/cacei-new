@@ -59,6 +59,21 @@ export class AuthRepository {
     }
   }
 
+  async getCurrentUser(): Promise<{ id: string; uuid: string; name: string; lastName: string; secondLastName: string; email: string; roles: any[] } | null> {
+    try {
+      const response = await ApiClient.get('/auth/me');
+      
+      if (response.status === 200) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error al obtener usuario actual:", error);
+      return null;
+    }
+  }
+
   async logout(): Promise<boolean> {
     try {
       await ApiClient.post('/auth/logout');

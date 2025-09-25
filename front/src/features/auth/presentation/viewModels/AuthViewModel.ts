@@ -39,12 +39,45 @@ export class AuthViewModel {
     this.error = error;
   }
 
-  setUser(user: User, permissions: UserPermissions) {
+  async setUser(user: User, permissions: UserPermissions, token?: string) {
     this.currentUser = user;
     this.userUuid = user.getUuid() || null;
     this.userRoles = user.getRoles() || [];
     this.userPermissions = permissions;
     this.isAuthenticated = true;
+    
+    // Almacenar el token JWT si se proporciona
+    if (token) {
+      localStorage.setItem('auth-token', token);
+      
+      // Obtener información completa del usuario desde el backend
+      try {
+        const userData = await this.repository.getCurrentUser();
+        if (userData) {
+          // Actualizar el usuario con el ID real
+          this.currentUser = new User(
+            userData.id,
+            userData.name,
+            userData.lastName,
+            userData.secondLastName || '',
+            userData.email,
+            '', // password
+            '', // confirmPassword
+            userData.uuid,
+            userData.roles || [],
+            true, // active
+            undefined, // created_at
+            undefined, // updated_at
+            undefined, // user_creation
+            undefined  // user_update
+          );
+          console.log('✅ Usuario actualizado con ID real:', userData.id);
+        }
+      } catch (error) {
+        console.error('❌ Error al obtener información del usuario:', error);
+      }
+    }
+    
     this.saveToStorage();
   }
 
@@ -60,6 +93,7 @@ export class AuthViewModel {
   private saveToStorage() {
     const authData = {
       currentUser: this.currentUser ? {
+        id: this.currentUser.getId(),
         uuid: this.currentUser.getUuid(),
         name: this.currentUser.getName(),
         lastName: this.currentUser.getLastName(),
@@ -89,7 +123,7 @@ export class AuthViewModel {
         // Restaurar usuario completo
         if (parsed.currentUser) {
           this.currentUser = new User(
-            '', // id
+            parsed.currentUser.id || '', // id
             parsed.currentUser.name,
             parsed.currentUser.lastName,
             parsed.currentUser.secondLastName || '',
@@ -129,6 +163,7 @@ export class AuthViewModel {
 
   private clearStorage() {
     localStorage.removeItem('auth-storage');
+    localStorage.removeItem('auth-token');
   }
 
   async login(email: string, password: string): Promise<boolean> {
@@ -138,9 +173,9 @@ export class AuthViewModel {
     try {
       const result = await this.loginUseCase.execute(email, password);
 
-      runInAction(() => {
+      runInAction(async () => {
         if (result) {
-          this.setUser(result.user, result.permissions);
+          await this.setUser(result.user, result.permissions, result.token);
           return true;
         } else {
           this.setError("Credenciales inválidas");

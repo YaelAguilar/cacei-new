@@ -59,6 +59,34 @@ export class CommentRepository {
         }
     }
 
+    // ✅ NUEVO: Rechazar toda la propuesta
+    async rejectProposal(proposalId: string): Promise<boolean> {
+        try {
+            const response = await ApiClient.post('/rechazar-propuesta', {
+                proposalId
+            });
+            
+            return response.status === 200;
+        } catch (error) {
+            console.error("Error en rejectProposal:", error);
+            throw error;
+        }
+    }
+
+    // ✅ NUEVO: Actualizar toda la propuesta
+    async updateProposal(proposalId: string): Promise<boolean> {
+        try {
+            const response = await ApiClient.post('/actualizar-propuesta', {
+                proposalId
+            });
+            
+            return response.status === 200;
+        } catch (error) {
+            console.error("Error en updateProposal:", error);
+            throw error;
+        }
+    }
+
     async getCommentsByProposal(proposalId: string): Promise<ProposalComment[]> {
         console.log('🔍 CommentRepository.getCommentsByProposal() called');
         console.log('📦 proposalId recibido:', proposalId);

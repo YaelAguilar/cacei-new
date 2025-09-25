@@ -90,14 +90,19 @@ export class CreatePropuestaUseCase {
             this.validateDates(projectStartDate, projectEndDate);
 
             // Verificar que el tipo de pasantía esté disponible en la convocatoria
+            console.log('🔍 Tipo de pasantía seleccionado:', internshipType);
+            console.log('🔍 Pasantías disponibles en convocatoria:', convocatoriaActiva.pasantiasDisponibles);
             if (!convocatoriaActiva.pasantiasDisponibles.includes(internshipType)) {
-                throw new Error("El tipo de pasantía seleccionado no está disponible en la convocatoria actual");
+                throw new Error(`El tipo de pasantía seleccionado "${internshipType}" no está disponible en la convocatoria actual. Pasantías disponibles: ${convocatoriaActiva.pasantiasDisponibles.join(', ')}`);
             }
 
             // Verificar que el tutor académico esté disponible en la convocatoria
+            console.log('🔍 Buscando tutor académico con ID:', academicTutorId);
+            console.log('🔍 Profesores disponibles:', convocatoriaActiva.profesoresDisponibles);
             const tutorDisponible = convocatoriaActiva.profesoresDisponibles.find(
                 profesor => profesor.id === academicTutorId
             );
+            console.log('🔍 Tutor encontrado:', tutorDisponible);
             if (!tutorDisponible) {
                 throw new Error("El tutor académico seleccionado no está disponible en la convocatoria actual");
             }

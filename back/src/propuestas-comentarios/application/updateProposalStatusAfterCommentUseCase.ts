@@ -1,0 +1,33 @@
+// src/propuestas-comentarios/application/updateProposalStatusAfterCommentUseCase.ts
+import { CalculateProposalStatusUseCase } from "../../propuestas/application/calculateProposalStatusUseCase";
+import { PropuestaRepository } from "../../propuestas/domain/interfaces/propuestaRepository";
+import { CommentRepository } from "../domain/interfaces/commentRepository";
+
+export class UpdateProposalStatusAfterCommentUseCase {
+    constructor(
+        private readonly calculateProposalStatusUseCase: CalculateProposalStatusUseCase,
+        private readonly propuestaRepository: PropuestaRepository,
+        private readonly commentRepository: CommentRepository
+    ) {}
+
+    async run(proposalId: string): Promise<boolean> {
+        try {
+            console.log(`🔄 Actualizando estado de propuesta ${proposalId} después de comentario`);
+            
+            // Calcular y actualizar el estado de la propuesta
+            const statusUpdated = await this.calculateProposalStatusUseCase.updateProposalStatusIfNeeded(proposalId);
+            
+            if (statusUpdated) {
+                console.log(`✅ Estado de propuesta ${proposalId} actualizado exitosamente`);
+            } else {
+                console.log(`ℹ️ Estado de propuesta ${proposalId} no requirió actualización`);
+            }
+
+            return statusUpdated;
+        } catch (error) {
+            console.error("Error updating proposal status after comment:", error);
+            throw error;
+        }
+    }
+}
+

@@ -33,7 +33,7 @@ const PropuestaCard: React.FC<PropuestaCardProps> = observer(({
         <div className="flex items-start justify-between mb-3 gap-3">
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-semibold text-gray-900 mb-1 break-words">
-              {propuesta.getProyecto().getNombre()}
+              {propuesta.getProyecto()?.getNombre() || 'Proyecto sin nombre'}
             </h3>
             
             {/* Información del proyecto */}

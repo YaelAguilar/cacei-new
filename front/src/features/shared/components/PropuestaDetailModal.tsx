@@ -1,13 +1,16 @@
 // src/features/alumnos-propuestas/presentation/components/PropuestaDetailModal.tsx
-import React from "react";
+import React, { useMemo, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { motion } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
 import { PropuestaCompleta } from "../../alumnos-propuestas/data/models/Propuesta";
 import Status from "../components/Status";
+import { useAuth } from "../../../core/utils/AuthContext";
+import { CommentsViewModel } from "../../propuestas-comentarios/presentation/viewModels/CommentsViewModel";
 import { 
   FiCalendar, FiUser, FiBriefcase, FiFileText, FiTarget, FiTool, 
-  FiActivity, FiClock, FiMail, FiGlobe, FiPhone, FiMapPin, FiBook
+  FiActivity, FiClock, FiMail, FiGlobe, FiPhone, FiMapPin, FiBook,
+  FiCheck, FiX, FiRefreshCw
 } from "react-icons/fi";
 
 // Interface genérica para el ViewModel
@@ -32,7 +35,130 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
   viewModel, 
   onClose 
 }) => {
+  const authViewModel = useAuth();
+  const commentsViewModel = useMemo(() => new CommentsViewModel(), []);
+  
+  // Verificar si el usuario es tutor académico (PTC o PA)
+  const isTutorAcademico = authViewModel.userRoles.some(role => 
+    ['PTC', 'PA', 'Director', 'SUPER-ADMIN'].includes(role.name)
+  );
+
   const statusInfo = viewModel.getPropuestaStatus(propuesta);
+
+  // Cargar comentarios cuando se abre el modal
+  useEffect(() => {
+    if (isTutorAcademico && propuesta.getId()) {
+      console.log('🔄 Cargando comentarios para propuesta:', propuesta.getId());
+      commentsViewModel.loadComments(propuesta.getId());
+    }
+  }, [isTutorAcademico, propuesta.getId()]);
+
+  // Manejar votación de la propuesta completa
+  const handleVote = async (voteType: 'APROBADO' | 'RECHAZADO') => {
+    if (commentsViewModel.loading) {
+      console.log('⏳ Ya hay una votación en proceso...');
+      return;
+    }
+
+    try {
+      console.log(`🗳️ Votando ${voteType} para la propuesta ${propuesta.getId()}`);
+      
+      let success = false;
+      
+      switch (voteType) {
+        case 'APROBADO':
+          success = await commentsViewModel.approveProposal(propuesta.getId());
+          break;
+        case 'RECHAZADO':
+          success = await commentsViewModel.rejectProposal(propuesta.getId());
+          break;
+      }
+      
+      if (success) {
+        // Recargar comentarios después de votar exitosamente
+        console.log('🔄 Recargando comentarios después de votar...');
+        await commentsViewModel.loadComments(propuesta.getId());
+        alert(`✅ Has votado ${voteType} para esta propuesta exitosamente.`);
+        // No cerrar el modal para que el usuario vea su evaluación
+      } else {
+        alert(`❌ Error al procesar la votación. ${commentsViewModel.error || 'Inténtalo de nuevo.'}`);
+      }
+    } catch (error) {
+      console.error('Error al votar:', error);
+      alert('❌ Error al procesar la votación. Inténtalo de nuevo.');
+    }
+  };
+
+  // Verificar si el tutor actual ya votó
+  const currentTutorUuid = authViewModel.currentUser?.getUuid();
+  const currentTutorId = authViewModel.currentUser?.getId();
+  
+  // Obtener información del token JWT almacenado
+  const getTokenInfo = () => {
+    try {
+      const token = localStorage.getItem('auth-token');
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return {
+          uuid: payload.uuid,
+          roles: payload.roles || []
+        };
+      }
+    } catch (error) {
+      console.error('Error decoding token:', error);
+    }
+    return null;
+  };
+  
+  const tokenInfo = getTokenInfo();
+  
+  // Identificar roles del usuario
+  const isDirector = authViewModel.userRoles.some(role => role.name === 'Director');
+  const isPTC = authViewModel.userRoles.some(role => role.name === 'PTC');
+  
+  // Usar el ID real del usuario si está disponible
+  const effectiveTutorId = currentTutorId && currentTutorId !== '' ? currentTutorId : null;
+  
+  // Buscar comentarios del tutor actual
+  const tutorComments = commentsViewModel.comments.filter(comment => {
+    // Usar el ID efectivo calculado
+    return Number(comment.tutorId) === Number(effectiveTutorId);
+  });
+  
+  const hasVoted = tutorComments.length > 0;
+  const tutorVote = hasVoted ? tutorComments[0] : null;
+
+  // Debug logs
+  console.log('🔍 Debug votación básico:', {
+    currentTutorId,
+    currentTutorIdType: typeof currentTutorId,
+    currentTutorUuid,
+    tokenInfo,
+    isDirector,
+    isPTC,
+    effectiveTutorId,
+    totalComments: commentsViewModel.comments.length,
+    tutorComments: tutorComments.length,
+    hasVoted,
+    tutorVote: tutorVote?.voteStatus
+  });
+  
+  console.log('🔍 Todos los comentarios:', commentsViewModel.comments.map(c => ({ 
+    tutorId: c.tutorId, 
+    tutorIdType: typeof c.tutorId,
+    voteStatus: c.voteStatus,
+    active: c.active,
+    sectionName: c.sectionName,
+    subsectionName: c.subsectionName
+  })));
+  
+  console.log('🔍 Comentarios del tutor actual:', tutorComments.map(c => ({
+    tutorId: c.tutorId,
+    voteStatus: c.voteStatus,
+    active: c.active,
+    sectionName: c.sectionName,
+    subsectionName: c.subsectionName
+  })));
 
   return (
     <motion.div
@@ -55,9 +181,11 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
         <div className="flex flex-row items-center justify-between mb-4">
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-gray-900 truncate">
-              {propuesta.getProyecto().getNombre()}
+              {propuesta.getProyecto()?.getNombre() || 'Proyecto sin nombre'}
             </h1>
-            <p className="text-md font-light text-gray-600">Detalles completos de la propuesta</p>
+            <p className="text-md font-light text-gray-600">
+              {isTutorAcademico ? 'Revisar y votar sobre la propuesta' : 'Detalles completos de la propuesta'}
+            </p>
           </div>
           <div className="flex items-center gap-4 ml-4">
             <Status 
@@ -65,6 +193,62 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
               label={statusInfo.label}
               className={statusInfo.color}
             />
+            
+            {/* Botones de votación - Solo para tutores académicos */}
+            {isTutorAcademico && (
+              <div className="flex items-center gap-2">
+                {!hasVoted ? (
+                  // Mostrar botones de votación si no ha votado
+                  <>
+                    <button
+                      onClick={() => handleVote('APROBADO')}
+                      disabled={commentsViewModel.loading}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                        commentsViewModel.loading 
+                          ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                          : 'bg-green-600 text-white hover:bg-green-700'
+                      }`}
+                      title={commentsViewModel.loading ? "Procesando..." : "Aprobar esta propuesta"}
+                    >
+                      <FiCheck className="w-4 h-4" />
+                      {commentsViewModel.loading ? 'Procesando...' : 'Aprobar'}
+                    </button>
+                    
+                    <button
+                      onClick={() => handleVote('RECHAZADO')}
+                      disabled={commentsViewModel.loading}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                        commentsViewModel.loading 
+                          ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                          : 'bg-red-600 text-white hover:bg-red-700'
+                      }`}
+                      title={commentsViewModel.loading ? "Procesando..." : "Rechazar esta propuesta"}
+                    >
+                      <FiX className="w-4 h-4" />
+                      {commentsViewModel.loading ? 'Procesando...' : 'Rechazar'}
+                    </button>
+                  </>
+                ) : (
+                  // Mostrar estado de la evaluación si ya votó
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
+                    <span className="text-sm font-medium text-gray-700">
+                      Tu evaluación:
+                    </span>
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      tutorVote?.voteStatus === 'ACEPTADO' 
+                        ? 'bg-green-100 text-green-800' 
+                        : tutorVote?.voteStatus === 'RECHAZADO'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {tutorVote?.voteStatus === 'ACEPTADO' ? 'APROBADO' : 
+                       tutorVote?.voteStatus === 'RECHAZADO' ? 'RECHAZADO' : 
+                       tutorVote?.voteStatus || 'PENDIENTE'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
             
             <button 
               onClick={onClose} 
@@ -119,6 +303,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </p>
                   </div>
                 </div>
+                
               </div>
 
               {/* Objetivos */}
@@ -143,6 +328,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </p>
                   </div>
                 </div>
+                
               </div>
 
               {/* Actividades y Entregables */}
@@ -173,6 +359,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </p>
                   </div>
                 </div>
+                
               </div>
 
               {/* Tecnologías */}
@@ -187,6 +374,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     {propuesta.getProyecto().getTecnologias()}
                   </p>
                 </div>
+                
               </div>
 
               {/* Período del proyecto */}
@@ -226,7 +414,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                   <div>
                     <p className="text-sm font-semibold text-purple-700 mb-1">Nombre Comercial</p>
                     <p className="text-purple-900 font-bold text-lg">
-                      {propuesta.getEmpresa().getNombreCorto()}
+                      {propuesta.getEmpresa().getNombreCorto() || 'No especificado'}
                     </p>
                   </div>
                   
@@ -280,6 +468,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </div>
                   )}
                 </div>
+                
               </div>
 
               {/* Dirección de la Empresa */}
@@ -417,6 +606,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </a>
                   </div>
                 </div>
+                
               </div>
 
               {/* Tutor Académico */}
@@ -472,6 +662,20 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                   <span className="font-mono ml-1">{propuesta.getId()}</span>
                 </p>
               </div>
+
+              {/* Información para tutores académicos */}
+              {isTutorAcademico && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-2">Información para Tutores Académicos</h3>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• Use los botones de votación en la parte superior para evaluar esta propuesta</li>
+                    <li>• <strong>Aprobar:</strong> La propuesta cumple con todos los requisitos</li>
+                    <li>• <strong>Rechazar:</strong> La propuesta no cumple con los requisitos mínimos</li>
+                    <li>• <strong>Actualizar:</strong> La propuesta necesita modificaciones antes de ser evaluada</li>
+                    <li>• Una vez votada, la propuesta cambiará su estado automáticamente</li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>

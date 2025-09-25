@@ -290,6 +290,124 @@ export class MysqlCommentRepository implements CommentRepository {
         }
     }
 
+    // ✅ NUEVO: Rechazar toda la propuesta
+    async rejectEntireProposal(
+        proposalId: string,
+        tutorId: number,
+        tutorName: string,
+        tutorEmail: string
+    ): Promise<boolean> {
+        try {
+            // Convertir proposalId si es UUID
+            let numericProposalId: number;
+            
+            if (isNaN(Number(proposalId))) {
+                const proposalQuery = `SELECT id FROM project_proposals WHERE uuid = ? AND active = true`;
+                const proposalResult: any = await query(proposalQuery, [proposalId]);
+                if (proposalResult.length === 0) {
+                    throw new Error("Propuesta no encontrada");
+                }
+                numericProposalId = proposalResult[0].id;
+            } else {
+                numericProposalId = Number(proposalId);
+            }
+
+            // Verificar si el tutor ya tiene comentarios en esta propuesta
+            const existingComments = await query(
+                `SELECT COUNT(*) as count FROM proposal_comments WHERE proposal_id = ? AND tutor_id = ? AND active = true`,
+                [numericProposalId, tutorId]
+            );
+
+            if (existingComments[0].count > 0) {
+                throw new Error("No se puede rechazar toda la propuesta si ya existen comentarios específicos. Elimine los comentarios existentes primero.");
+            }
+
+            // Crear un comentario especial de rechazo general
+            const uuid = uuidv4();
+            const sql = `
+                INSERT INTO proposal_comments (
+                    uuid, proposal_id, tutor_id, section_name, subsection_name, 
+                    comment_text, vote_status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            const params = [
+                uuid,
+                numericProposalId,
+                tutorId,
+                'PROPUESTA_COMPLETA',
+                'RECHAZO_GENERAL',
+                `Propuesta rechazada en su totalidad por ${tutorName}`,
+                'RECHAZADO'
+            ];
+
+            await query(sql, params);
+            return true;
+        } catch (error) {
+            console.error("Error rejecting entire proposal:", error);
+            throw new Error(`Error al rechazar la propuesta: ${error}`);
+        }
+    }
+
+    // ✅ NUEVO: Actualizar toda la propuesta
+    async updateEntireProposal(
+        proposalId: string,
+        tutorId: number,
+        tutorName: string,
+        tutorEmail: string
+    ): Promise<boolean> {
+        try {
+            // Convertir proposalId si es UUID
+            let numericProposalId: number;
+            
+            if (isNaN(Number(proposalId))) {
+                const proposalQuery = `SELECT id FROM project_proposals WHERE uuid = ? AND active = true`;
+                const proposalResult: any = await query(proposalQuery, [proposalId]);
+                if (proposalResult.length === 0) {
+                    throw new Error("Propuesta no encontrada");
+                }
+                numericProposalId = proposalResult[0].id;
+            } else {
+                numericProposalId = Number(proposalId);
+            }
+
+            // Verificar si el tutor ya tiene comentarios en esta propuesta
+            const existingComments = await query(
+                `SELECT COUNT(*) as count FROM proposal_comments WHERE proposal_id = ? AND tutor_id = ? AND active = true`,
+                [numericProposalId, tutorId]
+            );
+
+            if (existingComments[0].count > 0) {
+                throw new Error("No se puede solicitar actualización de toda la propuesta si ya existen comentarios específicos. Elimine los comentarios existentes primero.");
+            }
+
+            // Crear un comentario especial de actualización general
+            const uuid = uuidv4();
+            const sql = `
+                INSERT INTO proposal_comments (
+                    uuid, proposal_id, tutor_id, section_name, subsection_name, 
+                    comment_text, vote_status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            const params = [
+                uuid,
+                numericProposalId,
+                tutorId,
+                'PROPUESTA_COMPLETA',
+                'ACTUALIZACION_GENERAL',
+                `Propuesta requiere actualización general por ${tutorName}`,
+                'ACTUALIZA'
+            ];
+
+            await query(sql, params);
+            return true;
+        } catch (error) {
+            console.error("Error updating entire proposal:", error);
+            throw new Error(`Error al solicitar actualización de la propuesta: ${error}`);
+        }
+    }
+
     private mapRowToComment(row: any): ProposalComment {
         return new ProposalComment(
             row.id,

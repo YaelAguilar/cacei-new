@@ -9,7 +9,7 @@ export class UpdateConvocatoriaUseCase {
         nombre?: string,
         descripcion?: string | null,
         fechaLimite?: string, // Formato YYYY-MM-DD
-        pasantiasDisponibles?: string[],
+        pasantiasSeleccionadas?: string[],
         actualizarProfesores?: boolean
     ): Promise<Convocatoria | null> {
         try {
@@ -53,24 +53,24 @@ export class UpdateConvocatoriaUseCase {
                 updatedData.fechaLimite = fechaConvertida;
             }
 
-            if (pasantiasDisponibles !== undefined) {
-                if (!Array.isArray(pasantiasDisponibles) || pasantiasDisponibles.length === 0) {
+            if (pasantiasSeleccionadas !== undefined) {
+                if (!Array.isArray(pasantiasSeleccionadas) || pasantiasSeleccionadas.length === 0) {
                     throw new Error("Debe seleccionar al menos una pasantía");
                 }
 
-                if (pasantiasDisponibles.length > 5) {
+                if (pasantiasSeleccionadas.length > 5) {
                     throw new Error("No se pueden seleccionar más de 5 pasantías");
                 }
 
                 // Validar que las pasantías seleccionadas sean válidas
                 const pasantiasValidas = ["Estancia I", "Estancia II", "Estadía", "Estadía 1", "Estadía 2"];
-                const pasantiasInvalidas = pasantiasDisponibles.filter(p => !pasantiasValidas.includes(p));
+                const pasantiasInvalidas = pasantiasSeleccionadas.filter(p => !pasantiasValidas.includes(p));
                 if (pasantiasInvalidas.length > 0) {
                     throw new Error(`Pasantías no válidas: ${pasantiasInvalidas.join(", ")}`);
                 }
 
                 // Eliminar duplicados
-                updatedData.pasantiasDisponibles = [...new Set(pasantiasDisponibles)];
+                updatedData.pasantiasDisponibles = [...new Set(pasantiasSeleccionadas)];
             }
 
             // Si se solicita actualizar la lista de profesores

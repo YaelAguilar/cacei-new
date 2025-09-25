@@ -56,7 +56,7 @@ const TableFilters: React.FC<TableFiltersProps> = observer(({ viewModel }) => {
             <option value="all">Todos los tipos</option>
             {viewModel.uniqueTiposPasantia.map((tipo) => (
               <option key={tipo} value={tipo}>
-                {tipo}
+                {typeof tipo === 'string' ? tipo : String(tipo)}
               </option>
             ))}
           </select>

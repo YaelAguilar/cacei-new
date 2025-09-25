@@ -72,6 +72,26 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         ];
 
         try {
+            console.log("🔍 SQL Query:", sql);
+            console.log("🔍 Params count:", params.length);
+            console.log("🔍 Params:", params);
+            
+            // Validar que no haya valores undefined
+            const undefinedParams = params.map((param, index) => ({ index, param, isUndefined: param === undefined }));
+            const hasUndefined = undefinedParams.some(p => p.isUndefined);
+            if (hasUndefined) {
+                console.error("❌ Parámetros undefined encontrados:", undefinedParams.filter(p => p.isUndefined));
+                throw new Error("Algunos parámetros están undefined");
+            }
+            
+            // Validar que no haya valores null cuando no deberían serlo
+            const nullParams = params.map((param, index) => ({ index, param, isNull: param === null }));
+            const hasNull = nullParams.some(p => p.isNull);
+            if (hasNull) {
+                console.error("❌ Parámetros null encontrados:", nullParams.filter(p => p.isNull));
+                // No lanzar error aquí, solo loggear para debug
+            }
+            
             const result: any = await query(sql, params);
             
             return new Propuesta(
@@ -547,6 +567,174 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
         } catch (error) {
             console.error("Error getting propuestas by status:", error);
             throw new Error(`Error al obtener las propuestas por estatus: ${error}`);
+        }
+    }
+
+    // ✅ NUEVOS MÉTODOS PARA FILTROS AVANZADOS
+    async getPropuestasWithFilters(filters: ProposalFilters): Promise<Propuesta[]> {
+        let sql = `
+            SELECT pp.*, c.nombre as convocatoria_nombre, c.fecha_limite as convocatoria_fecha_limite
+            FROM project_proposals pp
+            LEFT JOIN convocatorias c ON pp.convocatoria_id = c.id
+            WHERE pp.active = true
+        `;
+        
+        const params: any[] = [];
+        const conditions: string[] = [];
+
+        // Filtro por estado
+        if (filters.status && filters.status !== 'all') {
+            conditions.push('pp.proposal_status = ?');
+            params.push(filters.status);
+        }
+
+        // Filtro por tipo de pasantía
+        if (filters.internshipType && filters.internshipType !== 'all') {
+            conditions.push('pp.internship_type = ?');
+            params.push(filters.internshipType);
+        }
+
+        // Filtro por tutor
+        if (filters.tutorId) {
+            conditions.push('pp.academic_tutor_id = ?');
+            params.push(filters.tutorId);
+        }
+
+        // Filtro por convocatoria
+        if (filters.convocatoriaId) {
+            conditions.push('pp.convocatoria_id = ?');
+            params.push(filters.convocatoriaId);
+        }
+
+        // Solo propuestas del período actual (convocatoria activa)
+        if (!filters.convocatoriaId) {
+            conditions.push('c.active = true');
+        }
+
+        if (conditions.length > 0) {
+            sql += ` AND ${conditions.join(' AND ')}`;
+        }
+
+        sql += ` ORDER BY pp.created_at DESC`;
+
+        try {
+            const result: any = await query(sql, params);
+            
+            if (result.length > 0) {
+                return result.map((row: any) => this.mapRowToPropuesta(row));
+            }
+            return [];
+        } catch (error) {
+            console.error("Error getting propuestas with filters:", error);
+            throw new Error(`Error al obtener las propuestas con filtros: ${error}`);
+        }
+    }
+
+    async getPropuestasByTutor(tutorId: number, filters?: ProposalFilters): Promise<Propuesta[]> {
+        let sql = `
+            SELECT pp.*, c.nombre as convocatoria_nombre, c.fecha_limite as convocatoria_fecha_limite
+            FROM project_proposals pp
+            LEFT JOIN convocatorias c ON pp.convocatoria_id = c.id
+            WHERE pp.active = true AND pp.academic_tutor_id = ?
+        `;
+        
+        const params: any[] = [tutorId];
+        const conditions: string[] = [];
+
+        // Filtros adicionales
+        if (filters) {
+            if (filters.status && filters.status !== 'all') {
+                conditions.push('pp.proposal_status = ?');
+                params.push(filters.status);
+            }
+
+            if (filters.internshipType && filters.internshipType !== 'all') {
+                conditions.push('pp.internship_type = ?');
+                params.push(filters.internshipType);
+            }
+
+            if (filters.convocatoriaId) {
+                conditions.push('pp.convocatoria_id = ?');
+                params.push(filters.convocatoriaId);
+            } else {
+                // Solo propuestas del período actual
+                conditions.push('c.active = true');
+            }
+        } else {
+            // Solo propuestas del período actual
+            conditions.push('c.active = true');
+        }
+
+        if (conditions.length > 0) {
+            sql += ` AND ${conditions.join(' AND ')}`;
+        }
+
+        sql += ` ORDER BY pp.created_at DESC`;
+
+        try {
+            const result: any = await query(sql, params);
+            
+            if (result.length > 0) {
+                return result.map((row: any) => this.mapRowToPropuesta(row));
+            }
+            return [];
+        } catch (error) {
+            console.error("Error getting propuestas by tutor:", error);
+            throw new Error(`Error al obtener las propuestas del tutor: ${error}`);
+        }
+    }
+
+    // ✅ MÉTODO PARA HISTORIAL DE DIRECTORES
+    async getAllProposalsFromAllPeriods(filters?: ProposalFilters): Promise<Propuesta[]> {
+        let sql = `
+            SELECT pp.*, c.nombre as convocatoria_nombre, c.fecha_limite as convocatoria_fecha_limite
+            FROM project_proposals pp
+            LEFT JOIN convocatorias c ON pp.convocatoria_id = c.id
+            WHERE pp.active = true
+        `;
+        
+        const params: any[] = [];
+        const conditions: string[] = [];
+
+        // Aplicar filtros
+        if (filters) {
+            if (filters.status && filters.status !== 'all') {
+                conditions.push('pp.proposal_status = ?');
+                params.push(filters.status);
+            }
+
+            if (filters.internshipType && filters.internshipType !== 'all') {
+                conditions.push('pp.internship_type = ?');
+                params.push(filters.internshipType);
+            }
+
+            if (filters.tutorId) {
+                conditions.push('pp.academic_tutor_id = ?');
+                params.push(filters.tutorId);
+            }
+
+            if (filters.convocatoriaId) {
+                conditions.push('pp.convocatoria_id = ?');
+                params.push(filters.convocatoriaId);
+            }
+        }
+
+        if (conditions.length > 0) {
+            sql += ` AND ${conditions.join(' AND ')}`;
+        }
+
+        sql += ` ORDER BY c.created_at DESC, pp.created_at DESC`;
+
+        try {
+            const result: any = await query(sql, params);
+            
+            if (result.length > 0) {
+                return result.map((row: any) => this.mapRowToPropuesta(row));
+            }
+            return [];
+        } catch (error) {
+            console.error("Error getting all proposals from all periods:", error);
+            throw new Error(`Error al obtener todas las propuestas de todos los períodos: ${error}`);
         }
     }
 }

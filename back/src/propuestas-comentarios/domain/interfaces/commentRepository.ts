@@ -48,4 +48,20 @@ export interface CommentRepository {
         tutorName: string,
         tutorEmail: string
     ): Promise<boolean>;
+
+    // ✅ NUEVO: Rechazar toda la propuesta
+    rejectEntireProposal(
+        proposalId: string,
+        tutorId: number,
+        tutorName: string,
+        tutorEmail: string
+    ): Promise<boolean>;
+
+    // ✅ NUEVO: Actualizar toda la propuesta
+    updateEntireProposal(
+        proposalId: string,
+        tutorId: number,
+        tutorName: string,
+        tutorEmail: string
+    ): Promise<boolean>;
 }

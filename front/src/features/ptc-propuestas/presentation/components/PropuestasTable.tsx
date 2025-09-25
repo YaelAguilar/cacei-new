@@ -96,7 +96,7 @@ const PropuestasTable: React.FC<PropuestasTableProps> = observer(({ viewModel })
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
-                          {propuesta.getProyecto().getNombre()}
+                          {propuesta.getProyecto()?.getNombre() || 'Proyecto sin nombre'}
                         </div>
                       </div>
                     </div>
@@ -105,7 +105,7 @@ const PropuestasTable: React.FC<PropuestasTableProps> = observer(({ viewModel })
                   {/* Empresa */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {propuesta.getEmpresa().getNombreCorto()}
+                      {propuesta.getEmpresa().getNombreCorto() || propuesta.getEmpresa().getRazonSocial()}
                     </div>
                     <div className="text-sm text-gray-500">
                       {propuesta.getEmpresa().getSector()}

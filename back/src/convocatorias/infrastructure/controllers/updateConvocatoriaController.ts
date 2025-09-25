@@ -10,7 +10,7 @@ export class UpdateConvocatoriaController {
             nombre, 
             descripcion, 
             fechaLimite, 
-            pasantiasDisponibles,
+            pasantiasSeleccionadas,
             actualizarProfesores
         } = req.body;
 
@@ -20,7 +20,7 @@ export class UpdateConvocatoriaController {
                 nombre,
                 descripcion,
                 fechaLimite,
-                pasantiasDisponibles,
+                pasantiasSeleccionadas,
                 actualizarProfesores
             );
 

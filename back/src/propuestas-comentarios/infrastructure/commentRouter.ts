@@ -5,7 +5,9 @@ import {
     updateCommentController,
     getCommentsByProposalController,
     getCommentsByTutorController,
-    approveProposalController
+    approveProposalController,
+    rejectProposalController,
+    updateProposalController
 } from './dependencies';
 
 export const commentRouter = express.Router();
@@ -77,6 +79,30 @@ commentRouter.put('/comentarios/:uuid', (req, res) => {
 commentRouter.post('/aprobar-propuesta', (req, res) => {
     console.log('✅ Aprobando propuesta completa');
     approveProposalController.run(req, res);
+});
+
+/**
+ * ✅ NUEVA RUTA: POST /rechazar-propuesta
+ * Rechazar toda la propuesta sin necesidad de comentarios específicos
+ * Body: {
+ *   proposalId: string
+ * }
+ */
+commentRouter.post('/rechazar-propuesta', (req, res) => {
+    console.log('❌ Rechazando propuesta completa');
+    rejectProposalController.run(req, res);
+});
+
+/**
+ * ✅ NUEVA RUTA: POST /actualizar-propuesta
+ * Solicitar actualización de toda la propuesta sin necesidad de comentarios específicos
+ * Body: {
+ *   proposalId: string
+ * }
+ */
+commentRouter.post('/actualizar-propuesta', (req, res) => {
+    console.log('🔄 Solicitando actualización de propuesta completa');
+    updateProposalController.run(req, res);
 });
 
 /**

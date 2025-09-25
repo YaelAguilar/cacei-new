@@ -48,14 +48,14 @@ const SuccessMessage: React.FC<SuccessMessageProps> = observer(({
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Proyecto:</p>
                 <p className="text-gray-900 font-medium">
-                  {propuesta.getProyecto().getNombre()}
+                  {propuesta.getProyecto()?.getNombre() || 'Proyecto sin nombre'}
                 </p>
               </div>
               
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Empresa:</p>
                 <p className="text-gray-900 font-medium">
-                  {propuesta.getEmpresa().getNombreCorto()}
+                  {propuesta.getEmpresa().getNombreCorto() || propuesta.getEmpresa().getRazonSocial()}
                 </p>
                 <p className="text-sm text-gray-600">
                   {propuesta.getEmpresa().getSector()}
