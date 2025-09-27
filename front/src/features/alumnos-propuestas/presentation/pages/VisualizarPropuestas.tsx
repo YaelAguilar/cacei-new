@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import MainContainer from "../../../shared/layout/MainContainer";
+import Button from "../../../shared/components/Button";
 import { VisualizarPropuestasViewModel } from "../viewModels/VisualizarPropuestasViewModel";
 import PropuestaCard from "../components/PropuestaCard";
 // Modal eliminado - ahora se usa navegación a página de detalles
@@ -131,31 +132,32 @@ const VisualizarPropuestas: React.FC = observer(() => {
             
             {/* Botones de acción */}
             <div className="mt-4 md:mt-0 flex gap-3">
-              <button
+              <Button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <FiFilter className="w-4 h-4" />
-                Filtros
-              </button>
+                variant="secondary"
+                size="sm"
+                icon={<FiFilter className="w-4 h-4" />}
+                label="Filtros"
+              />
               
-              <button
+              <Button
                 onClick={handleRefresh}
                 disabled={visualizarViewModel.loading}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <FiRefreshCw className={`w-4 h-4 ${visualizarViewModel.loading ? 'animate-spin' : ''}`} />
-                {visualizarViewModel.loading ? 'Actualizando...' : 'Actualizar'}
-              </button>
+                loading={visualizarViewModel.loading}
+                variant="secondary"
+                size="sm"
+                icon={<FiRefreshCw className="w-4 h-4" />}
+                label={visualizarViewModel.loading ? 'Actualizando...' : 'Actualizar'}
+              />
               
               {!canManageStatus && (
-                <button
+                <Button
                   onClick={() => window.location.href = '/mis-propuestas/nueva-propuesta'}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <FiPlus className="w-4 h-4" />
-                  Nueva Propuesta
-                </button>
+                  variant="primary"
+                  size="sm"
+                  icon={<FiPlus className="w-4 h-4" />}
+                  label="Nueva Propuesta"
+                />
               )}
             </div>
           </div>
@@ -349,26 +351,26 @@ const VisualizarPropuestas: React.FC = observer(() => {
                   
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     {selectedStatusFilter !== 'ALL' && (
-                      <button
+                      <Button
                         onClick={() => handleFilterChange('ALL')}
-                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                      >
-                        Ver todas las propuestas
-                      </button>
+                        variant="secondary"
+                        size="sm"
+                        label="Ver todas las propuestas"
+                      />
                     )}
-                    <button
+                    <Button
                       onClick={handleRefresh}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Actualizar lista
-                    </button>
+                      variant="primary"
+                      size="sm"
+                      label="Actualizar lista"
+                    />
                     {!canManageStatus && selectedStatusFilter === 'ALL' && (
-                      <button
+                      <Button
                         onClick={() => window.location.href = '/mis-propuestas/nueva-propuesta'}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                      >
-                        Verificar convocatorias
-                      </button>
+                        variant="success"
+                        size="sm"
+                        label="Verificar convocatorias"
+                      />
                     )}
                   </div>
                 </div>

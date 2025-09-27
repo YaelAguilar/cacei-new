@@ -1,6 +1,7 @@
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { observer } from "mobx-react-lite";
+import Button from "../../../shared/components/Button";
 import { ConvocatoriaViewModel } from "../viewModels/ConvocatoriaViewModel";
 import { ConvocatoriaValidationSchema } from "../validations/ConvocatoriaSchema";
 import { CreateConvocatoriaParams } from "../../domain/CreateConvocatoriaUseCase";
@@ -180,17 +181,14 @@ const ConvocatoriaForm: React.FC<ConvocatoriaFormProps> = observer(({ viewModel,
 
             {/* Botón de enviar */}
             <div className="flex justify-end pt-4">
-              <button
+              <Button
                 type="submit"
                 disabled={!isValid || isFormDisabled || isSubmitting || viewModel.submitting}
-                className={`bg-indigo-600 text-white font-bold py-2 px-6 rounded-md transition duration-300 ease-in-out flex items-center
-                            ${(!isValid || isFormDisabled || isSubmitting || viewModel.submitting) ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-700 focus:outline-none focus:shadow-outline"}`}
-              >
-                {(isSubmitting || viewModel.submitting) && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                )}
-                {(isSubmitting || viewModel.submitting) ? "Creando..." : "Crear Convocatoria"}
-              </button>
+                loading={isSubmitting || viewModel.submitting}
+                variant="primary"
+                size="md"
+                label={isSubmitting || viewModel.submitting ? "Creando..." : "Crear Convocatoria"}
+              />
             </div>
 
             {/* Error del ViewModel */}

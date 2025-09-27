@@ -1,9 +1,10 @@
 // src/features/alumnos-propuestas/presentation/pages/PropuestaDetalle.tsx
 import React, { useMemo, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PropuestaCompleta } from "../../data/models/Propuesta";
 import Status from "../../../shared/components/Status";
+import Button from "../../../shared/components/Button";
 import MainContainer from "../../../shared/layout/MainContainer";
 import { useAuth } from "../../../../core/utils/AuthContext";
 import { CommentsViewModel } from "../../../propuestas-comentarios/presentation/viewModels/CommentsViewModel";
@@ -237,13 +238,13 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center gap-4">
-              <button
+              <Button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <FiArrowLeft className="w-5 h-5" />
-                <span>Volver</span>
-              </button>
+                variant="ghost"
+                size="sm"
+                icon={<FiArrowLeft className="w-4 h-4" />}
+                label="Volver"
+              />
               <div className="h-6 w-px bg-gray-300"></div>
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl font-bold text-gray-900 truncate">
@@ -270,45 +271,40 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
                     <span>
                       <strong>Votación completa:</strong> Aprobar o rechazar toda la propuesta
                     </span>
-                    <button
+                    <Button
                       onClick={() => setShowHelpModal(true)}
-                      className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                      variant="ghost"
+                      size="sm"
+                      icon={<FiHelpCircle className="w-4 h-4" />}
                       title="Ver guía de votación"
-                    >
-                      <FiHelpCircle className="w-3 h-3 text-blue-600" />
-                    </button>
+                      aria-label="Ver guía de votación"
+                    />
                   </div>
                   
                   {!hasVoted ? (
                     // Mostrar botones de votación si no ha votado
                     <div className="flex items-center gap-2">
-                      <button
+                      <Button
                         onClick={() => handleVoteClick('APROBADO')}
                         disabled={commentsViewModel.loading}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                          commentsViewModel.loading 
-                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                            : 'bg-green-600 text-white hover:bg-green-700'
-                        }`}
+                        loading={commentsViewModel.loading}
+                        variant="success"
+                        size="sm"
+                        icon={<FiCheck className="w-4 h-4" />}
+                        label={commentsViewModel.loading ? 'Procesando...' : 'Aprobar Propuesta'}
                         title={commentsViewModel.loading ? "Procesando..." : "Aprobar esta propuesta completa"}
-                      >
-                        <FiCheck className="w-4 h-4" />
-                        {commentsViewModel.loading ? 'Procesando...' : 'Aprobar Propuesta'}
-                      </button>
+                      />
                       
-                      <button
+                      <Button
                         onClick={() => handleVoteClick('RECHAZADO')}
                         disabled={commentsViewModel.loading}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                          commentsViewModel.loading 
-                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                            : 'bg-red-600 text-white hover:bg-red-700'
-                        }`}
+                        loading={commentsViewModel.loading}
+                        variant="danger"
+                        size="sm"
+                        icon={<FiX className="w-4 h-4" />}
+                        label={commentsViewModel.loading ? 'Procesando...' : 'Rechazar Propuesta'}
                         title={commentsViewModel.loading ? "Procesando..." : "Rechazar esta propuesta completa"}
-                      >
-                        <FiX className="w-4 h-4" />
-                        {commentsViewModel.loading ? 'Procesando...' : 'Rechazar Propuesta'}
-                      </button>
+                      />
                     </div>
                   ) : (
                     // ✅ NUEVO: Mostrar estado de la evaluación si ya votó con voto final
@@ -385,13 +381,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
                 <div className="mt-4 pt-4 border-t border-red-200">
-                  <button
+                  <Button
                     onClick={() => handleOpenCommentForm('Datos del Proyecto', 'Contexto y Problemática')}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-                  >
-                    <FiMessageSquare className="w-4 h-4" />
-                    Comentar esta sección
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<FiMessageSquare className="w-4 h-4" />}
+                    label="Comentar esta sección"
+                    className="bg-red-100 text-red-700 hover:bg-red-200"
+                  />
                 </div>
               )}
               
@@ -423,13 +420,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
                 <div className="mt-4 pt-4 border-t border-green-200">
-                  <button
+                  <Button
                     onClick={() => handleOpenCommentForm('Datos del Proyecto', 'Objetivos del Proyecto')}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                  >
-                    <FiMessageSquare className="w-4 h-4" />
-                    Comentar esta sección
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<FiMessageSquare className="w-4 h-4" />}
+                    label="Comentar esta sección"
+                    className="bg-green-100 text-green-700 hover:bg-green-200"
+                  />
                 </div>
               )}
               
@@ -467,13 +465,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
                 <div className="mt-4 pt-4 border-t border-purple-200">
-                  <button
+                  <Button
                     onClick={() => handleOpenCommentForm('Datos del Proyecto', 'Actividades y Entregables')}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
-                  >
-                    <FiMessageSquare className="w-4 h-4" />
-                    Comentar esta sección
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<FiMessageSquare className="w-4 h-4" />}
+                    label="Comentar esta sección"
+                    className="bg-purple-100 text-purple-700 hover:bg-purple-200"
+                  />
                 </div>
               )}
               
@@ -495,13 +494,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
                 <div className="mt-4 pt-4 border-t border-cyan-200">
-                  <button
+                  <Button
                     onClick={() => handleOpenCommentForm('Datos del Proyecto', 'Tecnologías')}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-cyan-100 text-cyan-700 rounded-lg hover:bg-cyan-200 transition-colors"
-                  >
-                    <FiMessageSquare className="w-4 h-4" />
-                    Comentar esta sección
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<FiMessageSquare className="w-4 h-4" />}
+                    label="Comentar esta sección"
+                    className="bg-cyan-100 text-cyan-700 hover:bg-cyan-200"
+                  />
                 </div>
               )}
               
@@ -531,13 +531,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
                 <div className="mt-4 pt-4 border-t border-green-200">
-                  <button
+                  <Button
                     onClick={() => handleOpenCommentForm('Datos del Proyecto', 'Período del Proyecto')}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                  >
-                    <FiMessageSquare className="w-4 h-4" />
-                    Comentar esta sección
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<FiMessageSquare className="w-4 h-4" />}
+                    label="Comentar esta sección"
+                    className="bg-green-100 text-green-700 hover:bg-green-200"
+                  />
                 </div>
               )}
             </div>
@@ -615,13 +616,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
                 <div className="mt-4 pt-4 border-t border-purple-200">
-                  <button
+                  <Button
                     onClick={() => handleOpenCommentForm('Información de la Empresa', 'Datos de la Empresa')}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
-                  >
-                    <FiMessageSquare className="w-4 h-4" />
-                    Comentar esta sección
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<FiMessageSquare className="w-4 h-4" />}
+                    label="Comentar esta sección"
+                    className="bg-purple-100 text-purple-700 hover:bg-purple-200"
+                  />
                 </div>
               )}
               
@@ -643,13 +645,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
                 <div className="mt-4 pt-4 border-t border-pink-200">
-                  <button
+                  <Button
                     onClick={() => handleOpenCommentForm('Información de la Empresa', 'Dirección')}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-pink-100 text-pink-700 rounded-lg hover:bg-pink-200 transition-colors"
-                  >
-                    <FiMessageSquare className="w-4 h-4" />
-                    Comentar esta sección
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<FiMessageSquare className="w-4 h-4" />}
+                    label="Comentar esta sección"
+                    className="bg-pink-100 text-pink-700 hover:bg-pink-200"
+                  />
                 </div>
               )}
             </div>
@@ -708,13 +711,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
                 <div className="mt-4 pt-4 border-t border-orange-200">
-                  <button
+                  <Button
                     onClick={() => handleOpenCommentForm('Información de Contacto', 'Persona de Contacto')}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
-                  >
-                    <FiMessageSquare className="w-4 h-4" />
-                    Comentar esta sección
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<FiMessageSquare className="w-4 h-4" />}
+                    label="Comentar esta sección"
+                    className="bg-orange-100 text-orange-700 hover:bg-orange-200"
+                  />
                 </div>
               )}
             </div>
@@ -766,13 +770,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
                 <div className="mt-4 pt-4 border-t border-teal-200">
-                  <button
+                  <Button
                     onClick={() => handleOpenCommentForm('Supervisor del Proyecto', 'Información del Supervisor')}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors"
-                  >
-                    <FiMessageSquare className="w-4 h-4" />
-                    Comentar esta sección
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<FiMessageSquare className="w-4 h-4" />}
+                    label="Comentar esta sección"
+                    className="bg-teal-100 text-teal-700 hover:bg-teal-200"
+                  />
                 </div>
               )}
             </div>
@@ -828,13 +833,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
                 <div className="mt-4 pt-4 border-t border-indigo-200">
-                  <button
+                  <Button
                     onClick={() => handleOpenCommentForm('Tutor Académico', 'Información del Tutor')}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                  >
-                    <FiMessageSquare className="w-4 h-4" />
-                    Comentar esta sección
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<FiMessageSquare className="w-4 h-4" />}
+                    label="Comentar esta sección"
+                    className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                  />
                 </div>
               )}
             </div>

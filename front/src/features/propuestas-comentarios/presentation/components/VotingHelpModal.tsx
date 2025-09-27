@@ -1,6 +1,7 @@
 // src/features/propuestas-comentarios/presentation/components/VotingHelpModal.tsx
 import React from "react";
 import { motion } from "framer-motion";
+import Button from "../../../shared/components/Button";
 import { FiCheckCircle, FiXCircle, FiRefreshCw, FiInfo, FiX } from "react-icons/fi";
 
 interface VotingHelpModalProps {
@@ -36,12 +37,14 @@ const VotingHelpModal: React.FC<VotingHelpModalProps> = ({ isOpen, onClose }) =>
               Guía de Votación
             </h2>
           </div>
-          <button
+          <Button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <FiX className="w-5 h-5 text-gray-600" />
-          </button>
+            variant="ghost"
+            size="sm"
+            icon={<FiX className="w-5 h-5 text-gray-600" />}
+            title="Cerrar"
+            aria-label="Cerrar"
+          />
         </div>
 
         {/* Content */}
@@ -172,12 +175,12 @@ const VotingHelpModal: React.FC<VotingHelpModalProps> = ({ isOpen, onClose }) =>
 
         {/* Footer */}
         <div className="flex justify-end mt-6 pt-4 border-t">
-          <button
+          <Button
             onClick={onClose}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Entendido
-          </button>
+            variant="primary"
+            size="sm"
+            label="Entendido"
+          />
         </div>
       </motion.div>
     </motion.div>

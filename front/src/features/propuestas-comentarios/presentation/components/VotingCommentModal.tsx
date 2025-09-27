@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
 import Modal from "../../../shared/layout/Modal";
+import Button from "../../../shared/components/Button";
 import { FiCheck, FiX, FiMessageSquare } from "react-icons/fi";
 
 interface VotingCommentModalProps {
@@ -114,38 +115,22 @@ const VotingCommentModal: React.FC<VotingCommentModalProps> = observer(({
 
         {/* Botones */}
         <div className="flex justify-end gap-3 pt-4 border-t">
-          <button
+          <Button
             onClick={handleClose}
             disabled={loading}
-            className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-          >
-            Cancelar
-          </button>
-          <button
+            variant="outline"
+            size="sm"
+            label="Cancelar"
+          />
+          <Button
             onClick={handleVote}
             disabled={isVoteDisabled}
-            className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors disabled:opacity-50 ${
-              voteType === 'APROBADO'
-                ? 'bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-400'
-                : 'bg-red-600 text-white hover:bg-red-700 disabled:bg-gray-400'
-            }`}
-          >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Procesando...
-              </>
-            ) : (
-              <>
-                {voteType === 'APROBADO' ? (
-                  <FiCheck className="w-4 h-4" />
-                ) : (
-                  <FiX className="w-4 h-4" />
-                )}
-                {voteType === 'APROBADO' ? 'Aprobar' : 'Rechazar'}
-              </>
-            )}
-          </button>
+            loading={loading}
+            variant={voteType === 'APROBADO' ? 'success' : 'danger'}
+            size="sm"
+            icon={voteType === 'APROBADO' ? <FiCheck className="w-4 h-4" /> : <FiX className="w-4 h-4" />}
+            label={loading ? 'Procesando...' : (voteType === 'APROBADO' ? 'Aprobar' : 'Rechazar')}
+          />
         </div>
       </div>
     </Modal>

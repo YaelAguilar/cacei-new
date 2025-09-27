@@ -1,6 +1,7 @@
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { observer } from "mobx-react-lite";
+import Button from "../../../shared/components/Button";
 import { Convocatoria } from "../../data/models/Convocatoria";
 import { VisualizarConvocatoriasViewModel } from "../viewModels/VisualizarConvocatoriasViewModel";
 import { ConvocatoriaValidationSchema } from "../validations/ConvocatoriaSchema";
@@ -135,16 +136,21 @@ const EditConvocatoriaForm: React.FC<EditConvocatoriaFormProps> = observer(({
 
             {/* Botones de acción */}
             <div className="flex justify-end pt-4 border-t gap-3">
-              <button type="button" onClick={onCancel} className="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-md hover:bg-gray-300">
-                Cancelar
-              </button>
-              <button
+              <Button 
+                type="button" 
+                onClick={onCancel} 
+                variant="outline"
+                size="sm"
+                label="Cancelar"
+              />
+              <Button
                 type="submit"
                 disabled={!isValid || isSubmitting || viewModel.isUpdating}
-                className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-md disabled:opacity-50"
-              >
-                {viewModel.isUpdating ? "Guardando..." : "Guardar Cambios"}
-              </button>
+                loading={viewModel.isUpdating}
+                variant="primary"
+                size="sm"
+                label={viewModel.isUpdating ? "Guardando..." : "Guardar Cambios"}
+              />
             </div>
           </Form>
         )}

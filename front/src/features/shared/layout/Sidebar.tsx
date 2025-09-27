@@ -104,7 +104,9 @@ const Sidebar: React.FC = observer(() => {
         {hasChildren && isExpanded && (
           <div className="mt-1 space-y-1 overflow-hidden">
             <div className="animate-fade-in">
-              {item.children!.map(child => renderNavigationItem(child, level + 1, currentPath))}
+              {item.children!
+                .filter(child => child.name !== 'Detalle de Propuesta') // Ocultar este submenú del sidebar
+                .map(child => renderNavigationItem(child, level + 1, currentPath))}
             </div>
           </div>
         )}

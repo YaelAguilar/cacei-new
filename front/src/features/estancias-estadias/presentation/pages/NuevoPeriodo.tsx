@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import MainContainer from "../../../shared/layout/MainContainer";
+import Loading from "../../../shared/components/Loading";
 import { Toasters } from "../../../shared/components/Toasters";
 import { ConvocatoriaViewModel } from "../viewModels/ConvocatoriaViewModel";
 import ConvocatoriaForm from "../components/ConvocatoriaForm";
@@ -33,10 +34,11 @@ const NuevoPeriodo: React.FC = observer(() => {
   if (!convocatoriaViewModel.isInitialized) {
     return (
       <MainContainer>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <span className="ml-3 text-gray-600">Verificando convocatorias activas...</span>
-        </div>
+        <Loading 
+          size="lg" 
+          text="Verificando convocatorias activas..." 
+          className="py-12"
+        />
       </MainContainer>
     );
   }

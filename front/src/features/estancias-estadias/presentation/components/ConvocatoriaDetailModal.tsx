@@ -1,5 +1,6 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
+import Button from "../../../shared/components/Button";
 import { Convocatoria } from "../../data/models/Convocatoria";
 import { VisualizarConvocatoriasViewModel } from "../viewModels/VisualizarConvocatoriasViewModel";
 import Modal from "../../../shared/layout/Modal";
@@ -156,12 +157,12 @@ const ConvocatoriaDetailModal: React.FC<ConvocatoriaDetailModalProps> = observer
       {/* Footer del modal */}
       <div className="mt-6 pt-4 border-t border-gray-200">
         <div className="flex justify-end">
-          <button
+          <Button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-          >
-            Cerrar
-          </button>
+            variant="secondary"
+            size="sm"
+            label="Cerrar"
+          />
         </div>
       </div>
     </Modal>

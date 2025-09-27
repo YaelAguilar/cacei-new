@@ -1,5 +1,6 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
+import Button from "../../../shared/components/Button";
 import { Convocatoria } from "../../data/models/Convocatoria";
 import { VisualizarConvocatoriasViewModel } from "../viewModels/VisualizarConvocatoriasViewModel";
 import { FiCalendar, FiUsers, FiFileText, FiEye, FiEdit } from "react-icons/fi";
@@ -135,23 +136,25 @@ const ConvocatoriaCard: React.FC<ConvocatoriaCardProps> = observer(({
       {/* Footer con botón de acción */}
       <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
         <div className="flex items-center gap-2">
-          <button
+          <Button
             onClick={() => viewModel.openDetailModal(convocatoria)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
-          >
-            <FiEye className="w-4 h-4" />
-            Ver detalles
-          </button>
+            variant="primary"
+            size="sm"
+            icon={<FiEye className="w-4 h-4" />}
+            label="Ver detalles"
+            fullWidth
+          />
           
           {/* Botón de Editar, visible solo si la convocatoria está activa */}
           {statusInfo.status === 'active' && (
-            <button
+            <Button
               onClick={() => viewModel.openEditModal(convocatoria)}
-              className="flex-shrink-0 flex items-center justify-center p-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300 transition-colors"
+              variant="outline"
+              size="sm"
+              icon={<FiEdit className="w-4 h-4" />}
               title="Editar Convocatoria"
-            >
-              <FiEdit className="w-4 h-4" />
-            </button>
+              aria-label="Editar Convocatoria"
+            />
           )}
         </div>
       </div>

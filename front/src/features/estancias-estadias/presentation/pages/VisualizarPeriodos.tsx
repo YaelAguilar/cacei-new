@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import MainContainer from "../../../shared/layout/MainContainer";
+import Button from "../../../shared/components/Button";
+import Loading from "../../../shared/components/Loading";
 import { VisualizarConvocatoriasViewModel } from "../viewModels/VisualizarConvocatoriasViewModel";
 import ConvocatoriaCard from "../components/ConvocatoriaCard";
 import ConvocatoriaDetailModal from "../components/ConvocatoriaDetailModal";
@@ -44,10 +46,11 @@ const VisualizarPeriodos: React.FC = observer(() => {
   if (!visualizarViewModel.isInitialized) {
     return (
       <MainContainer>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <span className="ml-3 text-gray-600">Cargando convocatorias...</span>
-        </div>
+        <Loading 
+          size="lg" 
+          text="Cargando convocatorias..." 
+          className="py-12"
+        />
       </MainContainer>
     );
   }
@@ -69,14 +72,15 @@ const VisualizarPeriodos: React.FC = observer(() => {
             
             {/* Botón de actualizar */}
             <div className="mt-4 md:mt-0">
-              <button
+              <Button
                 onClick={handleRefresh}
                 disabled={visualizarViewModel.loading}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <FiRefreshCw className={`w-4 h-4 ${visualizarViewModel.loading ? 'animate-spin' : ''}`} />
-                {visualizarViewModel.loading ? 'Actualizando...' : 'Actualizar'}
-              </button>
+                loading={visualizarViewModel.loading}
+                variant="primary"
+                size="sm"
+                icon={<FiRefreshCw className="w-4 h-4" />}
+                label={visualizarViewModel.loading ? 'Actualizando...' : 'Actualizar'}
+              />
             </div>
           </div>
 
@@ -211,12 +215,12 @@ const VisualizarPeriodos: React.FC = observer(() => {
                   <p className="text-gray-600 mb-4">
                     No se han encontrado convocatorias registradas en el sistema.
                   </p>
-                  <button
+                  <Button
                     onClick={handleRefresh}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Actualizar lista
-                  </button>
+                    variant="primary"
+                    size="sm"
+                    label="Actualizar lista"
+                  />
                 </div>
               )}
             </>

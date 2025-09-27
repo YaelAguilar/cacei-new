@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import MainContainer from "../../../shared/layout/MainContainer";
+import Button from "../../../shared/components/Button";
 import { PTCPropuestasViewModel } from "../viewModels/PTCPropuestasViewModel";
 import StatisticsCards from "../components/StatisticsCards";
 import TableFilters from "../components/TableFilters";
@@ -67,27 +68,28 @@ const VisualizarPropuestas: React.FC = observer(() => {
 
           {/* Botones de acción */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-3 mt-4 mb-6">
-            <button
+            <Button
               onClick={handleRefresh}
               disabled={ptcViewModel.loading}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <FiRefreshCw className={`w-4 h-4 ${ptcViewModel.loading ? 'animate-spin' : ''}`} />
-              {ptcViewModel.loading ? 'Actualizando...' : 'Actualizar'}
-            </button>
+              loading={ptcViewModel.loading}
+              variant="secondary"
+              size="sm"
+              icon={<FiRefreshCw className="w-4 h-4" />}
+              label={ptcViewModel.loading ? 'Actualizando...' : 'Actualizar'}
+            />
             
             {/* Botón de exportar (futuro) */}
-            <button
+            <Button
               onClick={() => {
                 // TODO: Implementar exportación
                 alert('Funcionalidad de exportación próximamente');
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              variant="primary"
+              size="sm"
+              icon={<FiDownload className="w-4 h-4" />}
+              label="Exportar"
               title="Exportar datos"
-            >
-              <FiDownload className="w-4 h-4" />
-              Exportar
-            </button>
+            />
           </div>
 
           {/* Grid principal con el mismo espaciado que Dashboard */}
