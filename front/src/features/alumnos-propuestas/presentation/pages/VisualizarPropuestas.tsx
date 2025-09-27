@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import MainContainer from "../../../shared/layout/MainContainer";
 import { VisualizarPropuestasViewModel } from "../viewModels/VisualizarPropuestasViewModel";
 import PropuestaCard from "../components/PropuestaCard";
-import PropuestaDetailModal from "../../../shared/components/PropuestaDetailModal";
+// Modal eliminado - ahora se usa navegación a página de detalles
 import { FiRefreshCw, FiAlertCircle, FiFileText, FiPlus, FiFilter } from "react-icons/fi";
 import { ProposalStatus } from "../../data/models/Propuesta";
 import { useAuth } from "../../../../core/utils/AuthContext";
@@ -377,14 +377,7 @@ const VisualizarPropuestas: React.FC = observer(() => {
           )}
         </div>
 
-        {/* Modal de detalles */}
-        {visualizarViewModel.showDetailModal && visualizarViewModel.selectedPropuesta && (
-          <PropuestaDetailModal
-            propuesta={visualizarViewModel.selectedPropuesta}
-            viewModel={visualizarViewModel}
-            onClose={() => visualizarViewModel.closeDetailModal()}
-          />
-        )}
+        {/* Modal eliminado - ahora se usa navegación a página de detalles */}
       </div>
     </MainContainer>
   );

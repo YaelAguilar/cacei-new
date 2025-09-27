@@ -78,9 +78,22 @@ export class UpdateCommentUseCase {
         }
 
         if (updateData.voteStatus !== undefined) {
-            const validVotes = ['ACEPTADO', 'RECHAZADO', 'ACTUALIZA'];
-            if (!validVotes.includes(updateData.voteStatus)) {
-                throw new Error("El estado de votación debe ser ACEPTADO, RECHAZADO o ACTUALIZA");
+            // ✅ REGLAS DE NEGOCIO CORREGIDAS:
+            // - ACEPTADO/RECHAZADO: Solo para propuesta completa (usar endpoints específicos)
+            // - ACTUALIZA: Solo para secciones específicas (con comentario obligatorio)
+            
+            if (updateData.voteStatus === 'ACEPTADO' || updateData.voteStatus === 'RECHAZADO') {
+                const error = new Error(
+                    `Los votos "${updateData.voteStatus}" solo pueden aplicarse a la propuesta completa. ` +
+                    `Para votar por secciones específicas, use "ACTUALIZA" y proporcione un comentario detallado. ` +
+                    `Para aprobar/rechazar la propuesta completa, use los endpoints específicos de aprobación/rechazo.`
+                );
+                error.statusCode = 400;
+                throw error;
+            }
+
+            if (updateData.voteStatus !== 'ACTUALIZA') {
+                throw new Error("Para comentarios por sección, el estado de votación debe ser 'ACTUALIZA'");
             }
         }
     }

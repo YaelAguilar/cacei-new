@@ -154,12 +154,25 @@ export class CreateCommentController {
             if (error instanceof Error) {
                 const errorMessage = error.message;
                 
+                // ✅ Check if error has a custom statusCode
+                if ((error as any).statusCode) {
+                    res.status((error as any).statusCode).json({
+                        errors: [{
+                            status: (error as any).statusCode.toString(),
+                            title: "Business Logic Error",
+                            detail: errorMessage
+                        }]
+                    });
+                    return;
+                }
+                
                 const businessErrors = [
                     "Ya existe un comentario",
                     "Solo se permite un comentario por sección",
                     "es obligatorio",
                     "debe tener al menos",
-                    "debe ser ACEPTADO"
+                    "debe ser ACEPTADO",
+                    "solo pueden aplicarse a la propuesta completa"
                 ];
                 
                 if (businessErrors.some(msg => errorMessage.includes(msg))) {

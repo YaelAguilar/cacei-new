@@ -1,6 +1,7 @@
 // src/features/ptc-propuestas/presentation/components/PropuestasTable.tsx
 import React from "react";
 import { observer } from "mobx-react-lite";
+import { useNavigate } from "react-router-dom";
 import { PTCPropuestasViewModel } from "../viewModels/PTCPropuestasViewModel";
 import { FiEye, FiChevronUp, FiChevronDown, FiBriefcase, FiUser } from "react-icons/fi";
 import Status from "../../../shared/components/Status";
@@ -10,6 +11,8 @@ interface PropuestasTableProps {
 }
 
 const PropuestasTable: React.FC<PropuestasTableProps> = observer(({ viewModel }) => {
+  const navigate = useNavigate();
+  
   const handleSort = (column: string) => {
     viewModel.setSortColumn(column);
   };
@@ -150,7 +153,7 @@ const PropuestasTable: React.FC<PropuestasTableProps> = observer(({ viewModel })
                   {/* Acciones */}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
-                      onClick={() => viewModel.openDetailModal(propuesta)}
+                      onClick={() => navigate(`/propuesta/${propuesta.getId()}/detalle`)}
                       className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                     >
                       <FiEye className="h-4 w-4 mr-1" />

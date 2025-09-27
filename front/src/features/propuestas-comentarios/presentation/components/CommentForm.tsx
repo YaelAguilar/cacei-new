@@ -43,9 +43,8 @@ const CommentForm: React.FC<CommentFormProps> = observer(({
         }
     };
 
+    // ✅ NUEVA LÓGICA: Solo ACTUALIZA está permitido para secciones específicas
     const voteOptions = [
-        { value: 'ACEPTADO', label: 'Aceptado', icon: <FiCheckCircle />, color: 'text-green-600' },
-        { value: 'RECHAZADO', label: 'Rechazado', icon: <FiXCircle />, color: 'text-red-600' },
         { value: 'ACTUALIZA', label: 'Requiere Actualización', icon: <FiRefreshCw />, color: 'text-yellow-600' }
     ];
 
@@ -92,8 +91,11 @@ const CommentForm: React.FC<CommentFormProps> = observer(({
                         {/* Votación */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Votación *
+                                Votación por sección (Solo ACTUALIZA) *
                             </label>
+                            <p className="text-xs text-gray-600 mb-3">
+                                Para aprobar/rechazar la propuesta completa, use los botones de votación general.
+                            </p>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 {voteOptions.map((option) => (
                                     <button

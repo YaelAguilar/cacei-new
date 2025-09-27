@@ -63,7 +63,7 @@ export const deleteCommentController = new DeleteCommentController(deleteComment
 export const approveProposalController = new ApproveProposalController(approveProposalUseCase); // ✅ NUEVO
 export const rejectProposalController = new RejectProposalController(rejectProposalUseCase); // ✅ NUEVO
 export const updateProposalController = new UpdateProposalController(updateProposalUseCase); // ✅ NUEVO
-export const checkTutorFinalVoteController = new CheckTutorFinalVoteController(); // ✅ NUEVO
+export const checkTutorFinalVoteController = new CheckTutorFinalVoteController(checkTutorFinalVoteUseCase); // ✅ NUEVO
 
 // Exportar casos de uso adicionales
 export { getVotingHistoryUseCase };

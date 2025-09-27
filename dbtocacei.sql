@@ -95,7 +95,7 @@ CREATE TABLE `menu_submenu` (
   KEY `id_submenu` (`id_submenu`),
   CONSTRAINT `menu_submenu_ibfk_1` FOREIGN KEY (`id_menu`) REFERENCES `menus` (`id`),
   CONSTRAINT `menu_submenu_ibfk_2` FOREIGN KEY (`id_submenu`) REFERENCES `submenus` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -104,7 +104,7 @@ CREATE TABLE `menu_submenu` (
 
 LOCK TABLES `menu_submenu` WRITE;
 /*!40000 ALTER TABLE `menu_submenu` DISABLE KEYS */;
-INSERT INTO `menu_submenu` VALUES (9,'68217f8e-fa4d-4ee6-ac39-25cee3dd0067',17,10,'2025-06-28 03:57:33','2025-06-28 03:57:33',NULL,NULL),(10,'7b604ffe-31a8-4000-acbc-df2ee13287d7',18,11,'2025-07-17 00:45:25','2025-07-17 00:45:25',NULL,NULL),(11,'5ecd595b-2a4f-44d7-ab20-7801fb972e7a',18,12,'2025-07-17 00:46:39','2025-07-17 00:46:39',NULL,NULL),(15,'a1dd4554-487b-4a56-bf8c-477442ac8458',23,16,'2025-07-19 01:30:03','2025-07-19 01:30:03',NULL,NULL),(16,'fa0c0467-09db-49b6-9a1d-f035f0cec865',23,17,'2025-07-19 01:31:32','2025-07-19 01:31:32',NULL,NULL),(17,'5b13023e-cdca-4549-aafa-ca7ea7adef64',17,18,'2025-07-19 01:49:06','2025-07-19 01:49:06',NULL,NULL);
+INSERT INTO `menu_submenu` VALUES (9,'68217f8e-fa4d-4ee6-ac39-25cee3dd0067',17,10,'2025-06-28 03:57:33','2025-06-28 03:57:33',NULL,NULL),(10,'7b604ffe-31a8-4000-acbc-df2ee13287d7',18,11,'2025-07-17 00:45:25','2025-07-17 00:45:25',NULL,NULL),(11,'5ecd595b-2a4f-44d7-ab20-7801fb972e7a',18,12,'2025-07-17 00:46:39','2025-07-17 00:46:39',NULL,NULL),(15,'a1dd4554-487b-4a56-bf8c-477442ac8458',23,16,'2025-07-19 01:30:03','2025-07-19 01:30:03',NULL,NULL),(16,'fa0c0467-09db-49b6-9a1d-f035f0cec865',23,17,'2025-07-19 01:31:32','2025-07-19 01:31:32',NULL,NULL),(17,'5b13023e-cdca-4549-aafa-ca7ea7adef64',17,18,'2025-07-19 01:49:06','2025-07-19 01:49:06',NULL,NULL),(20,'b2c3d4e5-f6a7-8901-2345-678901bcde02',23,19,'2025-09-26 20:11:35','2025-09-26 20:11:35',NULL,NULL);
 /*!40000 ALTER TABLE `menu_submenu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -239,7 +239,6 @@ CREATE TABLE `project_proposals` (
 
 LOCK TABLES `project_proposals` WRITE;
 /*!40000 ALTER TABLE `project_proposals` DISABLE KEYS */;
-INSERT INTO `project_proposals` VALUES (1,'abaa8f29-9a8e-11f0-96a8-50fe0c03c2b6',1,5,'Juan Carlos Pérez García','juan.perez@upchiapas.edu.mx',10,'Carlos Mendoza García','carlos.mendoza@upchiapas.edu.mx','Estadía','Microsoft','Microsoft Corporation','MSF123456789','Chiapas','Tuxtla Gutiérrez','Fraccionamiento','Centro','Avenida','Central','100','A','29000','https://www.microsoft.com','https://www.linkedin.com/company/microsoft','María Elena Rodríguez','Gerente de Recursos Humanos','maria.rodriguez@microsoft.com','961-123-4567','Recursos Humanos','Roberto Sánchez López','Desarrollo de Software','roberto.sanchez@microsoft.com','961-987-6543','Sistema de Gestión de Inventarios','2025-11-01','2026-01-31','Las empresas modernas requieren sistemas eficientes para el control y gestión de inventarios que permitan optimizar sus operaciones y reducir costos operativos.','La falta de un sistema automatizado de gestión de inventarios genera pérdidas económicas significativas debido a desabasto, sobrestock y falta de visibilidad en tiempo real del estado de los productos.','Desarrollar un sistema web completo para la gestión de inventarios que permita el control eficiente de productos, seguimiento en tiempo real y optimización de procesos de almacén.','1. Analizar los procesos actuales de gestión de inventarios. 2. Diseñar la arquitectura del sistema. 3. Implementar módulos de registro y consulta de productos. 4. Desarrollar funcionalidades de alertas y reportes. 5. Realizar pruebas y optimización del sistema.','Análisis de requerimientos, diseño de base de datos, desarrollo del backend con Node.js, creación del frontend con React, implementación de funcionalidades de inventario, pruebas de integración, documentación del proyecto.','Sistema web funcional, documentación técnica completa, manual de usuario, código fuente documentado, presentación final del proyecto, reporte de resultados obtenidos.','Node.js, Express.js, React, MySQL, JavaScript, HTML5, CSS3, Bootstrap, Git, REST API, Docker','PENDIENTE',1,'2025-09-26 04:10:10','2025-09-26 04:10:10',5,NULL);
 /*!40000 ALTER TABLE `project_proposals` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -326,7 +325,6 @@ CREATE TABLE `proposal_comments` (
 
 LOCK TABLES `proposal_comments` WRITE;
 /*!40000 ALTER TABLE `proposal_comments` DISABLE KEYS */;
-INSERT INTO `proposal_comments` VALUES (1,'0d0a415d-403d-4bb0-8b99-0cf6ff7dcfe6','1',8,'APROBACIÓN_GENERAL','PROPUESTA_COMPLETA','Propuesta aprobada en su totalidad por Profesor Tiempo Completo (ptc@upchiapas.edu.mx)','ACEPTADO',1,'2025-09-26 04:17:13','2025-09-26 04:17:13');
 /*!40000 ALTER TABLE `proposal_comments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -482,7 +480,7 @@ CREATE TABLE `role_submenu` (
   KEY `id_submenu` (`id_submenu`),
   CONSTRAINT `role_submenu_ibfk_1` FOREIGN KEY (`id_role`) REFERENCES `roles` (`id`),
   CONSTRAINT `role_submenu_ibfk_2` FOREIGN KEY (`id_submenu`) REFERENCES `submenus` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -491,7 +489,7 @@ CREATE TABLE `role_submenu` (
 
 LOCK TABLES `role_submenu` WRITE;
 /*!40000 ALTER TABLE `role_submenu` DISABLE KEYS */;
-INSERT INTO `role_submenu` VALUES (5,'211f472f-cde5-487e-b0ce-c7fef2a7a066',13,10,'2025-06-28 03:58:14','2025-06-28 03:58:14',NULL,NULL),(8,'9f773e6c-2114-40ce-9aed-8384d14285c5',11,12,'2025-07-17 00:50:29','2025-07-17 00:50:29',NULL,NULL),(9,'9a56f20c-527a-412e-97af-2a4ee35922b0',11,11,'2025-07-17 00:50:32','2025-07-17 00:50:32',NULL,NULL),(10,'37405286-f402-400a-9d0d-274766d1b8cc',10,12,'2025-07-17 18:08:23','2025-07-17 18:08:23',NULL,NULL),(11,'2556dec5-ff74-44d7-b11e-90bd11f26162',10,11,'2025-07-17 18:08:27','2025-07-17 18:08:27',NULL,NULL),(14,'f35f7a3e-8af1-46bd-aadf-db23dd83dd24',15,17,'2025-07-19 01:38:03','2025-07-19 01:38:03',NULL,NULL),(15,'6b79b00f-c3aa-426f-b261-eccbe6afa7a4',15,16,'2025-07-19 01:38:05','2025-07-19 01:38:05',NULL,NULL),(16,'f6245943-f0f3-479d-843e-c244596de96b',13,18,'2025-07-19 01:55:13','2025-07-19 01:55:13',NULL,NULL);
+INSERT INTO `role_submenu` VALUES (5,'211f472f-cde5-487e-b0ce-c7fef2a7a066',13,10,'2025-06-28 03:58:14','2025-06-28 03:58:14',NULL,NULL),(8,'9f773e6c-2114-40ce-9aed-8384d14285c5',11,12,'2025-07-17 00:50:29','2025-07-17 00:50:29',NULL,NULL),(9,'9a56f20c-527a-412e-97af-2a4ee35922b0',11,11,'2025-07-17 00:50:32','2025-07-17 00:50:32',NULL,NULL),(10,'37405286-f402-400a-9d0d-274766d1b8cc',10,12,'2025-07-17 18:08:23','2025-07-17 18:08:23',NULL,NULL),(11,'2556dec5-ff74-44d7-b11e-90bd11f26162',10,11,'2025-07-17 18:08:27','2025-07-17 18:08:27',NULL,NULL),(14,'f35f7a3e-8af1-46bd-aadf-db23dd83dd24',15,17,'2025-07-19 01:38:03','2025-07-19 01:38:03',NULL,NULL),(15,'6b79b00f-c3aa-426f-b261-eccbe6afa7a4',15,16,'2025-07-19 01:38:05','2025-07-19 01:38:05',NULL,NULL),(16,'f6245943-f0f3-479d-843e-c244596de96b',13,18,'2025-07-19 01:55:13','2025-07-19 01:55:13',NULL,NULL),(20,'c3d4e5f6-a7b8-9012-3456-789012cdef03',15,19,'2025-09-26 20:11:35','2025-09-26 20:11:35',NULL,NULL),(21,'d4e5f6a7-b8c9-0123-4567-890123defa04',14,19,'2025-09-26 20:11:35','2025-09-26 20:11:35',NULL,NULL),(22,'e5f6a7b8-c9d0-1234-5678-901234efab05',13,19,'2025-09-26 20:11:35','2025-09-26 20:11:35',NULL,NULL);
 /*!40000 ALTER TABLE `role_submenu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -550,7 +548,7 @@ CREATE TABLE `roles` (
   `user_update` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -588,7 +586,7 @@ CREATE TABLE `submenus` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`),
   KEY `idx_submenus_component_name` (`component_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -597,7 +595,7 @@ CREATE TABLE `submenus` (
 
 LOCK TABLES `submenus` WRITE;
 /*!40000 ALTER TABLE `submenus` DISABLE KEYS */;
-INSERT INTO `submenus` VALUES (10,'c8729f81-9bf6-4151-a9da-26c1ddf92847','Ver Periodos','Módulo para crear periodos','<LuChartArea />','/visualizar-periodos',1,1,'VisualizarPeriodos',0,'2025-06-28 03:57:32','2025-07-19 01:48:21',NULL,NULL),(11,'8e0d78fb-2c1c-457e-a4a4-b736579926ae','Nuevo usuario','Módulo para registro de usuarios','ninguno','/nuevo',1,2,NULL,0,'2025-07-17 00:45:24','2025-07-17 00:47:30',NULL,NULL),(12,'1dfa7058-62da-41e7-9846-dd8fcb8c4cf6','Administración','Administración de usuarios','ninguno','/administracion',1,1,'AdministracionUsuarios',0,'2025-07-17 00:46:39','2025-07-19 01:07:46',NULL,NULL),(16,'1dc9a357-dca5-4769-8658-17e540779fdc','Generar Propuestas','Módulo para generar propuestas','ninguno','/nueva-propuesta',1,2,'GenerarPropuesta',0,'2025-07-19 01:30:02','2025-07-19 01:59:55',NULL,NULL),(17,'95b42045-6df7-4fa0-b090-9c812613daf8','Ver Propuestas','Módulo para visualizar las propuestas','ninguno','/visualizar-propuestas',1,1,'VisualizarPropuestas',0,'2025-07-19 01:31:31','2025-07-19 01:59:55',NULL,NULL),(18,'5c6d875e-f2db-4682-b874-71c311d50060','Nuevo Periodo','Módulo para crear periodos','ninguno','/nuevo-periodo',1,2,'NuevoPeriodo',0,'2025-07-19 01:49:05','2025-07-19 01:59:56',NULL,NULL);
+INSERT INTO `submenus` VALUES (10,'c8729f81-9bf6-4151-a9da-26c1ddf92847','Ver Periodos','Módulo para crear periodos','<LuChartArea />','/visualizar-periodos',1,1,'VisualizarPeriodos',0,'2025-06-28 03:57:32','2025-07-19 01:48:21',NULL,NULL),(11,'8e0d78fb-2c1c-457e-a4a4-b736579926ae','Nuevo usuario','Módulo para registro de usuarios','ninguno','/nuevo',1,2,NULL,0,'2025-07-17 00:45:24','2025-07-17 00:47:30',NULL,NULL),(12,'1dfa7058-62da-41e7-9846-dd8fcb8c4cf6','Administración','Administración de usuarios','ninguno','/administracion',1,1,'AdministracionUsuarios',0,'2025-07-17 00:46:39','2025-07-19 01:07:46',NULL,NULL),(16,'1dc9a357-dca5-4769-8658-17e540779fdc','Generar Propuestas','Módulo para generar propuestas','ninguno','/nueva-propuesta',1,2,'GenerarPropuesta',0,'2025-07-19 01:30:02','2025-07-19 01:59:55',NULL,NULL),(17,'95b42045-6df7-4fa0-b090-9c812613daf8','Ver Propuestas','Módulo para visualizar las propuestas','ninguno','/visualizar-propuestas',1,1,'VisualizarPropuestas',0,'2025-07-19 01:31:31','2025-07-19 01:59:55',NULL,NULL),(18,'5c6d875e-f2db-4682-b874-71c311d50060','Nuevo Periodo','Módulo para crear periodos','ninguno','/nuevo-periodo',1,2,'NuevoPeriodo',0,'2025-07-19 01:49:05','2025-07-19 01:59:56',NULL,NULL),(19,'a1b2c3d4-e5f6-7890-abcd-ef1234567890','Detalle de Propuesta','Visualización detallada de una propuesta específica','ninguno','/propuesta/:id/detalle',1,3,'PropuestaDetalle',0,'2025-09-26 20:11:35','2025-09-26 20:11:35',NULL,NULL);
 /*!40000 ALTER TABLE `submenus` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -701,4 +699,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-26 16:54:35
+-- Dump completed on 2025-09-26 20:11:35

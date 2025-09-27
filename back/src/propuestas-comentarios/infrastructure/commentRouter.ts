@@ -42,6 +42,15 @@ commentRouter.get('/mis-comentarios', (req, res) => {
 });
 
 /**
+ * GET /propuestas/:proposalId/tutor-voto-final
+ * Verificar si el tutor ya votó con voto final (ACEPTADO/RECHAZADO)
+ */
+commentRouter.get('/propuestas/:proposalId/tutor-voto-final', (req, res) => {
+    console.log('🔍 Verificando voto final del tutor para propuesta:', req.params.proposalId);
+    checkTutorFinalVoteController.run(req, res);
+});
+
+/**
  * POST /comentarios
  * Crear un nuevo comentario
  * Body: {

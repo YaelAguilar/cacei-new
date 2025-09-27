@@ -280,7 +280,8 @@ export class MysqlCommentRepository implements CommentRepository {
         proposalId: string,
         tutorId: number,
         tutorName: string,
-        tutorEmail: string
+        tutorEmail: string,
+        comment: string = ''
     ): Promise<boolean> {
         try {
             // Convertir proposalId si es UUID
@@ -297,15 +298,18 @@ export class MysqlCommentRepository implements CommentRepository {
                 numericProposalId = Number(proposalId);
             }
 
-            // Verificar si el tutor ya tiene comentarios en esta propuesta
-            const existingComments = await query(
-                `SELECT COUNT(*) as count FROM proposal_comments WHERE proposal_id = ? AND tutor_id = ? AND active = true`,
+            // ✅ NUEVA LÓGICA: Verificar si el tutor ya tiene votos finales (ACEPTADO/RECHAZADO)
+            const existingFinalVotes = await query(
+                `SELECT COUNT(*) as count FROM proposal_comments WHERE proposal_id = ? AND tutor_id = ? AND vote_status IN ('ACEPTADO', 'RECHAZADO') AND active = true`,
                 [numericProposalId, tutorId]
             );
 
-            if (existingComments[0].count > 0) {
-                throw new Error("No se puede aprobar toda la propuesta si ya existen comentarios específicos. Elimine los comentarios existentes primero.");
+            if (existingFinalVotes[0].count > 0) {
+                throw new Error("No se puede aprobar toda la propuesta si ya existe un voto final (ACEPTADO o RECHAZADO) de este tutor.");
             }
+
+            // ✅ PERMITIR aprobación si solo existen comentarios ACTUALIZA
+            // Los comentarios ACTUALIZA pueden coexistir con votos finales
 
             // Crear un comentario especial de aprobación general
             const uuid = uuidv4();
@@ -316,13 +320,17 @@ export class MysqlCommentRepository implements CommentRepository {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
             `;
 
+            const commentText = comment.trim() 
+                ? `${comment.trim()}\n\n--- Propuesta aprobada en su totalidad por ${tutorName} (${tutorEmail})`
+                : `Propuesta aprobada en su totalidad por ${tutorName} (${tutorEmail})`;
+
             const params = [
                 uuid,
                 numericProposalId,
                 tutorId,
                 'APROBACIÓN_GENERAL',
                 'PROPUESTA_COMPLETA',
-                `Propuesta aprobada en su totalidad por ${tutorName} (${tutorEmail})`,
+                commentText,
                 'ACEPTADO'
             ];
 
@@ -340,7 +348,8 @@ export class MysqlCommentRepository implements CommentRepository {
         proposalId: string,
         tutorId: number,
         tutorName: string,
-        tutorEmail: string
+        tutorEmail: string,
+        comment: string = ''
     ): Promise<boolean> {
         try {
             // Convertir proposalId si es UUID
@@ -357,15 +366,18 @@ export class MysqlCommentRepository implements CommentRepository {
                 numericProposalId = Number(proposalId);
             }
 
-            // Verificar si el tutor ya tiene comentarios en esta propuesta
-            const existingComments = await query(
-                `SELECT COUNT(*) as count FROM proposal_comments WHERE proposal_id = ? AND tutor_id = ? AND active = true`,
+            // ✅ NUEVA LÓGICA: Verificar si el tutor ya tiene votos finales (ACEPTADO/RECHAZADO)
+            const existingFinalVotes = await query(
+                `SELECT COUNT(*) as count FROM proposal_comments WHERE proposal_id = ? AND tutor_id = ? AND vote_status IN ('ACEPTADO', 'RECHAZADO') AND active = true`,
                 [numericProposalId, tutorId]
             );
 
-            if (existingComments[0].count > 0) {
-                throw new Error("No se puede rechazar toda la propuesta si ya existen comentarios específicos. Elimine los comentarios existentes primero.");
+            if (existingFinalVotes[0].count > 0) {
+                throw new Error("No se puede rechazar toda la propuesta si ya existe un voto final (ACEPTADO o RECHAZADO) de este tutor.");
             }
+
+            // ✅ PERMITIR rechazo si solo existen comentarios ACTUALIZA
+            // Los comentarios ACTUALIZA pueden coexistir con votos finales
 
             // Crear un comentario especial de rechazo general
             const uuid = uuidv4();
@@ -376,13 +388,17 @@ export class MysqlCommentRepository implements CommentRepository {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
             `;
 
+            const commentText = comment.trim() 
+                ? `${comment.trim()}\n\n--- Propuesta rechazada en su totalidad por ${tutorName}`
+                : `Propuesta rechazada en su totalidad por ${tutorName}`;
+
             const params = [
                 uuid,
                 numericProposalId,
                 tutorId,
                 'PROPUESTA_COMPLETA',
                 'RECHAZO_GENERAL',
-                `Propuesta rechazada en su totalidad por ${tutorName}`,
+                commentText,
                 'RECHAZADO'
             ];
 

@@ -204,12 +204,12 @@ export class CommentsViewModel {
     }
 
     // ✅ NUEVO: Aprobar toda la propuesta
-    async approveProposal(proposalId: string): Promise<boolean> {
+    async approveProposal(proposalId: string, comment?: string): Promise<boolean> {
         this.setLoading(true);
         this.setError(null);
 
         try {
-            const approved = await this.approveProposalUseCase.execute(proposalId);
+            const approved = await this.approveProposalUseCase.execute(proposalId, comment);
             if (approved) {
                 // Recargar comentarios para mostrar la aprobación
                 await this.loadComments(proposalId);
@@ -402,12 +402,12 @@ export class CommentsViewModel {
     // Resetear el ViewModel
 
     // ✅ NUEVO: Rechazar toda la propuesta
-    async rejectProposal(proposalId: string): Promise<boolean> {
+    async rejectProposal(proposalId: string, comment?: string): Promise<boolean> {
         try {
             this.loading = true;
             this.error = null;
             
-            const success = await this.repository.rejectProposal(proposalId);
+            const success = await this.repository.rejectProposal(proposalId, comment);
             
             if (success) {
                 // Recargar comentarios para mostrar el nuevo estado

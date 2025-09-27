@@ -9,7 +9,7 @@ export class RejectProposalController {
         console.log('🏁 RejectProposalController iniciado');
         
         try {
-            const { proposalId } = req.body;
+            const { proposalId, comment } = req.body;
 
             // Obtener información del tutor desde el token
             const userFromToken = (req as any).user;
@@ -66,7 +66,8 @@ export class RejectProposalController {
                 proposalId,
                 tutor.id,
                 tutorFullName,
-                tutor.email
+                tutor.email,
+                comment || ''
             );
 
             console.log('📋 Rechazo resultado:', rejected ? 'exitoso' : 'falló');

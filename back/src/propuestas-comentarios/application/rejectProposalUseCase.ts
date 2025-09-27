@@ -8,7 +8,8 @@ export class RejectProposalUseCase {
         proposalId: string,
         tutorId: number,
         tutorName: string,
-        tutorEmail: string
+        tutorEmail: string,
+        comment: string = ''
     ): Promise<boolean> {
         try {
             console.log(`🚫 RejectProposalUseCase iniciado para propuesta ${proposalId}`);
@@ -17,7 +18,8 @@ export class RejectProposalUseCase {
                 proposalId,
                 tutorId,
                 tutorName,
-                tutorEmail
+                tutorEmail,
+                comment.trim()
             );
 
             console.log(`📋 Rechazo resultado: ${rejected ? 'exitoso' : 'falló'}`);

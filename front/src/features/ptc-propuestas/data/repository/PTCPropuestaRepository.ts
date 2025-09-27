@@ -108,8 +108,7 @@ export class PTCPropuestaRepository {
     // Crear información del estudiante (necesario para el constructor)
     const estudiante = new InformacionEstudiante(
       attrs.estudiante?.nombre || 'Estudiante',
-      attrs.estudiante?.email || 'estudiante@email.com',
-      attrs.estudiante?.telefono || ''
+      attrs.estudiante?.email || 'estudiante@email.com'
     );
 
     return new PropuestaCompleta(

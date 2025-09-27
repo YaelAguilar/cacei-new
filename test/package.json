@@ -1,0 +1,21 @@
+{
+  "name": "cacei-test-suite",
+  "version": "1.0.0",
+  "description": "Comprehensive test suite for CACEI alumnos-propuestas feature",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test-runner.js",
+    "test:auth": "node tests/auth-tests.js",
+    "test:proposals": "node tests/proposal-tests.js",
+    "test:comments": "node tests/comment-tests.js",
+    "test:integration": "node tests/integration-tests.js",
+    "test:all": "npm run test:auth && npm run test:proposals && npm run test:comments && npm run test:integration"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "colors": "^1.4.0"
+  }
+}

@@ -4,7 +4,7 @@ import { PTCPropuestaRepository } from "../../data/repository/PTCPropuestaReposi
 import { GetAllPropuestasUseCase } from "../../domain/GetAllPropuestasUseCase";
 import { GetPropuestaDetailsUseCase } from "../../domain/GetPropuestaDetailsUseCase";
 import { PropuestaCompleta } from "../../../alumnos-propuestas/data/models/Propuesta";
-import { PropuestaDetailViewModelInterface } from "../../../shared/components/PropuestaDetailModal";
+import { PropuestaDetailViewModelInterface } from "../../../alumnos-propuestas/presentation/interfaces/PropuestaDetailViewModelInterface";
 
 export class PTCPropuestasViewModel implements PropuestaDetailViewModelInterface {
   // Estados de UI
@@ -158,7 +158,7 @@ export class PTCPropuestasViewModel implements PropuestaDetailViewModelInterface
       const searchLower = this.searchTerm.toLowerCase();
       filtered = filtered.filter(propuesta => 
         (propuesta.getProyecto()?.getNombre() || '').toLowerCase().includes(searchLower) ||
-        propuesta.getEmpresa().getNombreCorto().toLowerCase().includes(searchLower) ||
+        (propuesta.getEmpresa()?.getNombreCorto() || '').toLowerCase().includes(searchLower) ||
         propuesta.getTutorAcademico().getNombre().toLowerCase().includes(searchLower) ||
         propuesta.getTipoPasantia().toLowerCase().includes(searchLower)
       );

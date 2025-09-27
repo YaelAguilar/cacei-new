@@ -9,8 +9,9 @@ export class ApproveProposalController {
         console.log('🏁 ApproveProposalController iniciado');
         console.log('📝 Body recibido:', req.body);
         
-        const { proposalId } = req.body;
+        const { proposalId, comment } = req.body;
         console.log('📝 proposalId extraído:', proposalId);
+        console.log('📝 comment extraído:', comment);
         console.log('📝 Tipo de proposalId:', typeof proposalId);
 
         try {
@@ -77,7 +78,8 @@ export class ApproveProposalController {
                 proposalId,
                 tutor.id,
                 tutorFullName,
-                tutor.email
+                tutor.email,
+                comment || ''
             );
 
             console.log('📋 Aprobación resultado:', approved ? 'exitosa' : 'falló');

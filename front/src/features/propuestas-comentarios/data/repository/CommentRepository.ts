@@ -46,10 +46,11 @@ export class CommentRepository {
     }
 
     // ✅ NUEVO: Aprobar toda la propuesta
-    async approveProposal(proposalId: string): Promise<boolean> {
+    async approveProposal(proposalId: string, comment?: string): Promise<boolean> {
         try {
             const response = await ApiClient.post('/aprobar-propuesta', {
-                proposalId
+                proposalId,
+                comment: comment || ''
             });
             
             return response.status === 200;
@@ -60,10 +61,11 @@ export class CommentRepository {
     }
 
     // ✅ NUEVO: Rechazar toda la propuesta
-    async rejectProposal(proposalId: string): Promise<boolean> {
+    async rejectProposal(proposalId: string, comment?: string): Promise<boolean> {
         try {
             const response = await ApiClient.post('/rechazar-propuesta', {
-                proposalId
+                proposalId,
+                comment: comment || ''
             });
             
             return response.status === 200;

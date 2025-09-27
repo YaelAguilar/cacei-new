@@ -194,12 +194,23 @@ export class MysqlRoleRepository implements RoleRepository {
 
     async getRolePermissions(roleId: string): Promise<RoleWithPermissions | null> {
         try {
-            // 1. Obtener información del rol
-            const roleSql = "SELECT * FROM roles WHERE uuid = ?";
-            const roleData: any[] = await query(roleSql, [roleId]);
+            // 1. Obtener información del rol - manejar tanto UUID como ID numérico
+            let roleSql: string;
+            let roleData: any[];
+            
+            // Verificar si es un UUID o un ID numérico
+            if (roleId.match(/^[0-9]+$/)) {
+                // Es un ID numérico
+                roleSql = "SELECT * FROM roles WHERE id = ?";
+                roleData = await query(roleSql, [parseInt(roleId)]);
+            } else {
+                // Es un UUID
+                roleSql = "SELECT * FROM roles WHERE uuid = ?";
+                roleData = await query(roleSql, [roleId]);
+            }
 
             if (roleData.length === 0) {
-                throw new Error(`Role with UUID ${roleId} not found`);
+                throw new Error(`Role with ID/UUID ${roleId} not found`);
             }
 
             const role = roleData[0];

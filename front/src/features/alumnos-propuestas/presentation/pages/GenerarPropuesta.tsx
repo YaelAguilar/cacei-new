@@ -138,7 +138,7 @@ const GenerarPropuesta: React.FC = observer(() => {
     } else {
       // Manejo específico para el error de propuesta existente
       if (propuestaViewModel.error && propuestaViewModel.error.includes("Ya tienes una propuesta registrada")) {
-        Toasters("info", "Ya tienes una propuesta registrada en esta convocatoria. Revisa tu propuesta existente en 'Mis Propuestas'.");
+        Toasters("default", "Ya tienes una propuesta registrada en esta convocatoria. Revisa tu propuesta existente en 'Mis Propuestas'.");
       } else {
         Toasters("error", propuestaViewModel.error || "Error al registrar la propuesta");
       }

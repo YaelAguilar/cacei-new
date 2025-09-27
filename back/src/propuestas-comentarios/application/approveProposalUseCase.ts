@@ -8,7 +8,8 @@ export class ApproveProposalUseCase {
         proposalId: string,
         tutorId: number,
         tutorName: string,
-        tutorEmail: string
+        tutorEmail: string,
+        comment: string = ''
     ): Promise<boolean> {
         try {
             if (!proposalId || proposalId.trim() === '') {
@@ -31,7 +32,8 @@ export class ApproveProposalUseCase {
                 proposalId,
                 tutorId,
                 tutorName.trim(),
-                tutorEmail.trim()
+                tutorEmail.trim(),
+                comment.trim()
             );
 
         } catch (error) {

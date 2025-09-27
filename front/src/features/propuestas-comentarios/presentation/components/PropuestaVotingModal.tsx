@@ -3,7 +3,7 @@ import React, { useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { motion } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
-import { PropuestaCompleta } from "../../alumnos-propuestas/data/models/Propuesta";
+import { PropuestaCompleta } from "../../../alumnos-propuestas/data/models/Propuesta";
 import Status from "../../../shared/components/Status";
 import { CommentsViewModel } from "../viewModels/CommentsViewModel";
 import InlineComments from "./InlineComments";
@@ -140,7 +140,7 @@ const PropuestaVotingModal: React.FC<PropuestaVotingModalProps> = observer(({
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <p className="font-bold text-blue-900 text-lg mb-2">
-                    {propuesta.getEstudiante().getNombre()}
+                    {propuesta.getEstudiante().getNombreCompleto()}
                   </p>
                   <div className="flex items-center gap-2 mb-2">
                     <FiMail className="w-4 h-4 text-blue-600 flex-shrink-0" />
@@ -151,7 +151,7 @@ const PropuestaVotingModal: React.FC<PropuestaVotingModalProps> = observer(({
                   <div className="flex items-center gap-2">
                     <FiPhone className="w-4 h-4 text-blue-600 flex-shrink-0" />
                     <span className="text-blue-700 font-medium">
-                      {propuesta.getEstudiante().getTelefono()}
+                      No disponible
                     </span>
                   </div>
                 </div>
@@ -162,7 +162,7 @@ const PropuestaVotingModal: React.FC<PropuestaVotingModalProps> = observer(({
                   proposalId={propuesta.getId()}
                   sectionName="Información del Estudiante"
                   subsectionName="Datos Personales"
-                  currentUserEmail={authViewModel.user?.email}
+                  currentUserEmail={authViewModel.currentUser?.getEmail()}
                   canComment={true}
                 />
               </div>
@@ -206,7 +206,7 @@ const PropuestaVotingModal: React.FC<PropuestaVotingModalProps> = observer(({
                   proposalId={propuesta.getId()}
                   sectionName="Información de la Empresa"
                   subsectionName="Datos de la Empresa"
-                  currentUserEmail={authViewModel.user?.email}
+                  currentUserEmail={authViewModel.currentUser?.getEmail()}
                   canComment={true}
                 />
               </div>
@@ -258,7 +258,7 @@ const PropuestaVotingModal: React.FC<PropuestaVotingModalProps> = observer(({
                   proposalId={propuesta.getId()}
                   sectionName="Información del Proyecto"
                   subsectionName="Descripción del Proyecto"
-                  currentUserEmail={authViewModel.user?.email}
+                  currentUserEmail={authViewModel.currentUser?.getEmail()}
                   canComment={true}
                 />
               </div>

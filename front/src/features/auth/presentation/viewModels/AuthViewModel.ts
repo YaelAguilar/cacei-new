@@ -274,35 +274,69 @@ export class AuthViewModel {
       return false;
     }
 
+    console.log(`🔍 Verificando acceso a: ${path}`);
+    console.log(`📋 Permisos disponibles:`, this.userPermissions.menus.map(m => ({
+      name: m.attributes.name,
+      path: m.attributes.path,
+      assigned: m.attributes.assigned,
+      submenus: m.relationships.submenus.data.map(s => ({
+        name: s.attributes.name,
+        path: s.attributes.path,
+        assigned: s.attributes.assigned
+      }))
+    })));
+
     const hasAccess = this.userPermissions.menus.some(menu => {
       // 1. Verificar acceso al menú principal (exacto)
       if (menu.attributes.assigned && menu.attributes.path === path) {
+        console.log(`✅ Acceso concedido por menú principal: ${menu.attributes.path}`);
         return true;
       }
 
       // 2. ✅ NUEVO: Verificar acceso a rutas que empiecen con el path del menú
       // Esto maneja casos como "/roles/:id/permisos" donde necesitas acceso a "/roles"
       if (menu.attributes.assigned && path.startsWith(menu.attributes.path + '/')) {
+        console.log(`✅ Acceso concedido por prefijo de menú: ${menu.attributes.path}`);
         return true;
       }
 
       // 3. Verificar acceso a submenús (con rutas completas)
       const submenuAccess = menu.relationships.submenus.data.some(submenu => {
-        if (!submenu.attributes.assigned) return false;
+        if (!submenu.attributes.assigned) {
+          console.log(`⏭️ Submenú no asignado: ${submenu.attributes.name}`);
+          return false;
+        }
 
         // Construir ruta completa del submenú
-        const fullSubmenuPath = `${menu.attributes.path}${submenu.attributes.path}`;
+        // Si el submenú tiene una ruta que empieza con '/', es una ruta absoluta
+        const fullSubmenuPath = submenu.attributes.path.startsWith('/') 
+          ? submenu.attributes.path 
+          : `${menu.attributes.path}${submenu.attributes.path}`;
+        console.log(`🔍 Verificando submenú: ${fullSubmenuPath} vs ${path}`);
 
         // Verificar coincidencia exacta
         if (fullSubmenuPath === path) {
+          console.log(`✅ Acceso concedido por coincidencia exacta: ${fullSubmenuPath}`);
           return true;
         }
 
         // ✅ NUEVO: También verificar rutas que empiecen con el submenú
         if (path.startsWith(fullSubmenuPath + '/')) {
+          console.log(`✅ Acceso concedido por prefijo de submenú: ${fullSubmenuPath}`);
           return true;
         }
 
+        // ✅ NUEVO: Manejar rutas dinámicas con parámetros
+        // Convertir ruta con parámetros a patrón regex
+        const dynamicPattern = fullSubmenuPath.replace(/:[^/]+/g, '[^/]+');
+        const regex = new RegExp(`^${dynamicPattern}$`);
+        console.log(`🔍 Patrón dinámico: ${dynamicPattern} -> regex: ${regex}`);
+        if (regex.test(path)) {
+          console.log(`✅ Acceso concedido por patrón dinámico: ${fullSubmenuPath} -> ${path}`);
+          return true;
+        }
+
+        console.log(`❌ Submenú no coincide: ${fullSubmenuPath}`);
         return false;
       });
 
@@ -311,7 +345,7 @@ export class AuthViewModel {
 
     if (!hasAccess) {
       console.log(`❌ Acceso denegado a: ${path}`);
-      //console.log('📋 Rutas disponibles:', this.getAllAssignedPaths());
+      console.log('📋 Rutas disponibles:', this.getAllAssignedPaths());
     }
 
     return hasAccess;

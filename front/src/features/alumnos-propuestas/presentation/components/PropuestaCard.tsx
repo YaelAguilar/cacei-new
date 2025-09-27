@@ -1,6 +1,7 @@
 // src/features/alumnos-propuestas/presentation/components/PropuestaCard.tsx
 import React from "react";
 import { observer } from "mobx-react-lite";
+import { useNavigate } from "react-router-dom";
 import { FiBriefcase, FiEye, FiUser, FiCalendar, FiFileText, FiEdit, FiCheck, FiX, FiRefreshCw } from "react-icons/fi";
 import { PropuestaCompleta } from "../../data/models/Propuesta";
 import { VisualizarPropuestasViewModel } from "../viewModels/VisualizarPropuestasViewModel";
@@ -14,9 +15,10 @@ interface PropuestaCardProps {
 
 const PropuestaCard: React.FC<PropuestaCardProps> = observer(({ 
   propuesta, 
-  viewModel,
+  viewModel, 
   showStatusActions = false 
 }) => {
+  const navigate = useNavigate();
   const statusInfo = viewModel.getPropuestaDetailedStatus(propuesta);
 
   const handleStatusChange = async (newStatus: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' | 'ACTUALIZAR') => {
@@ -108,7 +110,7 @@ const PropuestaCard: React.FC<PropuestaCardProps> = observer(({
         <div className="flex flex-col space-y-3">
           {/* Botón principal de ver detalles */}
           <button
-            onClick={() => viewModel.openDetailModal(propuesta)}
+            onClick={() => navigate(`/propuesta/${propuesta.getId()}/detalle`)}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FiEye className="w-4 h-4" />

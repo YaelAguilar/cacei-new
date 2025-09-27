@@ -7,7 +7,7 @@ import StatisticsCards from "../components/StatisticsCards";
 import TableFilters from "../components/TableFilters";
 import PropuestasTable from "../components/PropuestasTable";
 import TablePagination from "../components/TablePagination";
-import PropuestaDetailModal from "../../../shared/components/PropuestaDetailModal";
+// Modal eliminado - ahora se usa navegación a página de detalles
 import { FiRefreshCw, FiAlertCircle, FiDownload } from "react-icons/fi";
 
 const VisualizarPropuestas: React.FC = observer(() => {
@@ -195,14 +195,7 @@ const VisualizarPropuestas: React.FC = observer(() => {
           </div>
         </div>
 
-        {/* Modal de detalles */}
-        {ptcViewModel.showDetailModal && ptcViewModel.selectedPropuesta && (
-          <PropuestaDetailModal
-            propuesta={ptcViewModel.selectedPropuesta}
-            viewModel={ptcViewModel}
-            onClose={() => ptcViewModel.closeDetailModal()}
-          />
-        )}
+        {/* Modal eliminado - ahora se usa navegación a página de detalles */}
       </div>
     </MainContainer>
   );

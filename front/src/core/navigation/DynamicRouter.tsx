@@ -7,7 +7,22 @@ import { LazyComponentWrapper } from './LazyComponentWrapper';
 import { NavigationHelper } from '../utils/NavigationHelper';
 import LoginPage from "../../features/auth/presentation/pages/Login";
 import Dashboard from '../../features/dashboard/presentation/pages/Dashboard';
-import NotFoundComponent from '../utils/NotFountPage';
+
+// Componente 404 simple
+const NotFoundComponent: React.FC = () => (
+  <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="text-center">
+      <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
+      <p className="text-gray-600 mb-4">Página no encontrada</p>
+      <button
+        onClick={() => window.history.back()}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        Volver
+      </button>
+    </div>
+  </div>
+);
 
 const DynamicRouter: React.FC = observer(() => {
   const authViewModel = useAuth();
@@ -100,6 +115,19 @@ const DynamicRouter: React.FC = observer(() => {
             <LazyComponentWrapper
               componentName="RolePermissions"
               featureName="roles"
+            />
+          </ProtectedRoute>
+        )
+      });
+
+      // Detalle de propuesta con parámetros dinámicos
+      routes.push({
+        path: "/propuesta/:id/detalle",
+        element: (
+          <ProtectedRoute authViewModel={authViewModel}>
+            <LazyComponentWrapper
+              componentName="PropuestaDetalleWrapper"
+              featureName="alumnos-propuestas"
             />
           </ProtectedRoute>
         )

@@ -3,7 +3,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { PropuestaRepository } from "../../data/repository/PropuestaRepository";
 import { GetPropuestasByAlumnoUseCase } from "../../domain/GetPropuestasByAlumnoUseCase";
 import { PropuestaCompleta, ProposalStatus } from "../../data/models/Propuesta";
-import { PropuestaDetailViewModelInterface } from "../../../shared/components/PropuestaDetailModal";
+import { PropuestaDetailViewModelInterface } from "../interfaces/PropuestaDetailViewModelInterface";
 
 export class VisualizarPropuestasViewModel implements PropuestaDetailViewModelInterface {
   // Estados de UI

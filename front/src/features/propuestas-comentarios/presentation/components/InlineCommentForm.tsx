@@ -52,27 +52,14 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
         }
     };
 
+    // ✅ NUEVA LÓGICA: Solo ACTUALIZA está permitido para secciones específicas
     const voteOptions = [
-        { 
-            value: 'ACEPTADO', 
-            label: '✓', 
-            icon: <FiCheckCircle />, 
-            color: 'bg-green-600',
-            description: 'Aprobado - No se puede editar después'
-        },
-        { 
-            value: 'RECHAZADO', 
-            label: '✗', 
-            icon: <FiXCircle />, 
-            color: 'bg-red-600',
-            description: 'Rechazado - No se puede editar después'
-        },
         { 
             value: 'ACTUALIZA', 
             label: '↻', 
             icon: <FiRefreshCw />, 
             color: 'bg-yellow-600',
-            description: 'Requiere actualización - Se puede editar'
+            description: 'Requiere actualización - Se puede editar después'
         }
     ] as const;
 
@@ -82,7 +69,18 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
             validationSchema={CommentValidationSchema}
             onSubmit={handleSubmit}
         >
-            {({ isSubmitting, values, setFieldValue }) => (
+            {({ isSubmitting, values, setFieldValue, isValid, errors, touched }) => {
+                // Debug logs
+                console.log('🔍 InlineCommentForm Debug:', {
+                    isValid,
+                    values,
+                    errors,
+                    touched,
+                    voteStatus: values.voteStatus,
+                    commentTextLength: values.commentText.length
+                });
+                
+                return (
                 <Form className="space-y-3">
                     <div>
                         <Field
@@ -101,7 +99,7 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
 
                     <div>
                         <p className="text-xs font-medium text-gray-700 mb-2">
-                            Votación (⚠️ ACEPTADO y RECHAZADO no se pueden editar después):
+                            Votación por sección (Solo se permite ACTUALIZA):
                         </p>
                         <div className="flex items-center gap-2">
                             {voteOptions.map((option) => (
@@ -131,7 +129,8 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
 
                     <div className="flex items-center justify-between">
                         <div className="text-xs text-gray-600">
-                            <strong>Nota:</strong> Solo se permite un comentario por sección por tutor.
+                            <strong>Nota:</strong> Solo se permite un comentario por sección por tutor. 
+                            Para aprobar/rechazar la propuesta completa, use los botones de votación general.
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -146,7 +145,7 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
                             )}
                             <button
                                 type="submit"
-                                disabled={isSubmitting || viewModel.loading || !values.voteStatus}
+                                disabled={isSubmitting || viewModel.loading || !isValid || !values.voteStatus}
                                 className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                             >
                                 {isSubmitting ? "Guardando..." : "Guardar"}
@@ -166,7 +165,8 @@ const InlineCommentForm: React.FC<InlineCommentFormProps> = observer(({
                         </div>
                     )}
                 </Form>
-            )}
+                );
+            }}
         </Formik>
     );
 });
