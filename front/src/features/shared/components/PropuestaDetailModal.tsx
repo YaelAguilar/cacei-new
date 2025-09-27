@@ -1,5 +1,5 @@
 // src/features/alumnos-propuestas/presentation/components/PropuestaDetailModal.tsx
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { motion } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
@@ -89,9 +89,20 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
     }
   };
 
+  // ✅ NUEVO: Estado para verificar voto final del tutor
+  const [tutorFinalVote, setTutorFinalVote] = useState<{
+    hasVoted: boolean;
+    voteStatus?: 'ACEPTADO' | 'RECHAZADO';
+    commentText?: string;
+    createdAt?: Date;
+    tutorName?: string;
+    tutorEmail?: string;
+  } | null>(null);
+
   // Verificar si el tutor actual ya votó
   const currentTutorUuid = authViewModel.currentUser?.getUuid();
-  const currentTutorId = authViewModel.currentUser?.getId();
+  const currentTutorIdRaw = authViewModel.currentUser?.getId();
+  const currentTutorId = currentTutorIdRaw ? String(currentTutorIdRaw) : '';
   
   // Obtener información del token JWT almacenado
   const getTokenInfo = () => {
@@ -116,20 +127,64 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
   const isDirector = authViewModel.userRoles.some(role => role.name === 'Director');
   const isPTC = authViewModel.userRoles.some(role => role.name === 'PTC');
   
-  // Usar el ID real del usuario si está disponible
-  const effectiveTutorId = currentTutorId && currentTutorId !== '' ? currentTutorId : null;
+  // Usar el ID real del usuario si está disponible (convertir a número)
+  const effectiveTutorId = currentTutorId && currentTutorId !== '' ? Number(currentTutorId) : null;
   
-  // Buscar comentarios del tutor actual
+  // ✅ NUEVO: Verificar voto final del tutor
+  useEffect(() => {
+    const checkTutorFinalVote = async () => {
+      console.log('🔄 useEffect checkTutorFinalVote ejecutándose:', {
+        isTutorAcademico,
+        proposalId: propuesta.getId(),
+        effectiveTutorId,
+        currentTutorId,
+        authUser: authViewModel.currentUser ? {
+          id: authViewModel.currentUser.getId(),
+          uuid: authViewModel.currentUser.getUuid()
+        } : null
+      });
+      
+      if (isTutorAcademico && propuesta.getId() && effectiveTutorId) {
+        console.log('🔍 Verificando voto final del tutor:', { 
+          proposalId: propuesta.getId(), 
+          tutorId: effectiveTutorId 
+        });
+        
+        try {
+          const result = await commentsViewModel.checkTutorFinalVote(propuesta.getId());
+          console.log('✅ Resultado verificación voto final:', result);
+          setTutorFinalVote(result);
+        } catch (error) {
+          console.error('❌ Error verificando voto final:', error);
+          setTutorFinalVote(null);
+        }
+      } else {
+        console.log('⚠️ No se puede verificar voto final:', {
+          isTutorAcademico,
+          proposalId: propuesta.getId(),
+          effectiveTutorId,
+          currentTutorId
+        });
+        setTutorFinalVote(null);
+      }
+    };
+
+    checkTutorFinalVote();
+  }, [isTutorAcademico, propuesta.getId(), effectiveTutorId]);
+
+  // Buscar comentarios del tutor actual (para compatibilidad con código existente)
   const tutorComments = commentsViewModel.comments.filter(comment => {
     // Usar el ID efectivo calculado
-    return Number(comment.tutorId) === Number(effectiveTutorId);
+    return Number(comment.getTutorId()) === Number(effectiveTutorId);
   });
   
-  const hasVoted = tutorComments.length > 0;
-  const tutorVote = hasVoted ? tutorComments[0] : null;
+  // ✅ NUEVO: Usar la verificación de voto final en lugar de cualquier comentario
+  const hasVoted = tutorFinalVote?.hasVoted || false;
+  const tutorVote = tutorFinalVote;
 
   // Debug logs
   console.log('🔍 Debug votación básico:', {
+    currentTutorIdRaw,
     currentTutorId,
     currentTutorIdType: typeof currentTutorId,
     currentTutorUuid,
@@ -137,27 +192,33 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
     isDirector,
     isPTC,
     effectiveTutorId,
+    effectiveTutorIdType: typeof effectiveTutorId,
     totalComments: commentsViewModel.comments.length,
     tutorComments: tutorComments.length,
     hasVoted,
-    tutorVote: tutorVote?.voteStatus
+    tutorVote: tutorVote?.voteStatus,
+    authUser: authViewModel.currentUser ? {
+      id: authViewModel.currentUser.getId(),
+      uuid: authViewModel.currentUser.getUuid(),
+      name: authViewModel.currentUser.getName()
+    } : null
   });
   
   console.log('🔍 Todos los comentarios:', commentsViewModel.comments.map(c => ({ 
-    tutorId: c.tutorId, 
-    tutorIdType: typeof c.tutorId,
-    voteStatus: c.voteStatus,
-    active: c.active,
-    sectionName: c.sectionName,
-    subsectionName: c.subsectionName
+    tutorId: c.getTutorId(), 
+    tutorIdType: typeof c.getTutorId(),
+    voteStatus: c.getVoteStatus(),
+    active: c.isActive(),
+    sectionName: c.getSectionName(),
+    subsectionName: c.getSubsectionName()
   })));
   
   console.log('🔍 Comentarios del tutor actual:', tutorComments.map(c => ({
-    tutorId: c.tutorId,
-    voteStatus: c.voteStatus,
-    active: c.active,
-    sectionName: c.sectionName,
-    subsectionName: c.subsectionName
+    tutorId: c.getTutorId(),
+    voteStatus: c.getVoteStatus(),
+    active: c.isActive(),
+    sectionName: c.getSectionName(),
+    subsectionName: c.getSubsectionName()
   })));
 
   return (
@@ -229,7 +290,7 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     </button>
                   </>
                 ) : (
-                  // Mostrar estado de la evaluación si ya votó
+                  // ✅ NUEVO: Mostrar estado de la evaluación si ya votó con voto final
                   <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
                     <span className="text-sm font-medium text-gray-700">
                       Tu evaluación:
@@ -237,14 +298,15 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${
                       tutorVote?.voteStatus === 'ACEPTADO' 
                         ? 'bg-green-100 text-green-800' 
-                        : tutorVote?.voteStatus === 'RECHAZADO'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
                     }`}>
-                      {tutorVote?.voteStatus === 'ACEPTADO' ? 'APROBADO' : 
-                       tutorVote?.voteStatus === 'RECHAZADO' ? 'RECHAZADO' : 
-                       tutorVote?.voteStatus || 'PENDIENTE'}
+                      {tutorVote?.voteStatus === 'ACEPTADO' ? 'APROBADO' : 'RECHAZADO'}
                     </span>
+                    {tutorVote?.createdAt && (
+                      <span className="text-xs text-gray-500">
+                        el {new Date(tutorVote.createdAt).toLocaleDateString('es-ES')}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
@@ -672,6 +734,8 @@ const PropuestaDetailModal: React.FC<PropuestaDetailModalProps> = observer(({
                     <li>• <strong>Aprobar:</strong> La propuesta cumple con todos los requisitos</li>
                     <li>• <strong>Rechazar:</strong> La propuesta no cumple con los requisitos mínimos</li>
                     <li>• <strong>Actualizar:</strong> La propuesta necesita modificaciones antes de ser evaluada</li>
+                    <li>• Una vez votada con <strong>Aprobado</strong> o <strong>Rechazado</strong>, no podrás volver a votar</li>
+                    <li>• Si votaste <strong>Actualizar</strong>, podrás modificar tu evaluación</li>
                     <li>• Una vez votada, la propuesta cambiará su estado automáticamente</li>
                   </ul>
                 </div>

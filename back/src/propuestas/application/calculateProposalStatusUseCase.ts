@@ -23,7 +23,7 @@ export class CalculateProposalStatusUseCase {
             // Obtener todos los comentarios de la propuesta
             const comments = await this.commentRepository.getCommentsByProposal(proposalId);
             
-            if (comments.length === 0) {
+            if (!comments || comments.length === 0) {
                 return {
                     totalVotes: 0,
                     acceptedVotes: 0,

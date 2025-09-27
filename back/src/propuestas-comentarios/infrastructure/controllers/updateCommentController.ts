@@ -8,6 +8,7 @@ export class UpdateCommentController {
     async run(req: Request, res: Response): Promise<void> {
         const { uuid } = req.params;
         const updateData = req.body;
+        const tutorId = (req as any).user?.id;
 
         try {
             if (!uuid) {
@@ -21,7 +22,18 @@ export class UpdateCommentController {
                 return;
             }
 
-            const comment = await this.updateCommentUseCase.run(uuid, updateData);
+            if (!tutorId) {
+                res.status(401).json({
+                    errors: [{
+                        status: "401",
+                        title: "Unauthorized",
+                        detail: "Usuario no autenticado"
+                    }]
+                });
+                return;
+            }
+
+            const comment = await this.updateCommentUseCase.run(uuid, updateData, tutorId);
 
             if (comment) {
                 const formattedComment = {

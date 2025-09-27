@@ -16,6 +16,26 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Temporary view structure for view `comment_statistics`
+--
+
+DROP TABLE IF EXISTS `comment_statistics`;
+/*!50001 DROP VIEW IF EXISTS `comment_statistics`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `comment_statistics` AS SELECT 
+ 1 AS `tutor_id`,
+ 1 AS `tutor_name`,
+ 1 AS `tutor_last_name`,
+ 1 AS `tutor_email`,
+ 1 AS `total_comments`,
+ 1 AS `comments_aceptados`,
+ 1 AS `comments_rechazados`,
+ 1 AS `comments_actualiza`,
+ 1 AS `propuestas_evaluadas`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Table structure for table `convocatorias`
 --
 
@@ -40,7 +60,7 @@ CREATE TABLE `convocatorias` (
   KEY `idx_convocatorias_active` (`active`),
   KEY `idx_convocatorias_fecha_limite` (`fecha_limite`),
   KEY `idx_convocatorias_created_at` (`created_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -49,7 +69,7 @@ CREATE TABLE `convocatorias` (
 
 LOCK TABLES `convocatorias` WRITE;
 /*!40000 ALTER TABLE `convocatorias` DISABLE KEYS */;
-INSERT INTO `convocatorias` VALUES (2,'f9fc93aa-be2e-4ec5-a12b-8d2d951a9429','Periodo test enero-abril 2026',NULL,'2025-09-25 18:00:00','[\"Estancia II\", \"Estadía\", \"Estadía 1\"]','[{\"id\": 13, \"email\": \"ana.perez@upchiapas.edu.mx\", \"nombre\": \"Ana Pérez Morales\"}, {\"id\": 10, \"email\": \"carlos.mendoza@upchiapas.edu.mx\", \"nombre\": \"Carlos Mendoza García\"}, {\"id\": 6, \"email\": \"director-test@upchiapas.edu.mx\", \"nombre\": \"Director directorApellido1 directorApellido2\"}, {\"id\": 12, \"email\": \"jose.hernandez@upchiapas.edu.mx\", \"nombre\": \"José Hernández Ruiz\"}, {\"id\": 11, \"email\": \"maria.gonzalez@upchiapas.edu.mx\", \"nombre\": \"María González López\"}, {\"id\": 8, \"email\": \"ptc@upchiapas.edu.mx\", \"nombre\": \"Profesor Tiempo Completo\"}, {\"id\": 14, \"email\": \"roberto.jimenez@upchiapas.edu.mx\", \"nombre\": \"Roberto Jiménez Torres\"}]',1,'2025-09-22 15:14:06','2025-09-23 11:27:05',NULL,NULL);
+INSERT INTO `convocatorias` VALUES (1,'849cf1dd-c38f-4a2d-ae9d-b8161173309c','Periodo test enero-abril 2027','descripcion breveeee','2025-09-29 18:00:00','[\"Estancia I\", \"Estadía\", \"Estancia II\"]','[{\"id\": 13, \"email\": \"ana.perez@upchiapas.edu.mx\", \"nombre\": \"Ana Pérez Morales\"}, {\"id\": 10, \"email\": \"carlos.mendoza@upchiapas.edu.mx\", \"nombre\": \"Carlos Mendoza García\"}, {\"id\": 6, \"email\": \"director-test@upchiapas.edu.mx\", \"nombre\": \"Director directorApellido1 directorApellido2\"}, {\"id\": 12, \"email\": \"jose.hernandez@upchiapas.edu.mx\", \"nombre\": \"José Hernández Ruiz\"}, {\"id\": 11, \"email\": \"maria.gonzalez@upchiapas.edu.mx\", \"nombre\": \"María González López\"}, {\"id\": 8, \"email\": \"ptc@upchiapas.edu.mx\", \"nombre\": \"Profesor Tiempo Completo\"}, {\"id\": 14, \"email\": \"roberto.jimenez@upchiapas.edu.mx\", \"nombre\": \"Roberto Jiménez Torres\"}]',1,'2025-09-25 18:27:10','2025-09-26 04:13:14',NULL,NULL);
 /*!40000 ALTER TABLE `convocatorias` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -197,6 +217,9 @@ CREATE TABLE `project_proposals` (
   KEY `idx_proposals_created_at` (`created_at`),
   KEY `idx_proposals_company` (`company_short_name`),
   KEY `idx_proposals_project_dates` (`project_start_date`,`project_end_date`),
+  KEY `idx_proposals_status_internship` (`proposal_status`,`internship_type`),
+  KEY `idx_proposals_tutor_status` (`academic_tutor_id`,`proposal_status`),
+  KEY `idx_proposals_convocatoria_status` (`convocatoria_id`,`proposal_status`),
   CONSTRAINT `fk_proposals_convocatoria` FOREIGN KEY (`convocatoria_id`) REFERENCES `convocatorias` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_proposals_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_proposals_tutor` FOREIGN KEY (`academic_tutor_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -216,8 +239,53 @@ CREATE TABLE `project_proposals` (
 
 LOCK TABLES `project_proposals` WRITE;
 /*!40000 ALTER TABLE `project_proposals` DISABLE KEYS */;
-INSERT INTO `project_proposals` VALUES (1,'71eae849-9928-4849-a67f-9837c51dff77',2,5,'','',10,'Carlos Mendoza García','carlos.mendoza@upchiapas.edu.mx','Estancia II','google','privada','BIM011108DJ5','Chiapas','Tuxtla Gutierrez','Barrio','Centro','Avenida','Central','200','c21312','29100','https://www.googl.com','https://www.googl.com','José Calzada Razo','director','crjosue@upgto.edu.mx','12-3456-7890','RH','supervisor juan','TI','yo@gmail.com','12-3456-7890','aqui va el nombre del proyecto completo','2025-09-27','2025-11-07','aqui describiremos el contexto de la problemática completa del proyecto.','aqui describiremos la problemática completa del proyecto.','terminar la aplicacion en el tiempo establecido','desarrollar backend, desarrollar frontend, etc etc ect','Desarrollar todo el backend, desarrollar todo el frontend y completar todo a tiempo','github y aplicacion desplegada y automatizada github y aplicacion desplegada y automatizada github y aplicacion desplegada y automatizada github y aplicacion desplegada y automatizada','react, node, docker, ia python','PENDIENTE',1,'2025-09-25 03:21:46','2025-09-25 03:21:46',5,NULL);
+INSERT INTO `project_proposals` VALUES (1,'abaa8f29-9a8e-11f0-96a8-50fe0c03c2b6',1,5,'Juan Carlos Pérez García','juan.perez@upchiapas.edu.mx',10,'Carlos Mendoza García','carlos.mendoza@upchiapas.edu.mx','Estadía','Microsoft','Microsoft Corporation','MSF123456789','Chiapas','Tuxtla Gutiérrez','Fraccionamiento','Centro','Avenida','Central','100','A','29000','https://www.microsoft.com','https://www.linkedin.com/company/microsoft','María Elena Rodríguez','Gerente de Recursos Humanos','maria.rodriguez@microsoft.com','961-123-4567','Recursos Humanos','Roberto Sánchez López','Desarrollo de Software','roberto.sanchez@microsoft.com','961-987-6543','Sistema de Gestión de Inventarios','2025-11-01','2026-01-31','Las empresas modernas requieren sistemas eficientes para el control y gestión de inventarios que permitan optimizar sus operaciones y reducir costos operativos.','La falta de un sistema automatizado de gestión de inventarios genera pérdidas económicas significativas debido a desabasto, sobrestock y falta de visibilidad en tiempo real del estado de los productos.','Desarrollar un sistema web completo para la gestión de inventarios que permita el control eficiente de productos, seguimiento en tiempo real y optimización de procesos de almacén.','1. Analizar los procesos actuales de gestión de inventarios. 2. Diseñar la arquitectura del sistema. 3. Implementar módulos de registro y consulta de productos. 4. Desarrollar funcionalidades de alertas y reportes. 5. Realizar pruebas y optimización del sistema.','Análisis de requerimientos, diseño de base de datos, desarrollo del backend con Node.js, creación del frontend con React, implementación de funcionalidades de inventario, pruebas de integración, documentación del proyecto.','Sistema web funcional, documentación técnica completa, manual de usuario, código fuente documentado, presentación final del proyecto, reporte de resultados obtenidos.','Node.js, Express.js, React, MySQL, JavaScript, HTML5, CSS3, Bootstrap, Git, REST API, Docker','PENDIENTE',1,'2025-09-26 04:10:10','2025-09-26 04:10:10',5,NULL);
 /*!40000 ALTER TABLE `project_proposals` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `proposal_comment_history`
+--
+
+DROP TABLE IF EXISTS `proposal_comment_history`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `proposal_comment_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(36) NOT NULL,
+  `original_comment_id` int NOT NULL COMMENT 'FK to proposal_comments table (id)',
+  `proposal_id` varchar(36) NOT NULL COMMENT 'FK to project_proposals table',
+  `tutor_id` int NOT NULL COMMENT 'FK to users table',
+  `section_name` varchar(100) NOT NULL,
+  `subsection_name` varchar(100) NOT NULL,
+  `previous_comment_text` text COMMENT 'Previous comment text',
+  `new_comment_text` text COMMENT 'New comment text',
+  `previous_vote_status` enum('ACEPTADO','RECHAZADO','ACTUALIZA') DEFAULT NULL COMMENT 'Previous vote status',
+  `new_vote_status` enum('ACEPTADO','RECHAZADO','ACTUALIZA') DEFAULT NULL COMMENT 'New vote status',
+  `change_reason` varchar(255) DEFAULT NULL COMMENT 'Reason for the change',
+  `changed_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `changed_by` int DEFAULT NULL COMMENT 'FK to users table - who made the change',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uuid` (`uuid`),
+  KEY `idx_comment_history_original_comment` (`original_comment_id`),
+  KEY `idx_comment_history_proposal_id` (`proposal_id`),
+  KEY `idx_comment_history_tutor_id` (`tutor_id`),
+  KEY `idx_comment_history_changed_at` (`changed_at`),
+  KEY `fk_comment_history_changed_by` (`changed_by`),
+  CONSTRAINT `fk_comment_history_changed_by` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_comment_history_original` FOREIGN KEY (`original_comment_id`) REFERENCES `proposal_comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_comment_history_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `project_proposals` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_comment_history_tutor` FOREIGN KEY (`tutor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='History of changes made to proposal comments';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `proposal_comment_history`
+--
+
+LOCK TABLES `proposal_comment_history` WRITE;
+/*!40000 ALTER TABLE `proposal_comment_history` DISABLE KEYS */;
+/*!40000 ALTER TABLE `proposal_comment_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -229,13 +297,13 @@ DROP TABLE IF EXISTS `proposal_comments`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `proposal_comments` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `uuid` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `proposal_id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `uuid` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `proposal_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tutor_id` int NOT NULL,
-  `section_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nombre de la sección principal (ej: "Objetivos del Proyecto")',
-  `subsection_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nombre de la subsección específica (ej: "Objetivo General")',
-  `comment_text` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Texto del comentario del tutor',
-  `vote_status` enum('ACEPTADO','RECHAZADO','ACTUALIZA') COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Decisión del tutor sobre esta subsección',
+  `section_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nombre de la sección principal (ej: "Objetivos del Proyecto")',
+  `subsection_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nombre de la subsección específica (ej: "Objetivo General")',
+  `comment_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Texto del comentario del tutor',
+  `vote_status` enum('ACEPTADO','RECHAZADO','ACTUALIZA') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Decisión del tutor sobre esta subsección',
   `active` tinyint(1) DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -246,6 +314,8 @@ CREATE TABLE `proposal_comments` (
   KEY `idx_proposal_comments_section` (`section_name`,`subsection_name`),
   KEY `idx_proposal_comments_vote_status` (`vote_status`),
   KEY `idx_proposal_comments_created_at` (`created_at`),
+  KEY `idx_comments_tutor_created` (`tutor_id`,`created_at`),
+  KEY `idx_comments_proposal_tutor` (`proposal_id`,`tutor_id`),
   CONSTRAINT `fk_proposal_comments_tutor` FOREIGN KEY (`tutor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -256,7 +326,7 @@ CREATE TABLE `proposal_comments` (
 
 LOCK TABLES `proposal_comments` WRITE;
 /*!40000 ALTER TABLE `proposal_comments` DISABLE KEYS */;
-INSERT INTO `proposal_comments` VALUES (1,'2b54847a-b22f-4471-9457-909f41e775f8','1',6,'Información de la Empresa','Datos Generales','corregir esto todo lo demas bien','ACEPTADO',1,'2025-09-22 23:03:29','2025-09-22 23:03:29');
+INSERT INTO `proposal_comments` VALUES (1,'0d0a415d-403d-4bb0-8b99-0cf6ff7dcfe6','1',8,'APROBACIÓN_GENERAL','PROPUESTA_COMPLETA','Propuesta aprobada en su totalidad por Profesor Tiempo Completo (ptc@upchiapas.edu.mx)','ACEPTADO',1,'2025-09-26 04:17:13','2025-09-26 04:17:13');
 /*!40000 ALTER TABLE `proposal_comments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -288,6 +358,71 @@ SET @saved_cs_client     = @@character_set_client;
  1 AS `active`,
  1 AS `created_at`,
  1 AS `updated_at`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `proposal_documents`
+--
+
+DROP TABLE IF EXISTS `proposal_documents`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `proposal_documents` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(36) NOT NULL,
+  `proposal_id` varchar(36) NOT NULL COMMENT 'FK to project_proposals table',
+  `student_id` int NOT NULL COMMENT 'FK to users table - student who uploaded the document',
+  `file_name` varchar(255) NOT NULL COMMENT 'Unique file name stored on server',
+  `original_file_name` varchar(255) NOT NULL COMMENT 'Original file name from user',
+  `file_size` bigint NOT NULL COMMENT 'File size in bytes',
+  `mime_type` varchar(100) NOT NULL COMMENT 'MIME type of the file',
+  `file_path` varchar(500) NOT NULL COMMENT 'Full path to the file on server',
+  `uploaded_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When the file was uploaded',
+  `active` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uuid` (`uuid`),
+  KEY `idx_proposal_documents_proposal_id` (`proposal_id`),
+  KEY `idx_proposal_documents_student_id` (`student_id`),
+  KEY `idx_proposal_documents_uploaded_at` (`uploaded_at`),
+  KEY `idx_proposal_documents_active` (`active`),
+  CONSTRAINT `fk_proposal_documents_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `project_proposals` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_proposal_documents_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Documents uploaded by students for approved proposals';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `proposal_documents`
+--
+
+LOCK TABLES `proposal_documents` WRITE;
+/*!40000 ALTER TABLE `proposal_documents` DISABLE KEYS */;
+/*!40000 ALTER TABLE `proposal_documents` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Temporary view structure for view `proposal_statistics`
+--
+
+DROP TABLE IF EXISTS `proposal_statistics`;
+/*!50001 DROP VIEW IF EXISTS `proposal_statistics`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `proposal_statistics` AS SELECT 
+ 1 AS `convocatoria_id`,
+ 1 AS `convocatoria_nombre`,
+ 1 AS `convocatoria_fecha_limite`,
+ 1 AS `total_propuestas`,
+ 1 AS `propuestas_pendientes`,
+ 1 AS `propuestas_aprobadas`,
+ 1 AS `propuestas_rechazadas`,
+ 1 AS `propuestas_actualizar`,
+ 1 AS `estancia_i_count`,
+ 1 AS `estancia_ii_count`,
+ 1 AS `estadia_count`,
+ 1 AS `estadia_1_count`,
+ 1 AS `estadia_2_count`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -504,6 +639,24 @@ INSERT INTO `users` VALUES (4,'2d7c8a19-b9a7-4f90-938b-236aec13f551','Admin usua
 UNLOCK TABLES;
 
 --
+-- Final view structure for view `comment_statistics`
+--
+
+/*!50001 DROP VIEW IF EXISTS `comment_statistics`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `comment_statistics` AS select `pc`.`tutor_id` AS `tutor_id`,`u`.`name` AS `tutor_name`,`u`.`lastName` AS `tutor_last_name`,`u`.`email` AS `tutor_email`,count(`pc`.`id`) AS `total_comments`,sum((case when (`pc`.`vote_status` = 'ACEPTADO') then 1 else 0 end)) AS `comments_aceptados`,sum((case when (`pc`.`vote_status` = 'RECHAZADO') then 1 else 0 end)) AS `comments_rechazados`,sum((case when (`pc`.`vote_status` = 'ACTUALIZA') then 1 else 0 end)) AS `comments_actualiza`,count(distinct `pc`.`proposal_id`) AS `propuestas_evaluadas` from (`proposal_comments` `pc` left join `users` `u` on((`pc`.`tutor_id` = `u`.`id`))) where (`pc`.`active` = true) group by `pc`.`tutor_id`,`u`.`name`,`u`.`lastName`,`u`.`email` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `proposal_comments_with_details`
 --
 
@@ -520,6 +673,24 @@ UNLOCK TABLES;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `proposal_statistics`
+--
+
+/*!50001 DROP VIEW IF EXISTS `proposal_statistics`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `proposal_statistics` AS select `c`.`id` AS `convocatoria_id`,`c`.`nombre` AS `convocatoria_nombre`,`c`.`fecha_limite` AS `convocatoria_fecha_limite`,count(`pp`.`id`) AS `total_propuestas`,sum((case when (`pp`.`proposal_status` = 'PENDIENTE') then 1 else 0 end)) AS `propuestas_pendientes`,sum((case when (`pp`.`proposal_status` = 'APROBADO') then 1 else 0 end)) AS `propuestas_aprobadas`,sum((case when (`pp`.`proposal_status` = 'RECHAZADO') then 1 else 0 end)) AS `propuestas_rechazadas`,sum((case when (`pp`.`proposal_status` = 'ACTUALIZAR') then 1 else 0 end)) AS `propuestas_actualizar`,sum((case when (`pp`.`internship_type` = 'Estancia I') then 1 else 0 end)) AS `estancia_i_count`,sum((case when (`pp`.`internship_type` = 'Estancia II') then 1 else 0 end)) AS `estancia_ii_count`,sum((case when (`pp`.`internship_type` = 'Estadía') then 1 else 0 end)) AS `estadia_count`,sum((case when (`pp`.`internship_type` = 'Estadía 1') then 1 else 0 end)) AS `estadia_1_count`,sum((case when (`pp`.`internship_type` = 'Estadía 2') then 1 else 0 end)) AS `estadia_2_count` from (`convocatorias` `c` left join `project_proposals` `pp` on(((`c`.`id` = `pp`.`convocatoria_id`) and (`pp`.`active` = true)))) group by `c`.`id`,`c`.`nombre`,`c`.`fecha_limite` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -530,4 +701,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-25  2:07:55
+-- Dump completed on 2025-09-26 16:54:35

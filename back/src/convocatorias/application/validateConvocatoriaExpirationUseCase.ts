@@ -4,11 +4,11 @@ import { ConvocatoriaRepository } from "../domain/interfaces/convocatoriaReposit
 export class ValidateConvocatoriaExpirationUseCase {
     constructor(private readonly convocatoriaRepository: ConvocatoriaRepository) {}
 
-    async run(convocatoriaId: number): Promise<boolean> {
+    async run(convocatoriaUuid: string): Promise<boolean> {
         try {
-            console.log('🕐 ValidateConvocatoriaExpirationUseCase iniciado:', { convocatoriaId });
+            console.log('🕐 ValidateConvocatoriaExpirationUseCase iniciado:', { convocatoriaUuid });
 
-            const convocatoria = await this.convocatoriaRepository.getConvocatoria(convocatoriaId);
+            const convocatoria = await this.convocatoriaRepository.getConvocatoria(convocatoriaUuid);
             if (!convocatoria) {
                 throw new Error("Convocatoria no encontrada");
             }
@@ -18,7 +18,7 @@ export class ValidateConvocatoriaExpirationUseCase {
             
             const isExpired = now > fechaLimite;
             
-            console.log(`✅ Convocatoria ${convocatoriaId} expirada: ${isExpired}`);
+            console.log(`✅ Convocatoria ${convocatoriaUuid} expirada: ${isExpired}`);
             
             return isExpired;
         } catch (error) {
@@ -27,20 +27,21 @@ export class ValidateConvocatoriaExpirationUseCase {
         }
     }
 
-    async validateProposalCreation(convocatoriaId: number): Promise<void> {
-        const isExpired = await this.run(convocatoriaId);
+    async validateProposalCreation(convocatoriaUuid: string): Promise<void> {
+        const isExpired = await this.run(convocatoriaUuid);
         
         if (isExpired) {
             throw new Error("No se pueden crear propuestas en convocatorias expiradas");
         }
     }
 
-    async validateProposalUpdate(convocatoriaId: number): Promise<void> {
-        const isExpired = await this.run(convocatoriaId);
+    async validateProposalUpdate(convocatoriaUuid: string): Promise<void> {
+        const isExpired = await this.run(convocatoriaUuid);
         
         if (isExpired) {
             throw new Error("No se pueden editar propuestas de convocatorias expiradas");
         }
     }
 }
+
 

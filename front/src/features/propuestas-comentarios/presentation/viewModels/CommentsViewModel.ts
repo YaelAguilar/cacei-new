@@ -290,6 +290,31 @@ export class CommentsViewModel {
         );
     }
 
+    // ✅ NUEVO: Verificar si el tutor ya votó con voto final
+    async checkTutorFinalVote(proposalId: string): Promise<{
+        hasVoted: boolean;
+        voteStatus?: 'ACEPTADO' | 'RECHAZADO';
+        commentText?: string;
+        createdAt?: Date;
+        tutorName?: string;
+        tutorEmail?: string;
+    }> {
+        try {
+            this.setLoading(true);
+            this.setError(null);
+            
+            const result = await this.repository.checkTutorFinalVote(proposalId);
+            return result;
+        } catch (error: any) {
+            runInAction(() => {
+                this.setError(error.message || "Error al verificar voto final del tutor");
+            });
+            return { hasVoted: false };
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
     // Obtener el estado general de una subsección
     getSubsectionStatus(sectionName: string, subsectionName: string): {
         hasComments: boolean;
@@ -375,28 +400,6 @@ export class CommentsViewModel {
     }
 
     // Resetear el ViewModel
-    // ✅ NUEVO: Aprobar toda la propuesta
-    async approveProposal(proposalId: string): Promise<boolean> {
-        try {
-            this.loading = true;
-            this.error = null;
-            
-            const success = await this.repository.approveProposal(proposalId);
-            
-            if (success) {
-                // Recargar comentarios para mostrar el nuevo estado
-                await this.loadComments(proposalId);
-            }
-            
-            return success;
-        } catch (error) {
-            console.error("Error approving proposal:", error);
-            this.error = error instanceof Error ? error.message : "Error al aprobar la propuesta";
-            return false;
-        } finally {
-            this.loading = false;
-        }
-    }
 
     // ✅ NUEVO: Rechazar toda la propuesta
     async rejectProposal(proposalId: string): Promise<boolean> {

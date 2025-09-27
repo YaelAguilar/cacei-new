@@ -107,7 +107,7 @@ export class AuthViewModel {
       isAuthenticated: this.isAuthenticated
     };
     localStorage.setItem('auth-storage', JSON.stringify(authData));
-    //console.log('💾 Auth data saved to localStorage:', authData);
+    console.log('💾 Auth data saved to localStorage:', authData);
   }
 
 
@@ -115,13 +115,20 @@ export class AuthViewModel {
   private initializeFromStorage() {
     try {
       const authData = localStorage.getItem('auth-storage');
-      //console.log('🔍 Initializing from storage:', authData);
+      console.log('🔍 Initializing from storage:', authData);
 
       if (authData) {
         const parsed = JSON.parse(authData);
+        console.log('📦 Parsed auth data:', parsed);
 
         // Restaurar usuario completo
         if (parsed.currentUser) {
+          console.log('👤 Creating user from storage:', {
+            id: parsed.currentUser.id,
+            name: parsed.currentUser.name,
+            uuid: parsed.currentUser.uuid
+          });
+          
           this.currentUser = new User(
             parsed.currentUser.id || '', // id
             parsed.currentUser.name,
@@ -138,12 +145,20 @@ export class AuthViewModel {
             undefined, // user_creation
             undefined  // user_update
           );
+          
+          console.log('✅ User created with ID:', this.currentUser.getId());
         }
 
         this.userUuid = parsed.userUuid;
         this.userRoles = parsed.userRoles || [];
         this.userPermissions = parsed.userPermissions || null;
         this.isAuthenticated = parsed.isAuthenticated || false;
+
+        // ✅ NUEVO: Si el usuario está autenticado pero no tiene ID, obtenerlo del backend
+        if (this.isAuthenticated && this.currentUser && (!this.currentUser.getId() || this.currentUser.getId() === '')) {
+          console.log('🔄 Usuario autenticado sin ID, obteniendo desde backend...');
+          this.loadUserFromBackend();
+        }
 
         /* console.log('✅ Auth state restored:', {
           isAuthenticated: this.isAuthenticated,
@@ -164,6 +179,43 @@ export class AuthViewModel {
   private clearStorage() {
     localStorage.removeItem('auth-storage');
     localStorage.removeItem('auth-token');
+  }
+
+  // ✅ NUEVO: Cargar información del usuario desde el backend
+  private async loadUserFromBackend() {
+    try {
+      console.log('🔍 Obteniendo información del usuario desde backend...');
+      const userData = await this.repository.getCurrentUser();
+      
+      if (userData && this.currentUser) {
+        console.log('📦 Datos del usuario obtenidos:', userData);
+        
+        // Actualizar el usuario con el ID real
+        this.currentUser = new User(
+          userData.id,
+          userData.name,
+          userData.lastName,
+          userData.secondLastName || '',
+          userData.email,
+          '', // password
+          '', // confirmPassword
+          userData.uuid,
+          userData.roles || [],
+          true, // active
+          undefined, // created_at
+          undefined, // updated_at
+          undefined, // user_creation
+          undefined  // user_update
+        );
+        
+        console.log('✅ Usuario actualizado con ID real:', userData.id);
+        
+        // Guardar los datos actualizados en localStorage
+        this.saveToStorage();
+      }
+    } catch (error) {
+      console.error('❌ Error al obtener información del usuario desde backend:', error);
+    }
   }
 
   async login(email: string, password: string): Promise<boolean> {

@@ -218,3 +218,5 @@ Tu sistema de gestión de pasantías ahora cumple con **TODOS** los requisitos e
 
 El sistema está listo para producción y maneja todos los casos de uso especificados en tus requerimientos.
 
+
+

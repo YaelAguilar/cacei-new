@@ -72,7 +72,7 @@ export class GetVotingHistoryUseCase {
 
     private async getDirectorVotingHistory(filters?: VotingHistoryFilters): Promise<VotingHistoryItem[]> {
         // Los directores pueden ver todas las votaciones de todos los períodos
-        const sql = `
+        let sql = `
             SELECT 
                 pc.id as comment_id,
                 pc.uuid as comment_uuid,
@@ -162,7 +162,7 @@ export class GetVotingHistoryUseCase {
 
     private async getTutorVotingHistory(tutorId: number, filters?: VotingHistoryFilters): Promise<VotingHistoryItem[]> {
         // Los tutores solo pueden ver sus propias votaciones
-        const sql = `
+        let sql = `
             SELECT 
                 pc.id as comment_id,
                 pc.uuid as comment_uuid,
@@ -245,4 +245,5 @@ export class GetVotingHistoryUseCase {
         }
     }
 }
+
 

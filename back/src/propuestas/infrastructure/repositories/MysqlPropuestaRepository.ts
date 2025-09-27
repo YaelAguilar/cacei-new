@@ -1,4 +1,4 @@
-import { PropuestaRepository, PropuestaCreateData, PropuestaUpdateData } from "../../domain/interfaces/propuestaRepository";
+import { PropuestaRepository, PropuestaCreateData, PropuestaUpdateData, ProposalFilters } from "../../domain/interfaces/propuestaRepository";
 import { Propuesta, ProposalStatus } from "../../domain/models/propuesta";
 import { query } from "../../../database/mysql";
 import { v4 as uuidv4 } from 'uuid';
@@ -20,7 +20,7 @@ export class MysqlPropuestaRepository implements PropuestaRepository {
                 project_problem_description, project_general_objective, project_specific_objectives,
                 project_main_activities, project_planned_deliverables, project_technologies,
                 proposal_status, user_creation
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const uuid = uuidv4();

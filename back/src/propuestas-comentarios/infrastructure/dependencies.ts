@@ -12,6 +12,7 @@ import { UpdateProposalUseCase } from "../application/updateProposalUseCase"; //
 import { UpdateProposalStatusAfterCommentUseCase } from "../application/updateProposalStatusAfterCommentUseCase"; // ✅ NUEVO
 import { ValidateCommentEditUseCase } from "../application/validateCommentEditUseCase"; // ✅ NUEVO
 import { GetVotingHistoryUseCase } from "../application/getVotingHistoryUseCase"; // ✅ NUEVO
+import { CheckTutorFinalVoteUseCase } from "../application/checkTutorFinalVoteUseCase"; // ✅ NUEVO
 
 // Controladores
 import { CreateCommentController } from "./controllers/createCommentController";
@@ -22,6 +23,7 @@ import { DeleteCommentController } from "./controllers/deleteCommentController";
 import { ApproveProposalController } from "./controllers/approveProposalController"; // ✅ NUEVO
 import { RejectProposalController } from "./controllers/rejectProposalController"; // ✅ NUEVO
 import { UpdateProposalController } from "./controllers/updateProposalController"; // ✅ NUEVO
+import { CheckTutorFinalVoteController } from "./controllers/checkTutorFinalVoteController"; // ✅ NUEVO
 
 // Repositorios
 import { MysqlCommentRepository } from "./repositories/MysqlCommentRepository";
@@ -50,6 +52,7 @@ const deleteCommentUseCase = new DeleteCommentUseCase(commentRepository);
 const approveProposalUseCase = new ApproveProposalUseCase(commentRepository); // ✅ NUEVO
 const rejectProposalUseCase = new RejectProposalUseCase(commentRepository); // ✅ NUEVO
 const updateProposalUseCase = new UpdateProposalUseCase(commentRepository); // ✅ NUEVO
+const checkTutorFinalVoteUseCase = new CheckTutorFinalVoteUseCase(commentRepository); // ✅ NUEVO
 
 // Controladores exportados
 export const createCommentController = new CreateCommentController(createCommentUseCase);
@@ -60,6 +63,7 @@ export const deleteCommentController = new DeleteCommentController(deleteComment
 export const approveProposalController = new ApproveProposalController(approveProposalUseCase); // ✅ NUEVO
 export const rejectProposalController = new RejectProposalController(rejectProposalUseCase); // ✅ NUEVO
 export const updateProposalController = new UpdateProposalController(updateProposalUseCase); // ✅ NUEVO
+export const checkTutorFinalVoteController = new CheckTutorFinalVoteController(); // ✅ NUEVO
 
 // Exportar casos de uso adicionales
 export { getVotingHistoryUseCase };

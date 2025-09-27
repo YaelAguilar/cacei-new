@@ -230,6 +230,51 @@ export class MysqlCommentRepository implements CommentRepository {
         }
     }
 
+    // ✅ NUEVO: Verificar si el tutor ya votó con voto final (APROBADO o RECHAZADO)
+    async hasTutorVotedFinal(
+        proposalId: string,
+        tutorId: number
+    ): Promise<{ hasVoted: boolean; voteStatus?: 'ACEPTADO' | 'RECHAZADO'; comment?: ProposalComment }> {
+        try {
+            // Convertir proposalId si es UUID
+            let numericProposalId: number;
+            
+            if (isNaN(Number(proposalId))) {
+                const proposalQuery = `SELECT id FROM project_proposals WHERE uuid = ? AND active = true`;
+                const proposalResult: any = await query(proposalQuery, [proposalId]);
+                if (proposalResult.length === 0) {
+                    return { hasVoted: false };
+                }
+                numericProposalId = proposalResult[0].id;
+            } else {
+                numericProposalId = Number(proposalId);
+            }
+
+            const sql = `
+                SELECT * FROM proposal_comments_with_details 
+                WHERE proposal_id = ? AND tutor_id = ? AND vote_status IN ('ACEPTADO', 'RECHAZADO') AND active = true
+                ORDER BY created_at DESC
+                LIMIT 1
+            `;
+            
+            const result: any = await query(sql, [numericProposalId, tutorId]);
+            
+            if (result.length > 0) {
+                const comment = this.mapRowToComment(result[0]);
+                return {
+                    hasVoted: true,
+                    voteStatus: comment.getVoteStatus() as 'ACEPTADO' | 'RECHAZADO',
+                    comment: comment
+                };
+            }
+            
+            return { hasVoted: false };
+        } catch (error) {
+            console.error("Error checking tutor final vote:", error);
+            throw new Error(`Error al verificar voto final del tutor: ${error}`);
+        }
+    }
+
     // ✅ NUEVO: Aprobar toda la propuesta
     async approveEntireProposal(
         proposalId: string,

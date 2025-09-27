@@ -319,3 +319,5 @@ const PropuestaVotingModal: React.FC<PropuestaVotingModalProps> = observer(({
 });
 
 export default PropuestaVotingModal;
+
+

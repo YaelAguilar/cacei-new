@@ -7,7 +7,8 @@ import {
     getCommentsByTutorController,
     approveProposalController,
     rejectProposalController,
-    updateProposalController
+    updateProposalController,
+    checkTutorFinalVoteController
 } from './dependencies';
 
 export const commentRouter = express.Router();
@@ -103,6 +104,15 @@ commentRouter.post('/rechazar-propuesta', (req, res) => {
 commentRouter.post('/actualizar-propuesta', (req, res) => {
     console.log('🔄 Solicitando actualización de propuesta completa');
     updateProposalController.run(req, res);
+});
+
+/**
+ * ✅ NUEVA RUTA: GET /propuestas/:proposalId/tutor-voto-final
+ * Verificar si el tutor actual ya votó con voto final (APROBADO o RECHAZADO)
+ */
+commentRouter.get('/propuestas/:proposalId/tutor-voto-final', (req, res) => {
+    console.log('🔍 Verificando voto final del tutor para propuesta:', req.params.proposalId);
+    checkTutorFinalVoteController.run(req, res);
 });
 
 /**

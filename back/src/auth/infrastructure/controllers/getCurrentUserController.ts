@@ -1,14 +1,12 @@
 import { Request, Response } from "express";
 import { GetCurrentUserUseCase } from "../../application/getCurrentUserUseCase";
-import { GetUserByUuidUseCase } from "../../../users/application/getUserByUuidUseCase";
 import { MysqlUserRepository } from "../../../users/infrastructure/repositories/MysqlUserRepository";
-import { mysql } from "../../../database/mysql";
 
 export class GetCurrentUserController {
   private getCurrentUserUseCase: GetCurrentUserUseCase;
 
   constructor() {
-    const userRepository = new MysqlUserRepository(mysql);
+    const userRepository = new MysqlUserRepository();
     this.getCurrentUserUseCase = new GetCurrentUserUseCase(userRepository);
   }
 
@@ -65,3 +63,4 @@ export class GetCurrentUserController {
     }
   }
 }
+

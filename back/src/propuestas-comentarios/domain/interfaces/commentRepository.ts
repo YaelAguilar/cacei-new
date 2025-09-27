@@ -64,4 +64,10 @@ export interface CommentRepository {
         tutorName: string,
         tutorEmail: string
     ): Promise<boolean>;
+
+    // ✅ NUEVO: Verificar si el tutor ya votó con voto final (APROBADO o RECHAZADO)
+    hasTutorVotedFinal(
+        proposalId: string,
+        tutorId: number
+    ): Promise<{ hasVoted: boolean; voteStatus?: 'ACEPTADO' | 'RECHAZADO'; comment?: ProposalComment }>;
 }

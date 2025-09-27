@@ -87,6 +87,36 @@ export class CommentRepository {
         }
     }
 
+    // ✅ NUEVO: Verificar si el tutor ya votó con voto final
+    async checkTutorFinalVote(proposalId: string): Promise<{
+        hasVoted: boolean;
+        voteStatus?: 'ACEPTADO' | 'RECHAZADO';
+        commentText?: string;
+        createdAt?: Date;
+        tutorName?: string;
+        tutorEmail?: string;
+    }> {
+        try {
+            const response = await ApiClient.get(`/propuestas/${proposalId}/tutor-voto-final`);
+            
+            if (response.status === 200 && response.data.success) {
+                return {
+                    hasVoted: response.data.data.hasVoted,
+                    voteStatus: response.data.data.voteStatus,
+                    commentText: response.data.data.commentText,
+                    createdAt: response.data.data.createdAt ? new Date(response.data.data.createdAt) : undefined,
+                    tutorName: response.data.data.tutorName,
+                    tutorEmail: response.data.data.tutorEmail
+                };
+            }
+            
+            return { hasVoted: false };
+        } catch (error) {
+            console.error("Error en checkTutorFinalVote:", error);
+            throw error;
+        }
+    }
+
     async getCommentsByProposal(proposalId: string): Promise<ProposalComment[]> {
         console.log('🔍 CommentRepository.getCommentsByProposal() called');
         console.log('📦 proposalId recibido:', proposalId);

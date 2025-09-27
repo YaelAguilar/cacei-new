@@ -1,5 +1,5 @@
 import { UserRepository } from "../../users/domain/interfaces/userRepository";
-import { User } from "../../users/domain/entities/User";
+import { User } from "../../users/domain/models/user";
 
 export class GetCurrentUserUseCase {
   constructor(private userRepository: UserRepository) {}
@@ -8,7 +8,7 @@ export class GetCurrentUserUseCase {
     try {
       console.log('🔍 GetCurrentUserUseCase ejecutándose para UUID:', uuid);
       
-      const user = await this.userRepository.getUserByUuid(uuid);
+      const user = await this.userRepository.getUser(uuid);
       
       if (!user) {
         console.log('❌ Usuario no encontrado para UUID:', uuid);
@@ -29,3 +29,4 @@ export class GetCurrentUserUseCase {
     }
   }
 }
+
