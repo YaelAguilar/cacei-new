@@ -11,11 +11,15 @@ import { CommentsViewModel } from "../../../propuestas-comentarios/presentation/
 import VotingHelpModal from "../../../propuestas-comentarios/presentation/components/VotingHelpModal";
 import VotingCommentModal from "../../../propuestas-comentarios/presentation/components/VotingCommentModal";
 import SectionCommentsModal from "../../../propuestas-comentarios/presentation/components/SectionCommentsModal";
+import { VoteCounter } from "../components/VoteCounter";
+import { useVoteStats } from "../../data/hooks/useVoteStats";
+import { CommentsSection } from "../components/CommentsSection";
+import { useComments } from "../../data/hooks/useComments";
 import { PropuestaDetailViewModelInterface } from "../interfaces/PropuestaDetailViewModelInterface";
 import { 
   FiCalendar, FiUser, FiBriefcase, FiFileText, FiTarget, FiTool, 
   FiActivity, FiClock, FiMail, FiGlobe, FiPhone, FiMapPin, FiBook,
-  FiCheck, FiX, FiHelpCircle, FiMessageSquare, FiArrowLeft
+  FiCheck, FiX, FiHelpCircle, FiMessageSquare, FiArrowLeft, FiInfo
 } from "react-icons/fi";
 
 // Interface movida a archivo separado
@@ -32,6 +36,12 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
   const navigate = useNavigate();
   const authViewModel = useAuth();
   const commentsViewModel = useMemo(() => new CommentsViewModel(), []);
+  
+  // Hook para obtener estadísticas de votos
+  const { voteStats, isLoading: voteStatsLoading, error: voteStatsError, refetch: refetchVoteStats } = useVoteStats(propuesta.getId());
+  
+  // Hook para obtener comentarios
+  const { comments, isLoading: commentsLoading, error: commentsError, refetch: refetchComments } = useComments(propuesta.getId());
   
   // Estado para el modal de ayuda
   const [showHelpModal, setShowHelpModal] = useState(false);
@@ -53,6 +63,9 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
   );
 
   const statusInfo = viewModel.getPropuestaStatus(propuesta);
+  
+  // Obtener el estado detallado directamente de la propuesta
+  const proposalStatus = propuesta.getStatusInfo();
 
   // Cargar comentarios cuando se monta el componente
   useEffect(() => {
@@ -78,6 +91,9 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
     setShowCommentForm(null);
     // Recargar comentarios
     await commentsViewModel.loadComments(propuesta.getId());
+    // Recargar estadísticas de votos y comentarios
+    refetchVoteStats();
+    refetchComments();
   };
 
   // Manejar apertura del modal de votación
@@ -116,6 +132,10 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
         // Recargar comentarios después de votar exitosamente
         console.log('🔄 Recargando comentarios después de votar...');
         await commentsViewModel.loadComments(propuesta.getId());
+        
+        // Recargar estadísticas de votos y comentarios
+        refetchVoteStats();
+        refetchComments();
         
         // ✅ NUEVO: Actualizar el estado del voto final
         console.log('🔄 Actualizando estado del voto final...');
@@ -178,9 +198,16 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
   // Usar el ID real del usuario si está disponible (convertir a número)
   const effectiveTutorId = currentTutorId && currentTutorId !== '' ? Number(currentTutorId) : null;
   
-  // ✅ NUEVO: Verificar voto final del tutor
+  // ✅ NUEVO: Verificar voto final del tutor (SOLO para tutores académicos)
   useEffect(() => {
     const checkTutorFinalVote = async () => {
+      // ✅ CORRECCIÓN: Solo ejecutar para tutores académicos, NO para alumnos
+      if (!isTutorAcademico) {
+        console.log('ℹ️ Usuario no es tutor académico, omitiendo verificación de voto final');
+        setTutorFinalVote(null);
+        return;
+      }
+      
       console.log('🔄 useEffect checkTutorFinalVote ejecutándose:', {
         isTutorAcademico,
         proposalId: propuesta.getId(),
@@ -192,7 +219,7 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
         } : null
       });
       
-      if (isTutorAcademico && propuesta.getId() && effectiveTutorId) {
+      if (propuesta.getId() && effectiveTutorId) {
         console.log('🔍 Verificando voto final del tutor:', { 
           proposalId: propuesta.getId(), 
           tutorId: effectiveTutorId 
@@ -208,7 +235,6 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
         }
       } else {
         console.log('⚠️ No se puede verificar voto final:', {
-          isTutorAcademico,
           proposalId: propuesta.getId(),
           effectiveTutorId,
           currentTutorId
@@ -258,30 +284,46 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
             
             <div className="flex items-center gap-4">
               <Status 
-                active={statusInfo.status === 'active'}
-                label={statusInfo.label}
-                className={statusInfo.color}
+                active={propuesta.isActive()}
+                label={proposalStatus.label}
+                className={`${proposalStatus.color} ${proposalStatus.bgColor}`}
               />
               
               {/* Botones de votación - Solo para tutores académicos */}
               {isTutorAcademico && (
                 <div className="flex flex-col items-end gap-2">
-                  {/* Información sobre votación */}
-                  <div className="flex items-center gap-2 text-xs text-gray-600 text-right">
-                    <span>
-                      <strong>Votación completa:</strong> Aprobar o rechazar toda la propuesta
-                    </span>
-                    <Button
-                      onClick={() => setShowHelpModal(true)}
-                      variant="ghost"
-                      size="sm"
-                      icon={<FiHelpCircle className="w-4 h-4" />}
-                      title="Ver guía de votación"
-                      aria-label="Ver guía de votación"
-                    />
-                  </div>
-                  
-                  {!hasVoted ? (
+                  {/* Verificar si la propuesta ya tiene veredicto final */}
+                  {proposalStatus.status === 'aprobado' || proposalStatus.status === 'rechazado' ? (
+                    // Mostrar mensaje de propuesta con veredicto
+                    <div className="flex items-center gap-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <FiInfo className="w-5 h-5 text-blue-600" />
+                      <div className="text-sm">
+                        <div className="font-semibold text-blue-800">
+                          Propuesta con veredicto final
+                        </div>
+                        <div className="text-blue-700">
+                          Esta propuesta ya tiene un veredicto ({proposalStatus.label}) y no recibirá más votos.
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Información sobre votación */}
+                      <div className="flex items-center gap-2 text-xs text-gray-600 text-right">
+                        <span>
+                          <strong>Votación completa:</strong> Aprobar o rechazar toda la propuesta
+                        </span>
+                        <Button
+                          onClick={() => setShowHelpModal(true)}
+                          variant="ghost"
+                          size="sm"
+                          icon={<FiHelpCircle className="w-4 h-4" />}
+                          title="Ver guía de votación"
+                          aria-label="Ver guía de votación"
+                        />
+                      </div>
+                      
+                      {!hasVoted ? (
                     // Mostrar botones de votación si no ha votado
                     <div className="flex items-center gap-2">
                       <Button
@@ -326,61 +368,102 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
                       )}
                     </div>
                   )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
-
+      
+      {/* Contador de Votos - Solo para alumnos */}
+      {!isTutorAcademico && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          {voteStatsError ? (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="text-red-800">
+                <strong>Error:</strong> {voteStatsError}
+              </div>
+            </div>
+          ) : (
+            <VoteCounter voteStats={voteStats} isLoading={voteStatsLoading} />
+          )}
+        </div>
+      )}
+      
       {/* Contenido principal */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
           
           {/* Columna principal - Información del proyecto */}
-          <div className="xl:col-span-2 space-y-6">
+          <div className="xl:col-span-3 space-y-6">
             
-            {/* Tipo de pasantía y fechas */}
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-600 text-white">
-                  {propuesta.getTipoPasantia()}
-                </span>
-                <div className="text-right">
-                  <p className="text-xs text-blue-700">Duración del proyecto</p>
-                  <p className="text-sm font-bold text-blue-900">
-                    {propuesta.getProyecto().getDuracionDias()} días
+            {/* Información General del Proyecto */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <FiBriefcase className="w-6 h-6 text-blue-600" />
+                <h2 className="text-2xl font-bold text-gray-900">Información General</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Tipo de Pasantía */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FiCalendar className="w-5 h-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-900">Tipo de Pasantía</h3>
+                  </div>
+                  <p className="text-blue-800 font-bold text-lg">
+                    {propuesta.getTipoPasantia()}
+                  </p>
+                </div>
+
+
+                {/* Duración */}
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FiCalendar className="w-5 h-5 text-purple-600" />
+                    <h3 className="font-semibold text-purple-900">Duración</h3>
+                  </div>
+                  <p className="text-purple-800 font-medium text-sm">
+                    {viewModel.formatDate(propuesta.getProyecto().getFechaInicio())} - {viewModel.formatDate(propuesta.getProyecto().getFechaFin())}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Contexto y Problemática */}
+            {/* Descripción del Proyecto */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-6">
                 <FiBook className="w-6 h-6 text-red-600" />
-                <h3 className="text-xl font-bold text-gray-900">Contexto y Problemática</h3>
+                <h2 className="text-2xl font-bold text-gray-900">Descripción del Proyecto</h2>
               </div>
               
-              <div className="space-y-4">
-                <div className="bg-red-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-red-900 mb-2">Contexto del Problema</h4>
-                  <p className="text-red-800 leading-relaxed whitespace-pre-wrap">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                  <h3 className="font-semibold text-red-900 mb-3 flex items-center gap-2">
+                    <FiBook className="w-5 h-5" />
+                    Contexto del Problema
+                  </h3>
+                  <p className="text-red-800 leading-relaxed whitespace-pre-wrap break-words">
                     {propuesta.getProyecto().getContextoProblema()}
                   </p>
                 </div>
 
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-orange-900 mb-2">Descripción del Problema</h4>
-                  <p className="text-orange-800 leading-relaxed whitespace-pre-wrap">
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                  <h3 className="font-semibold text-orange-900 mb-3 flex items-center gap-2">
+                    <FiTarget className="w-5 h-5" />
+                    Descripción del Problema
+                  </h3>
+                  <p className="text-orange-800 leading-relaxed whitespace-pre-wrap break-words">
                     {propuesta.getProyecto().getDescripcionProblema()}
                   </p>
                 </div>
               </div>
               
-              {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
+              {/* Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
-                <div className="mt-4 pt-4 border-t border-red-200">
+                <div className="mt-6 pt-4 border-t border-gray-200">
                   <Button
                     onClick={() => handleOpenCommentForm('Datos del Proyecto', 'Contexto y Problemática')}
                     variant="ghost"
@@ -391,35 +474,40 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
                   />
                 </div>
               )}
-              
             </div>
 
-            {/* Objetivos */}
+            {/* Objetivos del Proyecto */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-6">
                 <FiTarget className="w-6 h-6 text-green-600" />
-                <h3 className="text-xl font-bold text-gray-900">Objetivos del Proyecto</h3>
+                <h2 className="text-2xl font-bold text-gray-900">Objetivos del Proyecto</h2>
               </div>
               
-              <div className="space-y-4">
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-green-900 mb-2">Objetivo General</h4>
-                  <p className="text-green-800 leading-relaxed whitespace-pre-wrap">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h3 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                    <FiTarget className="w-5 h-5" />
+                    Objetivo General
+                  </h3>
+                  <p className="text-green-800 leading-relaxed whitespace-pre-wrap break-words">
                     {propuesta.getProyecto().getObjetivoGeneral()}
                   </p>
                 </div>
 
-                <div className="bg-emerald-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-emerald-900 mb-2">Objetivos Específicos</h4>
-                  <p className="text-emerald-800 leading-relaxed whitespace-pre-wrap">
+                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                  <h3 className="font-semibold text-emerald-900 mb-3 flex items-center gap-2">
+                    <FiTarget className="w-5 h-5" />
+                    Objetivos Específicos
+                  </h3>
+                  <p className="text-emerald-800 leading-relaxed whitespace-pre-wrap break-words">
                     {propuesta.getProyecto().getObjetivosEspecificos()}
                   </p>
                 </div>
               </div>
               
-              {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
+              {/* Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
-                <div className="mt-4 pt-4 border-t border-green-200">
+                <div className="mt-6 pt-4 border-t border-gray-200">
                   <Button
                     onClick={() => handleOpenCommentForm('Datos del Proyecto', 'Objetivos del Proyecto')}
                     variant="ghost"
@@ -430,41 +518,40 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
                   />
                 </div>
               )}
-              
             </div>
 
             {/* Actividades y Entregables */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-6">
                 <FiActivity className="w-6 h-6 text-purple-600" />
-                <h3 className="text-xl font-bold text-gray-900">Actividades y Entregables</h3>
+                <h2 className="text-2xl font-bold text-gray-900">Actividades y Entregables</h2>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 mb-3">
-                    <FiActivity className="w-5 h-5 text-purple-600" />
-                    <h4 className="font-semibold text-purple-900">Actividades Principales</h4>
-                  </div>
-                  <p className="text-purple-800 leading-relaxed whitespace-pre-wrap">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <h3 className="font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                    <FiActivity className="w-5 h-5" />
+                    Actividades Principales
+                  </h3>
+                  <p className="text-purple-800 leading-relaxed whitespace-pre-wrap break-words">
                     {propuesta.getProyecto().getActividadesPrincipales()}
                   </p>
                 </div>
 
-                <div className="bg-violet-50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 mb-3">
-                    <FiFileText className="w-5 h-5 text-violet-600" />
-                    <h4 className="font-semibold text-violet-900">Entregables Planeados</h4>
-                  </div>
-                  <p className="text-violet-800 leading-relaxed whitespace-pre-wrap">
+                <div className="bg-violet-50 p-4 rounded-lg border border-violet-200">
+                  <h3 className="font-semibold text-violet-900 mb-3 flex items-center gap-2">
+                    <FiFileText className="w-5 h-5" />
+                    Entregables Planeados
+                  </h3>
+                  <p className="text-violet-800 leading-relaxed whitespace-pre-wrap break-words">
                     {propuesta.getProyecto().getEntregablesPlaneados()}
                   </p>
                 </div>
               </div>
               
-              {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
+              {/* Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
-                <div className="mt-4 pt-4 border-t border-purple-200">
+                <div className="mt-6 pt-4 border-t border-gray-200">
                   <Button
                     onClick={() => handleOpenCommentForm('Datos del Proyecto', 'Actividades y Entregables')}
                     variant="ghost"
@@ -475,25 +562,24 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
                   />
                 </div>
               )}
-              
             </div>
 
             {/* Tecnologías */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-6">
                 <FiTool className="w-6 h-6 text-cyan-600" />
-                <h3 className="text-xl font-bold text-gray-900">Tecnologías</h3>
+                <h2 className="text-2xl font-bold text-gray-900">Tecnologías</h2>
               </div>
               
-              <div className="bg-cyan-50 p-4 rounded-lg">
-                <p className="text-cyan-800 leading-relaxed whitespace-pre-wrap">
+              <div className="bg-cyan-50 p-4 rounded-lg border border-cyan-200">
+                <p className="text-cyan-800 leading-relaxed whitespace-pre-wrap break-words">
                   {propuesta.getProyecto().getTecnologias()}
                 </p>
               </div>
               
-              {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
+              {/* Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
-                <div className="mt-4 pt-4 border-t border-cyan-200">
+                <div className="mt-6 pt-4 border-t border-gray-200">
                   <Button
                     onClick={() => handleOpenCommentForm('Datos del Proyecto', 'Tecnologías')}
                     variant="ghost"
@@ -504,118 +590,106 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
                   />
                 </div>
               )}
-              
             </div>
 
-            {/* Período del proyecto */}
+            {/* Información de la Empresa y Contactos */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <FiCalendar className="w-6 h-6 text-green-600" />
-                <h3 className="text-xl font-bold text-gray-900">Período del Proyecto</h3>
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <p className="text-sm font-semibold text-green-700 mb-2">Fecha de Inicio</p>
-                  <p className="text-green-900 font-bold text-lg">
-                    {viewModel.formatDate(propuesta.getProyecto().getFechaInicio())}
-                  </p>
-                </div>
-                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                  <p className="text-sm font-semibold text-red-700 mb-2">Fecha de Fin</p>
-                  <p className="text-red-900 font-bold text-lg">
-                    {viewModel.formatDate(propuesta.getProyecto().getFechaFin())}
-                  </p>
-                </div>
-              </div>
-              
-              {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
-              {isTutorAcademico && !hasVoted && (
-                <div className="mt-4 pt-4 border-t border-green-200">
-                  <Button
-                    onClick={() => handleOpenCommentForm('Datos del Proyecto', 'Período del Proyecto')}
-                    variant="ghost"
-                    size="sm"
-                    icon={<FiMessageSquare className="w-4 h-4" />}
-                    label="Comentar esta sección"
-                    className="bg-green-100 text-green-700 hover:bg-green-200"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Columna lateral - Información de empresa y contactos */}
-          <div className="space-y-6">
-            
-            {/* Información de la Empresa */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-6">
                 <FiBriefcase className="w-6 h-6 text-purple-600" />
-                <h3 className="text-xl font-bold text-gray-900">Empresa</h3>
+                <h2 className="text-2xl font-bold text-gray-900">Información de la Empresa</h2>
               </div>
               
-              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-4">
-                <div>
-                  <p className="text-sm font-semibold text-purple-700 mb-1">Nombre Comercial</p>
-                  <p className="text-purple-900 font-bold text-lg">
-                    {propuesta.getEmpresa().getNombreCorto() || 'No especificado'}
-                  </p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-semibold text-purple-700 mb-1">Razón Social</p>
-                  <p className="text-purple-900 font-medium">
-                    {propuesta.getEmpresa().getRazonSocial()}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-purple-700 mb-1">RFC</p>
-                  <p className="text-purple-900 font-mono">
-                    {propuesta.getEmpresa().getRFC()}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-purple-700 mb-1">Sector</p>
-                  <p className="text-purple-900 font-medium">
-                    {propuesta.getEmpresa().getSector()}
-                  </p>
-                </div>
-
-                {propuesta.getEmpresa().getPaginaWeb() && (
-                  <div>
-                    <p className="text-sm font-semibold text-purple-700 mb-1">Página Web</p>
-                    <a 
-                      href={propuesta.getEmpresa().getPaginaWeb()!} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-purple-900 underline hover:text-purple-700 flex items-center gap-2 font-medium break-all"
-                    >
-                      <FiGlobe className="w-4 h-4 flex-shrink-0" />
-                      {propuesta.getEmpresa().getPaginaWeb()}
-                    </a>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Información de la Empresa */}
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <h3 className="font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                    <FiBriefcase className="w-5 h-5" />
+                    Datos de la Empresa
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm font-semibold text-purple-700 mb-1">Nombre Comercial</p>
+                      <p className="text-purple-900 font-bold break-words">
+                        {propuesta.getEmpresa().getNombreCorto() || 'No especificado'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-purple-700 mb-1">Razón Social</p>
+                      <p className="text-purple-900 font-medium break-words">
+                        {propuesta.getEmpresa().getRazonSocial()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-purple-700 mb-1">RFC</p>
+                      <p className="text-purple-900 font-mono">
+                        {propuesta.getEmpresa().getRFC()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-purple-700 mb-1">Sector</p>
+                      <p className="text-purple-900 font-medium break-words">
+                        {propuesta.getEmpresa().getSector()}
+                      </p>
+                    </div>
                   </div>
-                )}
+                </div>
 
-                {propuesta.getEmpresa().getLinkedIn() && (
-                  <div>
-                    <p className="text-sm font-semibold text-purple-700 mb-1">LinkedIn</p>
-                    <a 
-                      href={propuesta.getEmpresa().getLinkedIn()!} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-purple-900 underline hover:text-purple-700 font-medium break-all"
-                    >
-                      {propuesta.getEmpresa().getLinkedIn()}
-                    </a>
+                {/* Dirección */}
+                <div className="bg-pink-50 p-4 rounded-lg border border-pink-200">
+                  <h3 className="font-semibold text-pink-900 mb-3 flex items-center gap-2">
+                    <FiMapPin className="w-5 h-5" />
+                    Dirección
+                  </h3>
+                  <p className="text-pink-900 leading-relaxed break-words">
+                    {propuesta.getEmpresa().getDireccion().getDireccionCompleta()}
+                  </p>
+                </div>
+
+                {/* Contacto */}
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                  <h3 className="font-semibold text-orange-900 mb-3 flex items-center gap-2">
+                    <FiPhone className="w-5 h-5" />
+                    Persona de Contacto
+                  </h3>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-sm font-semibold text-orange-700 mb-1">Nombre</p>
+                      <p className="text-orange-900 font-bold break-words">
+                        {propuesta.getContacto().getNombre()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-orange-700 mb-1">Puesto</p>
+                      <p className="text-orange-900 font-medium break-words">
+                        {propuesta.getContacto().getPuesto()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-orange-700 mb-1">Email</p>
+                      <a 
+                        href={`mailto:${propuesta.getContacto().getEmail()}`}
+                        className="text-orange-900 hover:text-orange-700 font-medium break-all flex items-center gap-1"
+                      >
+                        <FiMail className="w-4 h-4 flex-shrink-0" />
+                        {propuesta.getContacto().getEmail()}
+                      </a>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-orange-700 mb-1">Teléfono</p>
+                      <a 
+                        href={`tel:${propuesta.getContacto().getTelefono()}`}
+                        className="text-orange-900 hover:text-orange-700 font-medium"
+                      >
+                        {propuesta.getContacto().getTelefono()}
+                      </a>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
               
-              {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
+              {/* Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
-                <div className="mt-4 pt-4 border-t border-purple-200">
+                <div className="mt-6 pt-4 border-t border-gray-200">
                   <Button
                     onClick={() => handleOpenCommentForm('Información de la Empresa', 'Datos de la Empresa')}
                     variant="ghost"
@@ -626,213 +700,74 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
                   />
                 </div>
               )}
-              
             </div>
 
-            {/* Dirección de la Empresa */}
+            {/* Información Académica */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <FiMapPin className="w-6 h-6 text-pink-600" />
-                <h3 className="text-xl font-bold text-gray-900">Dirección</h3>
-              </div>
-              
-              <div className="bg-pink-50 p-4 rounded-lg border border-pink-200">
-                <p className="text-pink-900 leading-relaxed">
-                  {propuesta.getEmpresa().getDireccion().getDireccionCompleta()}
-                </p>
-              </div>
-              
-              {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
-              {isTutorAcademico && !hasVoted && (
-                <div className="mt-4 pt-4 border-t border-pink-200">
-                  <Button
-                    onClick={() => handleOpenCommentForm('Información de la Empresa', 'Dirección')}
-                    variant="ghost"
-                    size="sm"
-                    icon={<FiMessageSquare className="w-4 h-4" />}
-                    label="Comentar esta sección"
-                    className="bg-pink-100 text-pink-700 hover:bg-pink-200"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Persona de Contacto */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <FiPhone className="w-6 h-6 text-orange-600" />
-                <h3 className="text-xl font-bold text-gray-900">Persona de Contacto</h3>
-              </div>
-              
-              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 space-y-3">
-                <div>
-                  <p className="text-sm font-semibold text-orange-700 mb-1">Nombre</p>
-                  <p className="text-orange-900 font-bold">
-                    {propuesta.getContacto().getNombre()}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-orange-700 mb-1">Puesto</p>
-                  <p className="text-orange-900 font-medium">
-                    {propuesta.getContacto().getPuesto()}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-orange-700 mb-1">Área</p>
-                  <p className="text-orange-900 font-medium">
-                    {propuesta.getContacto().getArea()}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-orange-700 mb-1">Email</p>
-                  <a 
-                    href={`mailto:${propuesta.getContacto().getEmail()}`}
-                    className="text-orange-900 hover:text-orange-700 font-medium break-all flex items-center gap-2"
-                  >
-                    <FiMail className="w-4 h-4 flex-shrink-0" />
-                    {propuesta.getContacto().getEmail()}
-                  </a>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-orange-700 mb-1">Teléfono</p>
-                  <a 
-                    href={`tel:${propuesta.getContacto().getTelefono()}`}
-                    className="text-orange-900 hover:text-orange-700 font-medium"
-                  >
-                    {propuesta.getContacto().getTelefono()}
-                  </a>
-                </div>
-              </div>
-              
-              {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
-              {isTutorAcademico && !hasVoted && (
-                <div className="mt-4 pt-4 border-t border-orange-200">
-                  <Button
-                    onClick={() => handleOpenCommentForm('Información de Contacto', 'Persona de Contacto')}
-                    variant="ghost"
-                    size="sm"
-                    icon={<FiMessageSquare className="w-4 h-4" />}
-                    label="Comentar esta sección"
-                    className="bg-orange-100 text-orange-700 hover:bg-orange-200"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Supervisor del Proyecto */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <FiUser className="w-6 h-6 text-teal-600" />
-                <h3 className="text-xl font-bold text-gray-900">Supervisor del Proyecto</h3>
-              </div>
-              
-              <div className="bg-teal-50 p-4 rounded-lg border border-teal-200 space-y-3">
-                <div>
-                  <p className="text-sm font-semibold text-teal-700 mb-1">Nombre</p>
-                  <p className="text-teal-900 font-bold">
-                    {propuesta.getSupervisor().getNombre()}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-teal-700 mb-1">Área</p>
-                  <p className="text-teal-900 font-medium">
-                    {propuesta.getSupervisor().getArea()}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-teal-700 mb-1">Email</p>
-                  <a 
-                    href={`mailto:${propuesta.getSupervisor().getEmail()}`}
-                    className="text-teal-900 hover:text-teal-700 font-medium break-all flex items-center gap-2"
-                  >
-                    <FiMail className="w-4 h-4 flex-shrink-0" />
-                    {propuesta.getSupervisor().getEmail()}
-                  </a>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-teal-700 mb-1">Teléfono</p>
-                  <a 
-                    href={`tel:${propuesta.getSupervisor().getTelefono()}`}
-                    className="text-teal-900 hover:text-teal-700 font-medium"
-                  >
-                    {propuesta.getSupervisor().getTelefono()}
-                  </a>
-                </div>
-              </div>
-              
-              {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
-              {isTutorAcademico && !hasVoted && (
-                <div className="mt-4 pt-4 border-t border-teal-200">
-                  <Button
-                    onClick={() => handleOpenCommentForm('Supervisor del Proyecto', 'Información del Supervisor')}
-                    variant="ghost"
-                    size="sm"
-                    icon={<FiMessageSquare className="w-4 h-4" />}
-                    label="Comentar esta sección"
-                    className="bg-teal-100 text-teal-700 hover:bg-teal-200"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Información del Estudiante */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <FiUser className="w-6 h-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-gray-900">Información del Estudiante</h3>
-              </div>
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
-                <div>
-                  <p className="text-sm font-semibold text-blue-700 mb-1">Nombre Completo</p>
-                  <p className="text-blue-900 font-bold text-lg">
-                    {propuesta.getEstudiante().getNombreCompleto()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-blue-700 mb-1">Correo Electrónico</p>
-                  <a 
-                    href={`mailto:${propuesta.getEstudiante().getEmail()}`}
-                    className="text-blue-900 hover:text-blue-700 font-medium break-all flex items-center gap-2"
-                  >
-                    <FiMail className="w-4 h-4 flex-shrink-0" />
-                    {propuesta.getEstudiante().getEmail()}
-                  </a>
-                </div>
-              </div>
-              
-            </div>
-
-            {/* Tutor Académico */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-6">
                 <FiUser className="w-6 h-6 text-indigo-600" />
-                <h3 className="text-xl font-bold text-gray-900">Tutor Académico</h3>
+                <h2 className="text-2xl font-bold text-gray-900">Información Académica</h2>
               </div>
-              <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
-                <p className="font-bold text-indigo-900 text-lg mb-2">
-                  {propuesta.getTutorAcademico().getNombre()}
-                </p>
-                <div className="flex items-center gap-2">
-                  <FiMail className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-                  <a 
-                    href={`mailto:${propuesta.getTutorAcademico().getEmail()}`}
-                    className="text-indigo-700 hover:text-indigo-800 font-medium break-all"
-                  >
-                    {propuesta.getTutorAcademico().getEmail()}
-                  </a>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Tutor Académico */}
+                <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                  <h3 className="font-semibold text-indigo-900 mb-3 flex items-center gap-2">
+                    <FiUser className="w-5 h-5" />
+                    Tutor Académico
+                  </h3>
+                  <div className="space-y-2">
+                    <p className="font-bold text-indigo-900 text-lg mb-2 break-words">
+                      {propuesta.getTutorAcademico().getNombre()}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <FiMail className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                      <a 
+                        href={`mailto:${propuesta.getTutorAcademico().getEmail()}`}
+                        className="text-indigo-700 hover:text-indigo-800 font-medium break-all"
+                      >
+                        {propuesta.getTutorAcademico().getEmail()}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Supervisor del Proyecto */}
+                <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                  <h3 className="font-semibold text-teal-900 mb-3 flex items-center gap-2">
+                    <FiUser className="w-5 h-5" />
+                    Supervisor del Proyecto
+                  </h3>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-sm font-semibold text-teal-700 mb-1">Nombre</p>
+                      <p className="text-teal-900 font-bold break-words">
+                        {propuesta.getSupervisor().getNombre()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-teal-700 mb-1">Área</p>
+                      <p className="text-teal-900 font-medium break-words">
+                        {propuesta.getSupervisor().getArea()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-teal-700 mb-1">Email</p>
+                      <a 
+                        href={`mailto:${propuesta.getSupervisor().getEmail()}`}
+                        className="text-teal-900 hover:text-teal-700 font-medium break-all flex items-center gap-1"
+                      >
+                        <FiMail className="w-4 h-4 flex-shrink-0" />
+                        {propuesta.getSupervisor().getEmail()}
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              {/* ✅ NUEVO: Botón de comentario para tutores académicos */}
+              {/* Botón de comentario para tutores académicos */}
               {isTutorAcademico && !hasVoted && (
-                <div className="mt-4 pt-4 border-t border-indigo-200">
+                <div className="mt-6 pt-4 border-t border-gray-200">
                   <Button
                     onClick={() => handleOpenCommentForm('Tutor Académico', 'Información del Tutor')}
                     variant="ghost"
@@ -845,21 +780,22 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
               )}
             </div>
 
-            {/* Información de timestamps */}
+            {/* Información de Registro */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-6">
                 <FiClock className="w-6 h-6 text-gray-600" />
-                <h3 className="text-xl font-bold text-gray-900">Registro</h3>
+                <h2 className="text-2xl font-bold text-gray-900">Información de Registro</h2>
               </div>
-              <div className="space-y-3">
-                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                   <p className="text-sm text-green-700 font-semibold mb-1">Fecha de registro</p>
                   <p className="text-sm text-green-900 font-medium">
                     {viewModel.formatDateTime(propuesta.getCreatedAt())}
                   </p>
                 </div>
                 {propuesta.getUpdatedAt() && propuesta.getUpdatedAt()?.getTime() !== propuesta.getCreatedAt()?.getTime() && (
-                  <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                     <p className="text-sm text-yellow-700 font-semibold mb-1">Última actualización</p>
                     <p className="text-sm text-yellow-900 font-medium">
                       {viewModel.formatDateTime(propuesta.getUpdatedAt()!)}
@@ -867,21 +803,24 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* ID único */}
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <p className="text-xs text-gray-600">
-                <span className="font-semibold">ID de Propuesta:</span> 
-                <span className="font-mono ml-1">{propuesta.getId()}</span>
-              </p>
+              
+              {/* ID único */}
+              <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <p className="text-xs text-gray-600">
+                  <span className="font-semibold">ID de Propuesta:</span> 
+                  <span className="font-mono ml-1">{propuesta.getId()}</span>
+                </p>
+              </div>
             </div>
 
             {/* Información para tutores académicos */}
             {isTutorAcademico && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="font-semibold text-blue-900 mb-2">Información para Tutores Académicos</h3>
-                <ul className="text-sm text-blue-800 space-y-1">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="font-semibold text-blue-900 mb-4 flex items-center gap-2">
+                  <FiHelpCircle className="w-5 h-5" />
+                  Información para Tutores Académicos
+                </h3>
+                <ul className="text-sm text-blue-800 space-y-2">
                   <li>• Use los botones de votación en la parte superior para evaluar esta propuesta</li>
                   <li>• <strong>Aprobar:</strong> La propuesta cumple con todos los requisitos</li>
                   <li>• <strong>Rechazar:</strong> La propuesta no cumple con los requisitos mínimos</li>
@@ -892,6 +831,14 @@ const PropuestaDetalle: React.FC<PropuestaDetalleProps> = observer(({
                 </ul>
               </div>
             )}
+          </div>
+
+          {/* Columna derecha - EXCLUSIVAMENTE Comentarios y Evaluaciones */}
+          <div className="xl:col-span-2 space-y-6">
+            <CommentsSection 
+              comments={comments} 
+              isLoading={commentsLoading} 
+            />
           </div>
         </div>
       </div>

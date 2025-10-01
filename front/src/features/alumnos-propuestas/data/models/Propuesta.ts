@@ -227,8 +227,8 @@ export class PropuestaCompleta {
         return {
           status: 'pendiente',
           label: 'Pendiente',
-          color: 'text-blue-700',
-          bgColor: 'bg-blue-100 border-blue-300'
+          color: 'text-gray-700',
+          bgColor: 'bg-gray-100 border-gray-300'
         };
     }
   }
@@ -239,10 +239,12 @@ export class ConvocatoriaActiva {
     private readonly id: string,
     private readonly nombre: string,
     private readonly pasantiasDisponibles: string[],
-    private readonly profesoresDisponibles: TutorAcademico[]
+    private readonly profesoresDisponibles: TutorAcademico[],
+    private readonly idNumerico?: number // NUEVO: ID numérico para comparaciones
   ) {}
 
   getId(): string { return this.id; }
+  getIdNumerico(): number { return this.idNumerico || 0; } // NUEVO: Método para obtener ID numérico
   getNombre(): string { return this.nombre; }
   getPasantiasDisponibles(): string[] { return this.pasantiasDisponibles; }
   getProfesoresDisponibles(): TutorAcademico[] { return this.profesoresDisponibles; }

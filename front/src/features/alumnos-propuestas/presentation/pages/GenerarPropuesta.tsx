@@ -55,14 +55,6 @@ const GenerarPropuesta: React.FC = observer(() => {
 
   // Determinar qué vista mostrar basado en el estado del ViewModel
   const determineViewState = () => {
-    console.log('🔍 Debugging view state:', {
-      isInitialized: propuestaViewModel.isInitialized,
-      hasConvocatoriaActiva: propuestaViewModel.hasConvocatoriaActiva,
-      convocatoriaActivaId: propuestaViewModel.convocatoriaActiva?.getId(),
-      misPropuestasCount: propuestaViewModel.misPropuestas.length,
-      hasPropuestaEnConvocatoriaActual: propuestaViewModel.hasPropuestaEnConvocatoriaActual
-    });
-
     if (!propuestaViewModel.isInitialized) {
       setViewState('loading');
       return;
@@ -73,8 +65,7 @@ const GenerarPropuesta: React.FC = observer(() => {
       return;
     }
 
-    if (propuestaViewModel.hasPropuestaEnConvocatoriaActual) {
-      console.log('✅ Usuario tiene propuesta en convocatoria actual - mostrando PropuestaExistenteMessage');
+    if (propuestaViewModel.hasPropuestaBloqueante) {
       setViewState('propuesta-existente');
       return;
     }
@@ -95,7 +86,7 @@ const GenerarPropuesta: React.FC = observer(() => {
   }, [
     propuestaViewModel.isInitialized,
     propuestaViewModel.hasConvocatoriaActiva,
-    propuestaViewModel.hasPropuestaEnConvocatoriaActual,
+    propuestaViewModel.hasPropuestaBloqueante,
     propuestaViewModel.lastCreatedPropuesta
   ]);
 

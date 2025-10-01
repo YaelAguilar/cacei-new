@@ -8,7 +8,9 @@ import {
     approveProposalController,
     rejectProposalController,
     updateProposalController,
-    checkTutorFinalVoteController
+    checkTutorFinalVoteController,
+    getVoteStatsController,
+    syncProposalStatusController
 } from './dependencies';
 
 export const commentRouter = express.Router();
@@ -122,6 +124,24 @@ commentRouter.post('/actualizar-propuesta', (req, res) => {
 commentRouter.get('/propuestas/:proposalId/tutor-voto-final', (req, res) => {
     console.log('🔍 Verificando voto final del tutor para propuesta:', req.params.proposalId);
     checkTutorFinalVoteController.run(req, res);
+});
+
+/**
+ * ✅ NUEVA RUTA: GET /propuestas/:proposalId/estadisticas-votos
+ * Obtener estadísticas de votos para una propuesta específica
+ */
+commentRouter.get('/propuestas/:proposalId/estadisticas-votos', (req, res) => {
+    console.log('📊 Obteniendo estadísticas de votos para propuesta:', req.params.proposalId);
+    getVoteStatsController.run(req, res);
+});
+
+/**
+ * ✅ NUEVA RUTA: POST /propuestas/:proposalId/sincronizar-estado
+ * Sincronizar el estado oficial de la propuesta con el estado calculado basado en votos
+ */
+commentRouter.post('/propuestas/:proposalId/sincronizar-estado', (req, res) => {
+    console.log('🔄 Sincronizando estado de propuesta:', req.params.proposalId);
+    syncProposalStatusController.run(req, res);
 });
 
 /**

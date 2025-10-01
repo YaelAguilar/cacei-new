@@ -25,6 +25,76 @@ const Step1AlumnoInfo: React.FC<Step1AlumnoInfoProps> = observer(({ viewModel, o
     onNext();
   };
 
+         // NUEVA VALIDACIÓN: Verificar si hay propuesta bloqueante
+         if (viewModel.hasPropuestaBloqueante) {
+           const propuestaBloqueante = viewModel.propuestaBloqueante;
+           const estado = propuestaBloqueante?.getEstatus();
+           const esAprobada = estado === 'APROBADO';
+           const necesitaActualizar = estado === 'ACTUALIZAR';
+           const estaPendiente = estado === 'PENDIENTE';
+           
+           return (
+             <div className="bg-white p-6 rounded-lg shadow-md">
+               <div className="text-center py-8">
+                 <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                   esAprobada ? 'bg-green-100' : 
+                   necesitaActualizar ? 'bg-yellow-100' :
+                   'bg-blue-100'
+                 }`}>
+                   <FiUser className={`w-8 h-8 ${
+                     esAprobada ? 'text-green-600' : 
+                     necesitaActualizar ? 'text-yellow-600' :
+                     'text-blue-600'
+                   }`} />
+                 </div>
+                 <h2 className={`text-xl font-bold mb-2 ${
+                   esAprobada ? 'text-green-900' : 
+                   necesitaActualizar ? 'text-yellow-900' :
+                   'text-blue-900'
+                 }`}>
+                   {esAprobada ? 'Propuesta Ya Aprobada' : 
+                    necesitaActualizar ? 'Propuesta Requiere Actualización' :
+                    'Propuesta en Evaluación'}
+                 </h2>
+                 <p className={`text-sm mb-4 ${
+                   esAprobada ? 'text-green-700' : 
+                   necesitaActualizar ? 'text-yellow-700' :
+                   'text-blue-700'
+                 }`}>
+                   {esAprobada 
+                     ? 'Tu propuesta ya ha sido aprobada. No puedes crear una nueva propuesta en esta convocatoria.'
+                     : necesitaActualizar
+                     ? 'Tu propuesta actual requiere actualizaciones. Debes resolver las observaciones antes de crear una nueva propuesta.'
+                     : 'Ya tienes una propuesta en evaluación. No puedes crear una nueva propuesta hasta que termine el proceso de evaluación.'
+                   }
+                 </p>
+                 <div className={`border rounded-lg p-4 ${
+                   esAprobada 
+                     ? 'bg-green-50 border-green-200' 
+                     : necesitaActualizar
+                     ? 'bg-yellow-50 border-yellow-200'
+                     : 'bg-blue-50 border-blue-200'
+                 }`}>
+                   <p className={`text-sm font-medium ${
+                     esAprobada ? 'text-green-800' : 
+                     necesitaActualizar ? 'text-yellow-800' :
+                     'text-blue-800'
+                   }`}>
+                     Proyecto: {propuestaBloqueante?.getProyecto()?.getNombre() || 'Sin nombre'}
+                   </p>
+                   <p className={`text-xs mt-1 ${
+                     esAprobada ? 'text-green-600' : 
+                     necesitaActualizar ? 'text-yellow-600' :
+                     'text-blue-600'
+                   }`}>
+                     Estado: {estado}
+                   </p>
+                 </div>
+               </div>
+             </div>
+           );
+         }
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="mb-6">

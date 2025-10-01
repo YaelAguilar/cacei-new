@@ -28,6 +28,27 @@ export class ApproveProposalUseCase {
                 throw new Error("El email del tutor es obligatorio");
             }
 
+            // ✅ NUEVO: Verificar si el tutor ya tiene votos finales contradictorios
+            const existingFinalVotes = await this.commentRepository.hasTutorVotedFinal(proposalId, tutorId);
+            
+            if (existingFinalVotes.hasVoted) {
+                const existingStatus = existingFinalVotes.voteStatus;
+                
+                if (existingStatus === 'RECHAZADO') {
+                    throw new Error(
+                        `No se puede aprobar la propuesta porque ya existe un voto final "RECHAZADO" ` +
+                        `de este tutor para esta propuesta. Un tutor solo puede tener un voto final por propuesta.`
+                    );
+                }
+                
+                if (existingStatus === 'ACEPTADO') {
+                    throw new Error(
+                        `Ya existe un voto final "ACEPTADO" de este tutor para esta propuesta. ` +
+                        `No se permiten votos finales duplicados.`
+                    );
+                }
+            }
+
             return await this.commentRepository.approveEntireProposal(
                 proposalId,
                 tutorId,

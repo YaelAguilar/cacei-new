@@ -2,7 +2,7 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
-import { FiBriefcase, FiEye, FiUser, FiCalendar, FiFileText, FiEdit, FiCheck, FiX, FiRefreshCw } from "react-icons/fi";
+import { FiBriefcase, FiEye, FiFileText, FiEdit, FiCheck, FiX, FiRefreshCw } from "react-icons/fi";
 import { PropuestaCompleta } from "../../data/models/Propuesta";
 import { VisualizarPropuestasViewModel } from "../viewModels/VisualizarPropuestasViewModel";
 import Status from "../../../shared/components/Status";
@@ -37,23 +37,6 @@ const PropuestaCard: React.FC<PropuestaCardProps> = observer(({
             <h3 className="text-lg font-semibold text-gray-900 mb-1 break-words">
               {propuesta.getProyecto()?.getNombre() || 'Proyecto sin nombre'}
             </h3>
-            
-            {/* Información del proyecto */}
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-              <FiCalendar className="w-4 h-4" />
-              <span>
-                {viewModel.formatDate(propuesta.getProyecto().getFechaInicio())} - {' '}
-                {viewModel.formatDate(propuesta.getProyecto().getFechaFin())}
-              </span>
-            </div>
-
-            {/* NUEVA INFORMACIÓN: Estudiante */}
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <FiUser className="w-4 h-4 text-blue-500" />
-              <span className="font-medium text-blue-700">
-                {propuesta.getEstudiante().getNombreCompleto()}
-              </span>
-            </div>
           </div>
           
           {/* Status badge */}
@@ -78,20 +61,6 @@ const PropuestaCard: React.FC<PropuestaCardProps> = observer(({
               {propuesta.getEmpresa().getNombreCorto() || propuesta.getEmpresa().getRazonSocial()}
             </p>
             <p className="text-xs text-gray-500">{propuesta.getEmpresa().getSector()}</p>
-          </div>
-        </div>
-
-        {/* Tutor Académico */}
-        <div className="flex items-start gap-3">
-          <FiUser className="w-5 h-5 text-green-500 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-700">Tutor Académico</p>
-            <p className="text-sm text-gray-900 truncate">
-              {propuesta.getTutorAcademico().getNombre()}
-            </p>
-            <p className="text-xs text-gray-500 truncate">
-              {propuesta.getTutorAcademico().getEmail()}
-            </p>
           </div>
         </div>
 

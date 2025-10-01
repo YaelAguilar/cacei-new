@@ -12,10 +12,12 @@ export class UpdateProposalStatusAfterCommentUseCase {
 
     async run(proposalId: string): Promise<boolean> {
         try {
-            console.log(`🔄 Actualizando estado de propuesta ${proposalId} después de comentario`);
+            console.log(`🔄 DEBUG: UpdateProposalStatusAfterCommentUseCase.run() iniciado para propuesta ${proposalId}`);
             
             // Calcular y actualizar el estado de la propuesta
             const statusUpdated = await this.calculateProposalStatusUseCase.updateProposalStatusIfNeeded(proposalId);
+            
+            console.log(`📊 DEBUG: updateProposalStatusIfNeeded() devolvió: ${statusUpdated}`);
             
             if (statusUpdated) {
                 console.log(`✅ Estado de propuesta ${proposalId} actualizado exitosamente`);
@@ -25,7 +27,7 @@ export class UpdateProposalStatusAfterCommentUseCase {
 
             return statusUpdated;
         } catch (error) {
-            console.error("Error updating proposal status after comment:", error);
+            console.error("❌ DEBUG: Error updating proposal status after comment:", error);
             throw error;
         }
     }

@@ -26,8 +26,9 @@ export class GetActiveConvocatoriaController {
 
                 const formattedConvocatoria = {
                     type: "convocatoria-activa",
-                    id: convocatoriaActiva.uuid, // CORREGIDO: usar UUID, no ID numérico
+                    id: convocatoriaActiva.uuid, // UUID para identificación única
                     attributes: {
+                        idNumerico: convocatoriaActiva.id, // NUEVO: ID numérico para comparaciones
                         nombre: convocatoriaActiva.nombre,
                         pasantiasDisponibles: convocatoriaActiva.pasantiasDisponibles,
                         profesoresDisponibles: convocatoriaActiva.profesoresDisponibles

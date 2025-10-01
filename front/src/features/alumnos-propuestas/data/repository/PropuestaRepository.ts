@@ -38,7 +38,8 @@ export class PropuestaRepository {
           response.data.data.id,
           data.nombre,
           data.pasantiasDisponibles,
-          profesores
+          profesores,
+          data.idNumerico // NUEVO: Pasar el ID numérico
         );
       }
       
@@ -159,6 +160,11 @@ export class PropuestaRepository {
     let supervisor: Supervisor;
     let proyectoCompleto: ProyectoCompleto;
     let estatus: ProposalStatus = 'PENDIENTE';
+
+          // Mapear estatus desde la respuesta del API
+          if (attrs.estatus) {
+            estatus = attrs.estatus as ProposalStatus;
+          }
 
     // NUEVO: Mapear información del estudiante desde la nueva estructura
     if (attrs.informacionDelAlumno) {
@@ -294,8 +300,6 @@ export class PropuestaRepository {
         attrs.proyecto.entregablesPlaneados,
         attrs.proyecto.tecnologias
       );
-
-      estatus = 'PENDIENTE';
     } else {
       throw new Error('Estructura de datos de propuesta no reconocida');
     }

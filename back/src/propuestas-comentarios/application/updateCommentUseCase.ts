@@ -3,12 +3,15 @@ import { CommentRepository, CommentUpdateData } from "../domain/interfaces/comme
 import { ProposalComment } from "../domain/models/proposalComment";
 import { ValidateCommentEditUseCase } from "./validateCommentEditUseCase";
 import { UpdateProposalStatusAfterCommentUseCase } from "./updateProposalStatusAfterCommentUseCase";
+import { PropuestaRepository } from "../../propuestas/domain/interfaces/propuestaRepository";
+import mysql from 'mysql2/promise';
 
 export class UpdateCommentUseCase {
     constructor(
         private readonly commentRepository: CommentRepository,
         private readonly validateCommentEditUseCase: ValidateCommentEditUseCase,
-        private readonly updateProposalStatusUseCase: UpdateProposalStatusAfterCommentUseCase
+        private readonly updateProposalStatusUseCase: UpdateProposalStatusAfterCommentUseCase,
+        private readonly propuestaRepository: PropuestaRepository
     ) {}
 
     async run(
@@ -25,6 +28,9 @@ export class UpdateCommentUseCase {
             if (!existingComment) {
                 throw new Error("Comentario no encontrado");
             }
+
+            // ✅ NUEVO: Verificar que la propuesta no esté APROBADO o RECHAZADO
+            await this.validateProposalStatus(existingComment.getProposalId());
 
             // ✅ NUEVO: Validar permisos de edición
             await this.validateCommentEditUseCase.run(uuid, tutorId);
@@ -95,6 +101,38 @@ export class UpdateCommentUseCase {
             if (updateData.voteStatus !== 'ACTUALIZA') {
                 throw new Error("Para comentarios por sección, el estado de votación debe ser 'ACTUALIZA'");
             }
+        }
+    }
+
+    /**
+     * Valida que la propuesta no esté en estado APROBADO o RECHAZADO
+     */
+    private async validateProposalStatus(proposalId: string): Promise<void> {
+        try {
+            const proposal = await this.propuestaRepository.getPropuesta(proposalId);
+            
+            if (!proposal) {
+                throw new Error("Propuesta no encontrada");
+            }
+
+            const currentStatus = proposal.getProposalStatus();
+            
+            if (currentStatus === 'APROBADO') {
+                throw new Error(
+                    "No se pueden editar comentarios en propuestas que ya han sido APROBADAS. " +
+                    "La evaluación de esta propuesta ha sido cerrada."
+                );
+            }
+            
+            if (currentStatus === 'RECHAZADO') {
+                throw new Error(
+                    "No se pueden editar comentarios en propuestas que ya han sido RECHAZADAS. " +
+                    "La evaluación de esta propuesta ha sido cerrada."
+                );
+            }
+        } catch (error) {
+            console.error("Error validating proposal status:", error);
+            throw error;
         }
     }
 }

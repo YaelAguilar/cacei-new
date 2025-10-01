@@ -12,11 +12,13 @@ export class AuthRepository {
       });
 
       if (response.status === 200) {
+        console.log("🔍 Respuesta completa del login:", response.data);
         const userData = response.data.data.attributes;
-        console.log("Datos del usuario en AuthRepository:", userData);
+        console.log("🔍 Datos del usuario en AuthRepository:", userData);
+        console.log("🔍 Token en attributes:", userData.token);
         
         const user = new User(
-          '',
+          userData.id || '', // ✅ CORRECCIÓN: Usar el ID del backend
           userData.name,
           userData.lastName,
           userData.secondLastName,
@@ -33,6 +35,7 @@ export class AuthRepository {
         );
         
         const token = response.data.data.attributes.token;
+        console.log("🔍 Token extraído:", token);
         return { user, token };
       }
       

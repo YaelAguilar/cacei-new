@@ -16,6 +16,9 @@ export class GetPropuestaController {
                     type: "propuesta",
                     id: propuesta.getUuid(),
                     attributes: {
+                        // ✅ AGREGAR: Estatus de la propuesta
+                        estatus: propuesta.getProposalStatus(),
+                        
                         idConvocatoria: propuesta.getConvocatoriaId(),
                         
                         // Tutor Académico

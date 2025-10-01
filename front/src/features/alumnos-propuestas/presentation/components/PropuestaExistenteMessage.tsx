@@ -13,23 +13,42 @@ const PropuestaExistenteMessage: React.FC<PropuestaExistenteMessageProps> = obse
   viewModel, 
   onViewPropuestas 
 }) => {
-  // Encontrar la propuesta de la convocatoria actual
-  const propuestaActual = viewModel.misPropuestas.find(propuesta => 
-    propuesta.getIdConvocatoria().toString() === viewModel.convocatoriaActiva?.getId()
-  );
+  // Usar la propuesta bloqueante del ViewModel
+  const propuestaActual = viewModel.propuestaBloqueante;
+  
+  // Determinar el tipo de mensaje basado en el estado
+  const estado = propuestaActual?.getEstatus();
+  const esAprobada = estado === 'APROBADO';
+  const necesitaActualizar = estado === 'ACTUALIZAR';
+  const estaPendiente = estado === 'PENDIENTE';
 
   return (
     <div className="flex items-center justify-center py-12">
       <div className="text-center max-w-lg mx-auto">
         <div className="mb-6">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
-            <FiCheckCircle className="w-10 h-10 text-green-600" />
+          <div className={`w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center ${
+            esAprobada ? 'bg-green-100' : 
+            necesitaActualizar ? 'bg-yellow-100' : 
+            'bg-blue-100'
+          }`}>
+            <FiCheckCircle className={`w-10 h-10 ${
+              esAprobada ? 'text-green-600' : 
+              necesitaActualizar ? 'text-yellow-600' : 
+              'text-blue-600'
+            }`} />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Ya tienes una propuesta registrada
+            {esAprobada ? 'Propuesta Aprobada' : 
+             necesitaActualizar ? 'Propuesta Requiere Actualización' :
+             'Propuesta en Evaluación'}
           </h2>
           <p className="text-gray-600 mb-6">
-            Ya has enviado una propuesta para la convocatoria actual:{" "}
+            {esAprobada 
+              ? `Tu propuesta ha sido aprobada para la convocatoria: `
+              : necesitaActualizar
+              ? `Tu propuesta requiere actualizaciones para la convocatoria: `
+              : `Tu propuesta está siendo evaluada para la convocatoria: `
+            }
             <span className="font-semibold text-blue-600">
               {viewModel.convocatoriaActiva?.getNombre()}
             </span>
@@ -87,22 +106,67 @@ const PropuestaExistenteMessage: React.FC<PropuestaExistenteMessageProps> = obse
           </div>
         )}
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold text-blue-900 mb-2">Información importante</h3>
-          <ul className="text-sm text-blue-800 space-y-1 text-left">
-            <li>• Solo puedes tener una propuesta por convocatoria</li>
-            <li>• Puedes revisar tu propuesta en cualquier momento</li>
-            <li>• Para modificaciones, contacta a tu coordinador</li>
+        <div className={`border rounded-lg p-4 mb-6 ${
+          esAprobada 
+            ? 'bg-green-50 border-green-200' 
+            : necesitaActualizar
+            ? 'bg-yellow-50 border-yellow-200'
+            : 'bg-blue-50 border-blue-200'
+        }`}>
+          <h3 className={`font-semibold mb-2 ${
+            esAprobada ? 'text-green-900' : 
+            necesitaActualizar ? 'text-yellow-900' :
+            'text-blue-900'
+          }`}>
+            {esAprobada ? '¡Felicitaciones!' : 
+             necesitaActualizar ? 'Acción Requerida' :
+             'Evaluación en Proceso'}
+          </h3>
+          <ul className={`text-sm space-y-1 text-left ${
+            esAprobada ? 'text-green-800' : 
+            necesitaActualizar ? 'text-yellow-800' :
+            'text-blue-800'
+          }`}>
+            {esAprobada ? (
+              <>
+                <li>• Tu propuesta ha sido aprobada exitosamente</li>
+                <li>• No puedes crear una nueva propuesta en esta convocatoria</li>
+                <li>• Puedes revisar los detalles de tu propuesta aprobada</li>
+                <li>• Contacta a tu coordinador si necesitas información adicional</li>
+              </>
+            ) : necesitaActualizar ? (
+              <>
+                <li>• Tu propuesta necesita ser actualizada según los comentarios</li>
+                <li>• No puedes crear una nueva propuesta hasta resolver las observaciones</li>
+                <li>• Revisa los comentarios y actualiza tu propuesta existente</li>
+                <li>• Contacta a tu tutor académico si tienes dudas</li>
+              </>
+            ) : (
+              <>
+                <li>• Tu propuesta está siendo evaluada por los tutores académicos</li>
+                <li>• No puedes crear una nueva propuesta mientras está en evaluación</li>
+                <li>• Puedes revisar el progreso de la evaluación</li>
+                <li>• Contacta a tu tutor académico si tienes preguntas</li>
+              </>
+            )}
           </ul>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={onViewPropuestas}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            className={`flex items-center justify-center gap-2 px-6 py-3 text-white rounded-lg font-medium transition-colors ${
+              esAprobada 
+                ? 'bg-green-600 hover:bg-green-700' 
+                : necesitaActualizar
+                ? 'bg-yellow-600 hover:bg-yellow-700'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
             <FiEye className="w-4 h-4" />
-            Ver Mis Propuestas
+            {esAprobada ? 'Ver Propuesta Aprobada' : 
+             necesitaActualizar ? 'Revisar Propuesta' :
+             'Ver Estado de Evaluación'}
           </button>
         </div>
       </div>

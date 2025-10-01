@@ -485,6 +485,7 @@ export class MysqlCommentRepository implements CommentRepository {
             row.tutor_uuid,
             row.tutor_name,
             row.tutor_last_name,
+            row.tutor_second_last_name,
             row.tutor_email,
             row.proposal_uuid,
             row.project_name,

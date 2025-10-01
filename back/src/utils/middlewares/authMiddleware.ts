@@ -2,7 +2,15 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const token = req.cookies.token;
+  // Buscar token en cookies primero, luego en headers de autorización
+  let token = req.cookies.token;
+  
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7); // Remover "Bearer " del inicio
+    }
+  }
 
   if (!token) {
     res.status(401).json({

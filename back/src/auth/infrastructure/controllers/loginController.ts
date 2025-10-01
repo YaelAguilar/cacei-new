@@ -41,11 +41,16 @@ export class LoginController {
         type: "user",
         id: user.getUuid(),
         attributes: {
+          id: user.getId(), // ✅ AGREGAR EL ID NUMÉRICO
+          uuid: user.getUuid(),
           name: user.getName(),
+          lastName: user.getLastName(),
+          secondLastName: user.getSecondLastName(),
           email: user.getEmail(),
           phone: user.getPhone(),
           fullName: user.getFullName && user.getFullName(),
           roles: user.getRoles && user.getRoles(),
+          token: token, // ✅ AGREGAR EL TOKEN A LA RESPUESTA
           createdAt: user.getCreatedAt && user.getCreatedAt(),
           updatedAt: user.getUpdatedAt && user.getUpdatedAt(),
           userCreation: user.getUserCreation && user.getUserCreation(),

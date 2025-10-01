@@ -1,28 +1,32 @@
 // src/propuestas/application/updateProposalStatusUseCase.ts
 import { PropuestaRepository } from "../domain/interfaces/propuestaRepository";
-import { Propuesta, ProposalStatus } from "../domain/models/propuesta";
+
+export interface UpdateProposalStatusParams {
+    proposalId: string;
+    newStatus: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' | 'ACTUALIZAR';
+}
 
 export class UpdateProposalStatusUseCase {
     constructor(private readonly propuestaRepository: PropuestaRepository) {}
 
-    async run(uuid: string, status: ProposalStatus, userUpdate?: number): Promise<Propuesta | null> {
+    async execute(params: UpdateProposalStatusParams): Promise<boolean> {
         try {
-            // Validar que el estatus sea válido
-            const validStatuses: ProposalStatus[] = ['PENDIENTE', 'APROBADO', 'RECHAZADO', 'ACTUALIZAR'];
-            if (!validStatuses.includes(status)) {
-                throw new Error("Estatus de propuesta inválido");
+            console.log(`🔄 Actualizando estado de propuesta ${params.proposalId} a ${params.newStatus}`);
+            
+            const success = await this.propuestaRepository.updateProposalStatus(
+                params.proposalId, 
+                params.newStatus
+            );
+            
+            if (success) {
+                console.log(`✅ Estado de propuesta ${params.proposalId} actualizado exitosamente a ${params.newStatus}`);
+            } else {
+                console.log(`❌ Error al actualizar estado de propuesta ${params.proposalId}`);
             }
-
-            // Verificar que la propuesta existe
-            const propuestaExistente = await this.propuestaRepository.getPropuesta(uuid);
-            if (!propuestaExistente) {
-                throw new Error("Propuesta no encontrada");
-            }
-
-            // Actualizar el estatus
-            return await this.propuestaRepository.updateProposalStatus(uuid, status, userUpdate);
+            
+            return success;
         } catch (error) {
-            console.error("Error in UpdateProposalStatusUseCase:", error);
+            console.error("❌ Error in UpdateProposalStatusUseCase:", error);
             throw error;
         }
     }

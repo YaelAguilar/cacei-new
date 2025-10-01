@@ -17,24 +17,26 @@ export class GetCommentsByProposalController {
              console.log('📥 Comentarios obtenidos:', comments?.length || 0);
 
             const formattedComments = comments ? comments.map(comment => ({
-                type: "proposal-comment",
                 id: comment.getUuid(),
-                attributes: {
-                    proposalId: comment.getProposalId(),
-                    tutorId: comment.getTutorId(),
-                    tutorName: comment.getTutorFullName(),
-                    tutorEmail: comment.getTutorEmail(),
-                    sectionName: comment.getSectionName(),
-                    subsectionName: comment.getSubsectionName(),
-                    commentText: comment.getCommentText(),
-                    voteStatus: comment.getVoteStatus(),
-                    active: comment.isActive(),
-                    createdAt: comment.getCreatedAt(),
-                    updatedAt: comment.getUpdatedAt()
-                }
+                proposalId: comment.getProposalId(),
+                tutorId: comment.getTutorId(),
+                tutorName: comment.getTutorName(),
+                tutorLastName: comment.getTutorLastName(),
+                tutorSecondLastName: comment.getTutorSecondLastName(),
+                tutorEmail: comment.getTutorEmail(),
+                sectionName: comment.getSectionName(),
+                subsectionName: comment.getSubsectionName(),
+                commentText: comment.getCommentText(),
+                voteStatus: comment.getVoteStatus(),
+                active: comment.isActive(),
+                createdAt: comment.getCreatedAt(),
+                updatedAt: comment.getUpdatedAt()
             })) : [];
 
-            res.status(200).json({ data: formattedComments });
+            res.status(200).json({ 
+                success: true,
+                data: formattedComments 
+            });
         } catch (error) {
             console.error("Error in GetCommentsByProposalController:", error);
             res.status(500).json({

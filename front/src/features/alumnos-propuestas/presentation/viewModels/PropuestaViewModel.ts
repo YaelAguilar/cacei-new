@@ -366,8 +366,38 @@ export class PropuestaViewModel {
     );
   }
 
+  // NUEVO: Verificar si tiene propuesta en la convocatoria actual (bloquea cualquier estado)
+  get hasPropuestaBloqueante(): boolean {
+    if (!this.convocatoriaActiva || this.misPropuestas.length === 0) {
+      return false;
+    }
+    
+    // Comparar usando el ID numérico de la convocatoria
+    const convocatoriaActivaIdNumerico = this.convocatoriaActiva!.getIdNumerico();
+    const propuestaEnConvocatoriaActual = this.misPropuestas.find(propuesta => 
+      propuesta.getIdConvocatoria() === convocatoriaActivaIdNumerico
+    );
+    
+    // CORRECCIÓN: Bloquear si existe CUALQUIER propuesta en la convocatoria actual
+    // Un estudiante solo puede tener UNA propuesta por convocatoria
+    return propuestaEnConvocatoriaActual !== undefined;
+  }
+
+  // NUEVO: Obtener la propuesta bloqueante para mostrar información
+  get propuestaBloqueante() {
+    if (!this.convocatoriaActiva || this.misPropuestas.length === 0) {
+      return null;
+    }
+    
+    // Usar la misma lógica que hasPropuestaBloqueante
+    const convocatoriaActivaIdNumerico = this.convocatoriaActiva!.getIdNumerico();
+    return this.misPropuestas.find(propuesta => 
+      propuesta.getIdConvocatoria() === convocatoriaActivaIdNumerico
+    ) || null;
+  }
+
   get canCreatePropuesta(): boolean {
-    return this.hasConvocatoriaActiva && !this.hasPropuestaEnConvocatoriaActual;
+    return this.hasConvocatoriaActiva && !this.hasPropuestaBloqueante;
   }
 
   get tutoresDisponibles(): TutorAcademico[] {

@@ -13,6 +13,8 @@ import { UpdateProposalStatusAfterCommentUseCase } from "../application/updatePr
 import { ValidateCommentEditUseCase } from "../application/validateCommentEditUseCase"; // ✅ NUEVO
 import { GetVotingHistoryUseCase } from "../application/getVotingHistoryUseCase"; // ✅ NUEVO
 import { CheckTutorFinalVoteUseCase } from "../application/checkTutorFinalVoteUseCase"; // ✅ NUEVO
+import { GetVoteStatsUseCase } from "../application/getVoteStatsUseCase"; // ✅ NUEVO
+import { SyncProposalStatusUseCase } from "../application/syncProposalStatusUseCase"; // ✅ NUEVO
 
 // Controladores
 import { CreateCommentController } from "./controllers/createCommentController";
@@ -24,6 +26,8 @@ import { ApproveProposalController } from "./controllers/approveProposalControll
 import { RejectProposalController } from "./controllers/rejectProposalController"; // ✅ NUEVO
 import { UpdateProposalController } from "./controllers/updateProposalController"; // ✅ NUEVO
 import { CheckTutorFinalVoteController } from "./controllers/checkTutorFinalVoteController"; // ✅ NUEVO
+import { GetVoteStatsController } from "./controllers/getVoteStatsController"; // ✅ NUEVO
+import { SyncProposalStatusController } from "./controllers/syncProposalStatusController"; // ✅ NUEVO
 
 // Repositorios
 import { MysqlCommentRepository } from "./repositories/MysqlCommentRepository";
@@ -44,8 +48,8 @@ const updateProposalStatusAfterCommentUseCase = new UpdateProposalStatusAfterCom
 const validateCommentEditUseCase = new ValidateCommentEditUseCase(commentRepository, propuestaRepository);
 const getVotingHistoryUseCase = new GetVotingHistoryUseCase(commentRepository, propuestaRepository);
 
-const createCommentUseCase = new CreateCommentUseCase(commentRepository, updateProposalStatusAfterCommentUseCase);
-const updateCommentUseCase = new UpdateCommentUseCase(commentRepository, validateCommentEditUseCase, updateProposalStatusAfterCommentUseCase);
+const createCommentUseCase = new CreateCommentUseCase(commentRepository, updateProposalStatusAfterCommentUseCase, propuestaRepository);
+const updateCommentUseCase = new UpdateCommentUseCase(commentRepository, validateCommentEditUseCase, updateProposalStatusAfterCommentUseCase, propuestaRepository);
 const getCommentsByProposalUseCase = new GetCommentsByProposalUseCase(commentRepository);
 const getCommentsByTutorUseCase = new GetCommentsByTutorUseCase(commentRepository);
 const deleteCommentUseCase = new DeleteCommentUseCase(commentRepository);
@@ -53,6 +57,8 @@ const approveProposalUseCase = new ApproveProposalUseCase(commentRepository); //
 const rejectProposalUseCase = new RejectProposalUseCase(commentRepository); // ✅ NUEVO
 const updateProposalUseCase = new UpdateProposalUseCase(commentRepository); // ✅ NUEVO
 const checkTutorFinalVoteUseCase = new CheckTutorFinalVoteUseCase(commentRepository); // ✅ NUEVO
+const getVoteStatsUseCase = new GetVoteStatsUseCase(commentRepository); // ✅ NUEVO
+const syncProposalStatusUseCase = new SyncProposalStatusUseCase(commentRepository, propuestaRepository); // ✅ NUEVO
 
 // Controladores exportados
 export const createCommentController = new CreateCommentController(createCommentUseCase);
@@ -64,6 +70,8 @@ export const approveProposalController = new ApproveProposalController(approvePr
 export const rejectProposalController = new RejectProposalController(rejectProposalUseCase); // ✅ NUEVO
 export const updateProposalController = new UpdateProposalController(updateProposalUseCase); // ✅ NUEVO
 export const checkTutorFinalVoteController = new CheckTutorFinalVoteController(checkTutorFinalVoteUseCase); // ✅ NUEVO
+export const getVoteStatsController = new GetVoteStatsController(getVoteStatsUseCase); // ✅ NUEVO
+export const syncProposalStatusController = new SyncProposalStatusController(syncProposalStatusUseCase); // ✅ NUEVO
 
 // Exportar casos de uso adicionales
 export { getVotingHistoryUseCase };

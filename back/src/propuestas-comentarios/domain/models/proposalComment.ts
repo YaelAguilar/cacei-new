@@ -17,6 +17,7 @@ export class ProposalComment {
         private readonly tutorUuid?: string,
         private readonly tutorName?: string,
         private readonly tutorLastName?: string,
+        private readonly tutorSecondLastName?: string,
         private readonly tutorEmail?: string,
         
         // Información adicional de la propuesta (opcional, viene de la vista)
@@ -42,9 +43,10 @@ export class ProposalComment {
     getTutorUuid(): string | undefined { return this.tutorUuid; }
     getTutorName(): string | undefined { return this.tutorName; }
     getTutorLastName(): string | undefined { return this.tutorLastName; }
+    getTutorSecondLastName(): string | undefined { return this.tutorSecondLastName; }
     getTutorEmail(): string | undefined { return this.tutorEmail; }
     getTutorFullName(): string { 
-        return `${this.tutorName || ''} ${this.tutorLastName || ''}`.trim(); 
+        return `${this.tutorName || ''} ${this.tutorLastName || ''} ${this.tutorSecondLastName || ''}`.trim(); 
     }
     
     getProposalUuid(): string | undefined { return this.proposalUuid; }
